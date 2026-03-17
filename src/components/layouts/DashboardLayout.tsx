@@ -802,7 +802,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
               {!isMobile && (
                 <p className="text-xs text-muted-foreground">
-                  Version 4.1 • Last updated: 17-Mar-2026
+                  Version1 • Last updated: 17-Meb-2026
                 </p>
               )}
             </div>

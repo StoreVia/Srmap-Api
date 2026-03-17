@@ -114,7 +114,7 @@ export async function solveCaptcha(imageBuffer: Buffer): Promise<string | null> 
     const form = new FormData();
     form.append("file", imageBuffer, { filename: "captcha.png", contentType: "image/png" });
     try {
-        const response = await axios.post("http://0.0.0.0:6000/captcha", form, { headers: form.getHeaders(), timeout: 30000 });
+        const response = await axios.post("http://localhost:6000/captcha", form, { headers: form.getHeaders(), timeout: 30000 });
         return response.data as string;
     } catch (error: any) {
         console.log("Error In Solving Captcha. Error From Functions.Captcha:- ", error.message);
