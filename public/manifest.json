@@ -1,0 +1,36 @@
+{
+  "name": "Srmap API",
+  "short_name": "Srmapi",
+  "start_url": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "browser"],
+  "background_color": "#020817",
+  "theme_color": "#020817",
+  "form_factor": "wide",
+  "icons": [
+    {
+      "src": "./icons/192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile.jpg",
+      "type": "image/png",
+      "sizes": "384x815",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/pc.jpg",
+      "type": "image/png",
+      "sizes": "1393x795",
+      "form_factor": "wide"
+    }
+  ]
+}

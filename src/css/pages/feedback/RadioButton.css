@@ -1,0 +1,48 @@
+.custom-container {
+  --input-focus: #2d8cf0;
+  --input-out-of-focus: #ccc;
+  --bg-color: #fff;
+  --main-color: #323232;
+  position: relative;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.custom-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.checkmark {
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--main-color);
+  border-radius: 8px;
+  box-shadow: 4px 4px var(--main-color);
+  background-color: var(--input-out-of-focus);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.custom-container input:checked ~ .checkmark {
+  background-color: var(--input-focus);
+  box-shadow: 2px 2px var(--main-color);
+}
+
+.checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 8px;
+  top: 3px;
+  width: 7px;
+  height: 14px;
+  border: solid var(--bg-color);
+  border-width: 0 3px 3px 0;
+  transform: rotate(45deg);
+}
+
+.custom-container input:checked ~ .checkmark::after {
+  display: block;
+}

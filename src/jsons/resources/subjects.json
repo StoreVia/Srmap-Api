@@ -1,0 +1,31 @@
+{
+  "CSE": {
+    "1": [
+      { "id": 1, "code": "CSE 101", "name": "FUNDAMENTALS OF COMPUTING AND PROGRAMMING IN C" },
+      { "id": 2, "code": "FIC 103", "name": "CALCULUS FOR ENGINEERS" },
+      { "id": 3, "code": "FIC 105", "name": "PRINCIPLES OF ECONOMICS AND MANAGEMENT" },
+      { "id": 4, "code": "CSE 102", "name": "DATA STRUCTURES" },
+      { "id": 5, "code": "FIC 117", "name": "LINEAR ALGEBRA AND DIFFERENTIAL EQUATIONS" },
+      { "id": 6, "code": "FIC 120", "name": "FOUNDATIONS OF ELECTRICAL AND ELECTRONICS ENGINEERING" },
+      { "id": 7, "code": "FIC 102", "name": "ENGINEERING PHYSICS" },
+      { "id": 8, "code": "VAC 101", "name": "ENVIRONMENTAL SCIENCE" }
+    ],
+    "2": [
+      { "id": 1, "code": "AEC-108", "name": "PROBLEM SOLVING SKILLS" },
+      { "id": 2, "code": "CSE-202", "name": "OOPS WITH C++" },
+      { "id": 3, "code": "CSE-203", "name": "DISCRETE MATHEMATICS" },
+      { "id": 4, "code": "CSE-204", "name": "DESIGN AND ANALYSIS OF ALGORITHMS" },
+      { "id": 5, "code": "CSE-207", "name": "DIGITAL ELECTRONICS" }
+    ]
+  },
+  "ECE": {
+    "1": [
+      { "id": 1, "code": "ECE-101", "name": "FUNDAMENTALS-OF ELECTRICAL-CIRCUITS" },
+      { "id": 2, "code": "ECE-102", "name": "MICROELECTRONIC DEVICES AND CIRCUIT" },
+      { "id": 3, "code": "FIC-104", "name": "FUNDAMENTALS OF COMPUTING AND PROGRAMING IN C" },
+      { "id": 4, "code": "FIC-102", "name": "ENGINEERING PHYSICS" },
+      { "id": 5, "code": "FIC-103", "name": "CALCULUS FOR ENGINEERS" },
+      { "id": 6, "code": "FIC-117", "name": "LINEAR ALGEBRA AND DIFFERNTIAL EQUATIONS" }
+    ]
+  }
+}

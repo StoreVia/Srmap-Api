@@ -1,0 +1,9 @@
+{
+    "1": {
+        "CSE": { "name": "Computer Science & Engineering", "code": "CSE" },
+        "ECE": { "name": "Electronics & Communication Engineering", "code": "ECE" }
+    },
+    "2": {
+        "CSE": { "name": "Computer Science & Engineering", "code": "CSE" }
+    }
+}
