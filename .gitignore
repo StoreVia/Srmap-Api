@@ -1,0 +1,5 @@
+/.next
+/node_modules
+package-lock.json
+/python/venv
+src/.DS_Store

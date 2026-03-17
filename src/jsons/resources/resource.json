@@ -1,0 +1,689 @@
+{
+  "CSE": {
+    "1": {
+      "1": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 1001,
+              "title": "CSE 101 Mid Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1I269swZRaOR4twyjks__LH-JcPXAWRgO/view?usp=sharing"
+            },
+            {
+              "id": 1002,
+              "title": "CSE 101 Mid Semester Set 2 (2024)",
+              "size": "1.6 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1BUfocNIRESAy6dYzL6zVq64tUDFPZv17/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 1101,
+              "title": "CSE 101 End Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/13hSwS34LpJNs5nzB7QLx8OuLBO94rP6Y/view?usp=sharing"
+            },
+            {
+              "id": 1102,
+              "title": "CSE 101 End Semester Set 2 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1NLk2_Ywq9p4_YnFyRAtn3husO2CX-0cq/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 1201,
+            "title": "CSE 101 Unit 1",
+            "size": "1 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/11PmXm3_OE49z9tf-MPhOQe7UGz0lGjRr/view?usp=sharing"
+          },
+          {
+            "id": 1202,
+            "title": "CSE 101 Unit 2",
+            "size": "2.3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1VCeJ-rrgm6t7neiHdkQZRgiRH8p8ama3/view?usp=sharing"
+          },
+          {
+            "id": 1203,
+            "title": "CSE 101 Unit 3",
+            "size": "1.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1O2Ai1kEgHKBzcpC9ojSwW7zN2dJJYsww/view?usp=sharing"
+          },
+          {
+            "id": 1204,
+            "title": "CSE 101 Unit 4",
+            "size": "1 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1dMQOZQVmtrny-AKhMH5cpe9AXoZrSRDA/view?usp=sharing"
+          },
+          {
+            "id": 1205,
+            "title": "CSE 101 Unit 5",
+            "size": "1 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/14geEFuyGIDxPCxQUMACCCbwf5HJND8M4/view?usp=sharing"
+          }
+        ]
+      },
+      "2": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 2001,
+              "title": "FIC 103 Mid Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1nKX6u_zMevgKY6D0I6G53WYFvAcwNuFk/view?usp=sharing"
+            },
+            {
+              "id": 2002,
+              "title": "FIC 103 Mid Semester Set 2 (2024)",
+              "size": "1.6 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/11XI5eth_6RT-Pc2lCbfFj7bD7pGlLBDI/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 2101,
+              "title": "FIC 103 End Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/187D8H-GqbcBO34d24UMEJRc_TPrGe9Bg/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 2201,
+            "title": "FIC 103 Unit 1",
+            "size": "6.6 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1xPg662LfEvqt49MZX6yWh75Ca90-RBe5/view?usp=sharing"
+          },
+          {
+            "id": 2202,
+            "title": "FIC 103 Unit 2",
+            "size": "2.3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1oASx7fECa3Uj2PJOjgBTm9ZXjcBJkcHV/view?usp=sharing"
+          },
+          {
+            "id": 2203,
+            "title": "FIC 103 Unit 3",
+            "size": "3.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1WBqu-RSX2kNxzTNhm0DpGhGLlPKZEZeY/view?usp=sharing"
+          },
+          {
+            "id": 2204,
+            "title": "FIC 103 Unit 4",
+            "size": "1.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1sN8FGIDi4xesuugIO7XBt36woPEhyD5-/view?usp=sharing"
+          },
+          {
+            "id": 2205,
+            "title": "FIC 103 Unit 5",
+            "size": "1.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1j6UVCy7W-mlJPAc530HvLtLnjMlYGaG5/view?usp=sharing"
+          }
+        ]
+      },
+      "3": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 3001,
+              "title": "FIC 105 Mid Semester  (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1k6D8C-_821XYhll7_ltdsViaju7bm3v1/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 3101,
+              "title": "FIC 105 End Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1PoRA9LY32bkWUiI92Ux-VIa-o0DG-ZlN/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 3201,
+            "title": "FIC 105 Unit 1",
+            "size": "6.6 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1Ys3qfYI_ADacC6TOgzBeqiDZrAjPf4jW/view?usp=sharing"
+          },
+          {
+            "id": 3202,
+            "title": "FIC 105 Unit 2(a)",
+            "size": "2.3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/15c-X-VxjumDje9HIe2whpxm4H5o4ofux/view?usp=sharing"
+          },
+          {
+            "id": 3203,
+            "title": "FIC 105 Unit 2(b)",
+            "size": "3.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1os5zdn--khR5-eodRQFr9y2JXoNQLxNX/view?usp=sharing"
+          },
+          {
+            "id": 3204,
+            "title": "FIC 105 Unit 3(a)",
+            "size": "1 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1koW8MOr1GzIrbmjWeDEm9aOKx-Rtx1qq/view?usp=sharing"
+          },
+          {
+            "id": 3205,
+            "title": "FIC 105 Unit 3(b)",
+            "size": "1.5 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1q7rPX3sfSqRLPr5eYwHFmxw3GjSvPmQB/view?usp=sharing"
+          },
+          {
+            "id": 3206,
+            "title": "FIC 105 Unit 3(c)",
+            "size": "2.5 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1xKiWYNBo5v-Ry_Eq_KhrZKfaQeJu8BpG/view?usp=sharing"
+          },
+          {
+            "id": 3207,
+            "title": "FIC 105 Unit 4(a)",
+            "size": "1.5MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1v7r3-QPTaLYODQTGonx7mZKGiNjEX5fc/view?usp=sharing"
+          },
+          {
+            "id": 3208,
+            "title": "FIC 105 Unit 4(b)",
+            "size": "1.8 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1UlHzrS8WaBi8xCWmFWZHjEdNffw5BCD-/view?usp=sharing"
+          }
+        ]
+      },
+      "4": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 4001,
+              "title": "CSE 102 Mid Semester Set 1 (2024)",
+              "size": "3.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1n_gYAsqtkD4fXiaxsz2VURfG0hF4kCUW/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 4101,
+              "title": "CSE 102 End Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1GxGNFsmjhaOTODP_-krKBKfmoM3JRczY/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 4201,
+            "title": "CSE 102 Unit 1",
+            "size": "4.1 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/18crrFoyQV3MMhsqDK0cXlQQasycxhZmJ/view?usp=sharing"
+          },
+          {
+            "id": 4202,
+            "title": "CSE 102 Unit 2",
+            "size": "1.4 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1QCHTRDHcriuSpZ4PxwoSGsqmF3WW-UYT/view?usp=sharing"
+          },
+          {
+            "id": 4203,
+            "title": "CSE 102 Unit 3",
+            "size": "2.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1mdtiiMR1P2-abem0vLIyG5mgi6hsEFSL/view?usp=sharing"
+          },
+          {
+            "id": 4204,
+            "title": "CSE 102 Unit 4",
+            "size": "1.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1b9DsnAVEri8XkryoIxOwb2unGzhLJgBc/view?usp=sharing"
+          },
+          {
+            "id": 4205,
+            "title": "CSE 102 Unit 5",
+            "size": "1.4 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1IaNd36uxjtNmEhzwAhAxRJUmhyii7WzH/view?usp=sharing"
+          }
+        ]
+      },
+      "5": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 5001,
+              "title": "FIC 117 Mid Semester Set  (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1qXHXX_PdwUfc0mz0ue0wKwMIlRQEDn-r/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 5101,
+              "title": "FIC 117 End Semester Set  (2024)",
+              "size": "2 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1a2ZT1mcLAj5cpuT1XYEvZUysY7AgElH0/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 5201,
+            "title": "FIC 117 Unit 1,2",
+            "size": "21 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1b2Q3uAmGXO33i45u8izWYRQqrJZeNR57/view?usp=sharing"
+          },
+          {
+            "id": 5202,
+            "title": "FIC 117 Unit 3,4",
+            "size": "2.3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1ZOzHys1sKCn-dXgZzbMdhdxs17avCA_r/view?usp=sharing"
+          }
+        ]
+      },
+      "6": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 6001,
+              "title": "FIC 120 Mid Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1bQl2yhW0JjgtrFatlAvzazeyJ31aYtfp/view?usp=sharing"
+            },
+            {
+              "id": 6002,
+              "title": "FIC 120 Mid Semester Set 2 (2024)",
+              "size": "1.7 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/13e_M6c3XtnbL1sIBg4p4fNRjphnHY1sh/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 6101,
+              "title": "FIC 120 End Semester Set 1 (2024)",
+              "size": "1.6 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1Q1oSn9el2DnQLsB5wopWJyffJNsu4ZoX/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 6201,
+            "title": "FIC 120 Unit 1",
+            "size": "6.6 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/13W3BLPNeijqAv6-HahJSN_WRP7wfg1sD/view?usp=sharing"
+          },
+          {
+            "id": 6202,
+            "title": "FIC 120 Unit 2",
+            "size": "2.3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://docs.google.com/presentation/d/1e1uAZMnj_bvSB5FE892F1o7xBQY4Jo2q/edit?usp=sharing&ouid=116375822495062556445&rtpof=true&sd=true"
+          },
+          {
+            "id": 6203,
+            "title": "FIC 120 Unit 3",
+            "size": "3.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1tevaWKGo0UzFD4-wxt7bL1xrSRoI9O_M/view?usp=sharing"
+          },
+          {
+            "id": 6204,
+            "title": "FIC 120 Unit 4",
+            "size": "1.7 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1HaFRzlufH1ogVGq1ye6QTTP_lBdPERdO/view?usp=sharing"
+          }
+        ]
+      },
+      "7": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 7001,
+              "title": "FIC 102 Mid Semester Set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1A-aCy-OkIW607YEOWknUjKh-0o9XX4j0/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 7101,
+              "title": "FIC 102 End Semester Set 1 (2024)",
+              "size": "2.7 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1Sp420vrNLRoovqXRlx36p3Zfs07ww_Ub/view?usp=sharing"
+            }
+          ]
+        },
+        "slidesAndNotes": [
+          {
+            "id": 7201,
+            "title": "FIC 102 Unit 1",
+            "size": "11.1 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1h-Vf1RHLFQInxu9OqJMQjYdZ_JP4e0iu/view?usp=sharing"
+          },
+          {
+            "id": 7202,
+            "title": "FIC 102 Unit 2",
+            "size": "2.7 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/1_LOf8jtppbxKHVhjQRyAos0IdeX7--ep/view?usp=sharing"
+          },
+          {
+            "id": 7203,
+            "title": "FIC 102 Unit 3",
+            "size": "4.6 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1F2NDi537hVX97dt0THT1WLUSJVrWC7nK/view?usp=sharing"
+          },
+          {
+            "id": 7204,
+            "title": "FIC 102 Unit 4",
+            "size": "9.9 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1onlJGEpiPVJr2otzmh3nL-_c4dGPMw1h/view?usp=sharing"
+          },
+          {
+            "id": 7205,
+            "title": "FIC 102 Unit 5",
+            "size": "6.2 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1PdIGO1m5uNYihOOM1ecQbPNiQNof2KU6/view?usp=sharing"
+          }
+        ]
+      },
+      "8": {
+        "slidesAndNotes": [
+          {
+            "id": 7201,
+            "title": "VAC 101 Unit 1",
+            "size": "3 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/16yvXYF6kD3Hvie5zMXpH1zaAxCnhODUR/view?usp=sharing"
+          },
+          {
+            "id": 7202,
+            "title": "VAC 101 Unit 2",
+            "size": "3.5 MB",
+            "type": "pdf",
+            "downloadUrl": "https://drive.google.com/file/d/13bbl5mSWTyYZbua-0NNgtY_2zppYoUoI/view?usp=sharing"
+          },
+          {
+            "id": 7203,
+            "title": "VAC 101 Unit 3",
+            "size": "7.2 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1hXXNDBxCDo6Ztw9chFXjVJlSuCjFxPny/view?usp=sharing"
+          },
+          {
+            "id": 7204,
+            "title": "VAC 101 Unit 4",
+            "size": "2 MB",
+            "type": "pptx",
+            "downloadUrl": "https://drive.google.com/file/d/1b_eJOYheeMdI6nGzBQAxn63vJKw43Hcn/view?usp=sharing"
+          }
+        ]
+      }
+    },
+    "2": {
+      "1": {
+        "previousYearPapers": {
+          "mid": [
+            { "id": 1001, "title": "AEC 108 Mid Semester Set 1 (2024)", "size": "1.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1zlU5qnxRgsW5H-iTeqzF5zKywmCpDnWe/view?usp=sharing" },
+            { "id": 1002, "title": "AEC 108 Mid Semester Set 2 (2024)", "size": "1.6 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1Uycl-uhZK0goYa9EgGUo9Ok1ZmEu02Sj/view?usp=sharing" }
+          ],
+          "sem": [
+            { "id": 1101, "title": "AEC 108 End Semester Set 1 (2024)", "size": "1.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1Jf21G3pggXIBHEFl86IKZtycZRHKiQ9i/view?usp=sharing" }
+          ]
+        }
+      },
+      "2": {
+        "previousYearPapers": {
+          "mid": [
+            { "id": 2001, "title": "CSE 202 Mid Semester Set 1 (2024)", "size": "1.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1MeswjVxRDNOlRbvqljMedDEqlaCByifH/view?usp=sharing" }
+          ],
+          "sem": [
+            { "id": 2101, "title": "CSE 202 End Semester Set 1 (2024)", "size": "2.2 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1NyzbytT75WFMsBjPUWlRrbf02X2hR85O/view?usp=sharing" }
+          ]
+        },
+        "slidesAndNotes": [
+          { "id": 2201, "title": "CSE 202 Module 1", "size": "3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1fEq-0-X6iUVubs6M6cGEG5t_iQx0lV-x/view?usp=sharing" },
+          { "id": 2202, "title": "CSE 202 Module 2", "size": "2.3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1P1jV2aDEyRviLnXy9_ZBjRaoWX8oFtcg/view?usp=sharing" },
+          { "id": 2203, "title": "CSE 202 Module 3", "size": "3 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1fkR0odRGA6JUFUM3L9NbRM-tQv9zlLws/view?usp=sharing" },
+          { "id": 2204, "title": "CSE 202 Module 4", "size": "1 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1DE4RhW8DEsAfMlnEE_tnS2EWIuVSa3nP/view?usp=sharing" },
+          { "id": 2205, "title": "CSE 202 Module 5", "size": "1 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1wvf0xDzYk4Tnf465Ig81R9vM5_cm7gI9/view?usp=sharing" }
+        ]
+      },
+      "3": {
+        "previousYearPapers": {
+          "mid": [
+            { "id": 3001, "title": "CSE 203 Mid Semester (2024)", "size": "1.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1GFY9Lq2h_Ke_R69pZ3_AFNksJo2DpvWT/view?usp=sharing" }
+          ],
+          "sem": [
+            { "id": 3101, "title": "CSE 203 End Semester Set 1 (2024)", "size": "1.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1bYTEBHI2Eltly2qgoRFP3ei7dz7c4Qb5/view?usp=sharing" }
+          ]
+        },
+        "slidesAndNotes": [
+          { "id": 3201, "title": "CSE 203 Module 1", "size": "1 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1OeI2S2vqvUVcVHOo5AMS6aZu1NkXU-II/view?usp=sharing" },
+          { "id": 3202, "title": "CSE 203 Module 2", "size": "1 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1Gd5gZuVh99vYx6dJpxQqFi2lY7eZV_Tc/view?usp=sharing" },
+          { "id": 3203, "title": "CSE 203 Module 3", "size": "1 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1qvUuKlumLTFi8oEtVXGVW8ljz4ZkKKAf/view?usp=sharing" },
+          { "id": 3204, "title": "CSE 203 Module 4", "size": "1 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1F1xnhiG836zwcDfaXd7IBEl6vIBfGhgP/view?usp=sharing" },
+          { "id": 3205, "title": "CSE 203 Module 5", "size": "1 MB", "type": "pptx", "downloadUrl": "https://drive.google.com/file/d/1Pm8Vwtz5n2uUQgGLNOsVV3sAcjkK81y3/view?usp=sharing" }
+        ]
+      },
+      "4": {
+        "previousYearPapers": {
+          "mid": [
+            { "id": 4001, "title": "CSE 204 Mid Semester Set 1 (2024)", "size": "3.5 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1jATM7Q4OxMa45QOtcgssOA_aaOKiPwx4/view?usp=sharing" }
+          ],
+          "sem": [
+            { "id": 4101, "title": "CSE 204 End Semester Set 1 (2024)", "size": "1.9 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1EWKsjNh4r7NjvP2AYFOjBKA9JSLfsc8g/view?usp=sharing" }
+          ]
+        }
+      },
+      "5": {
+        "previousYearPapers": {
+          "mid": [
+            { "id": 5001, "title": "CSE 207 Mid Semester (2024)", "size": "1 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1YhZnunmgmQ3xEEXPUrJZYx77gr-mNgTK/view?usp=sharing" }
+          ],
+          "sem": [
+            { "id": 5101, "title": "CSE 207 End Semester (2024)", "size": "2 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/10BA1qaIzlNFd4wM2kESCVMBx0rbBOQ-n/view?usp=sharing" }
+          ]
+        },
+        "slidesAndNotes": [
+          { "id": 5201, "title": "CSE 207 Module 1", "size": "21 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/128LUi-ad5D8f_O9ow3Q91WrrM2aYBKf5/view?usp=sharing" },
+          { "id": 5202, "title": "CSE 207 Module 2", "size": "2.3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1sbldMv_y4-EJGu5DYFylZ7swtfVPz_i4/view?usp=sharing" },
+          { "id": 5203, "title": "CSE 207 Module 3", "size": "2.3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1fUXpnx-niscbBNUEVTtD-3Dp_LVQzHaQ/view?usp=sharing" },
+          { "id": 5204, "title": "CSE 207 Module 4", "size": "2.3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1OJ40Fwq61YaGU8hT1kW1jU8rsOSYKlTl/view?usp=sharing" },
+          { "id": 5205, "title": "CSE 207 Module 5", "size": "2.3 MB", "type": "pdf", "downloadUrl": "https://drive.google.com/file/d/1GEfp6HpO8OMery6u8RIXtt309jMJY0i0/view?usp=sharing" }
+        ]
+      }
+    }
+  },
+  "ECE": {
+    "1": {
+      "1": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 1001,
+              "title": "ECE-101 Mid Semester (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1tsmCeHu5EwghIVyjxf89PCbLvutTCWeg/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 1101,
+              "title": "ECE-101 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1sz-de2_KktejYDe8pAyzbrMcyf8aA9xQ/view?usp=sharing"
+            }
+          ]
+        }
+      },
+      "2": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 2001,
+              "title": "ECE-102 Mid Semester (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1ZtITcQhBYWBwB3uljZ51d1qhcvaPanz1/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 2101,
+              "title": "ECE-102 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1LJ4XoQJXC5Q75MZ-YXHV9s5QtCXGehWU/view?usp=sharing"
+            }
+          ]
+        }
+      },
+      "3": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 3001,
+              "title": "FIC-104 Mid Semester (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1ZtITcQhBYWBwB3uljZ51d1qhcvaPanz1/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 3101,
+              "title": "FIC-104 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1cvqnJArQuRc3IktPUJepseiQ0pzOTRVc/view?usp=sharing"
+            }
+          ]
+        }
+      },
+      "4": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 4001,
+              "title": "FIC-102 Mid Semester (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1ZtITcQhBYWBwB3uljZ51d1qhcvaPanz1/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 4101,
+              "title": "FIC-102 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1zkKTQeyxnFUOuvxy_LRvISHZNxOM743-/view?usp=sharing"
+            }
+          ]
+        }
+      },
+      "5": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 5001,
+              "title": "FIC-103 Mid Semester set 1 (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1hpQvMaxjG-UbKrN_Xk4e0K70lxxCKO6w/view?usp=sharing"
+            },
+            {
+              "id": 5002,
+              "title": "FIC-103 Mid Semester set 2(2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1R0oeYrp7jDDNJ0j3p7VqeFPkTEjLGhsb/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 5101,
+              "title": "FIC-103 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1X0CYKZQNU-YG9sZO5fa8SaA0rf_DukEj/view?usp=sharing"
+            }
+          ]
+        }
+      },
+      "6": {
+        "previousYearPapers": {
+          "mid": [
+            {
+              "id": 6001,
+              "title": "FIC-117 Mid Semester (2024)",
+              "size": "1.5 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1wRk-y043HlQQtYCuJzjyBKGCf4hnohNs/view?usp=sharing"
+            }
+          ],
+          "sem": [
+            {
+              "id": 6101,
+              "title": "FIC-117 End Semester (2024)",
+              "size": "2.0 MB",
+              "type": "pdf",
+              "downloadUrl": "https://drive.google.com/file/d/1nV5M30l2UQM7JheAt6Dw7uIVyuPhA0he/view?usp=sharing"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
