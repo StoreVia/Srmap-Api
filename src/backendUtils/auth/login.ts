@@ -1,10 +1,52 @@
-import { solveCaptcha } from "@/backendUtils/utils/functions";
-import { main, captcha, authenticate } from "@/backendUtils/utils/headers";
+import { solveCaptcha } from "@/server/utils/functions";
+import { main, captcha, authenticate } from "@/server/utils/headers";
 
-interface LoginResponse {
+export interface LoginResponse {
   success: boolean;
   sessionId?: string;
   message?: string;
+}
+
+export interface LoginFields {
+  usernameField: string;
+  passwordField: string;
+  authTokenField: string;
+  authTokenValue: string;
+  capid: string;
+}
+
+function extractLoginFields(html: string): LoginFields {
+  const capidMatch = html.match(/capid=([^"&\s]+)/);
+  if (!capidMatch) throw new Error("capid not found in login page");
+  const capid = capidMatch[1];
+
+  const assignments = [...html.matchAll(/\$\("#"\s*\+\s*"([a-f0-9]{32})"\)\.val\(([^)]+)\)/g)];
+  if (assignments.length < 3) throw new Error(`Could not find field assignments in script. Found: ${assignments.length}`);
+
+  let usernameField: string | undefined;
+  let passwordField: string | undefined;
+  let authTokenField: string | undefined;
+  let authTokenValue: string | undefined;
+
+  for (const match of assignments) {
+    const fieldName = match[1];
+    const valueExpr = match[2].trim();
+
+    if (valueExpr.startsWith('"') || valueExpr.startsWith("'")) {
+      authTokenField = fieldName;
+      authTokenValue = valueExpr.replace(/['"]/g, "");
+    } else if (valueExpr.includes("UserName")) {
+      usernameField = fieldName;
+    } else if (valueExpr.includes("AuthKey")) {
+      passwordField = fieldName;
+    }
+  }
+
+  if (!usernameField) throw new Error("Username field not found");
+  if (!passwordField) throw new Error("Password field not found");
+  if (!authTokenField || !authTokenValue) throw new Error("Auth token field not found");
+
+  return { usernameField, passwordField, authTokenField, authTokenValue, capid };
 }
 
 async function attemptLogin(username: string, password: string): Promise<LoginResponse> {
@@ -13,23 +55,18 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
     headers: main
   });
 
-
   if (!mainRes.ok) {
-    throw new Error("Srm Student Portal is unreachable. Please try again later.");
+    throw new Error("SRM Student Portal is unreachable. Please try again later.");
   }
 
   const htmlPage = await mainRes.text();
-  const capidMatch = htmlPage.match(/capid=([^"&]+)/);
-  const tokenMatch = htmlPage.match(/name="txtAuthToken"\s+value="([a-f0-9]+)"/);
-  if (!capidMatch || !tokenMatch) throw new Error("Required tokens not found");
 
   const setCookie = mainRes.headers.get("set-cookie") || "";
   const jsessionIdMatch = setCookie.match(/JSESSIONID=([^;]+)/);
-  if (!jsessionIdMatch) throw new Error("Session id not found");
-
-  const capid = capidMatch[1];
-  const authToken = tokenMatch[1];
+  if (!jsessionIdMatch) throw new Error("Session ID not found");
   const tempJsessionId = jsessionIdMatch[1];
+
+  const { usernameField, passwordField, authTokenField, authTokenValue, capid } = extractLoginFields(htmlPage);
 
   const captchaRes = await fetch(`https://student.srmap.edu.in/srmapstudentcorner/captchas?capid=${capid}`, {
     method: "GET",
@@ -41,10 +78,10 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
   if (!captchaText) throw new Error("Captcha solving failed");
 
   const payload = new URLSearchParams({
-    ccode: captchaText,
-    txtUserName: username,
-    txtAuthKey: password,
-    txtAuthToken: authToken
+    [usernameField]: username,
+    [passwordField]: password,
+    [authTokenField]: authTokenValue,
+    ccode: captchaText
   });
 
   const loginRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginToPortal", {
