@@ -7,46 +7,67 @@ export interface LoginResponse {
   message?: string;
 }
 
-export interface LoginFields {
-  usernameField: string;
-  passwordField: string;
-  authTokenField: string;
-  authTokenValue: string;
-  capid: string;
-}
+function extractLoginFields(html: string, username: string, password: string) {
+  let userField = "";
+  let userPrefix = "";
+  let userSuffix = "";
 
-function extractLoginFields(html: string): LoginFields {
-  const capidMatch = html.match(/capid=([^"&\s]+)/);
-  if (!capidMatch) throw new Error("capid not found in login page");
-  const capid = capidMatch[1];
+  let passField = "";
+  let passPrefix = "";
+  let passSuffix = "";
 
-  const assignments = [...html.matchAll(/\$\("#"\s*\+\s*"([a-f0-9]{32})"\)\.val\(([^)]+)\)/g)];
-  if (assignments.length < 3) throw new Error(`Could not find field assignments in script. Found: ${assignments.length}`);
+  let tokenField = "";
+  let tokenValue = "";
 
-  let usernameField: string | undefined;
-  let passwordField: string | undefined;
-  let authTokenField: string | undefined;
-  let authTokenValue: string | undefined;
+  const matches = [...html.matchAll(/\$\("#"\s*\+\s*"([a-f0-9]{32})"\)\.val\(([\s\S]*?)\);/g)];
+  if (!matches.length) throw new Error("No dynamic fields found");
 
-  for (const match of assignments) {
-    const fieldName = match[1];
-    const valueExpr = match[2].trim();
+  for (const match of matches) {
+    const field = match[1];
+    const expression = match[2].trim();
 
-    if (valueExpr.startsWith('"') || valueExpr.startsWith("'")) {
-      authTokenField = fieldName;
-      authTokenValue = valueExpr.replace(/['"]/g, "");
-    } else if (valueExpr.includes("UserName")) {
-      usernameField = fieldName;
-    } else if (valueExpr.includes("AuthKey")) {
-      passwordField = fieldName;
+    if (expression.includes("#UserName")) {
+      const parts = expression.match(/"([a-f0-9]+)"[\s\S]*\+\s*.*UserName[\s\S]*\+\s*"([a-f0-9]+)"/);
+      if (!parts) throw new Error("Failed parsing username field");
+      userField = field;
+      userPrefix = parts[1];
+      userSuffix = parts[2];
+    }
+
+    else if (expression.includes("#AuthKey")) {
+      const parts = expression.match(/"([a-f0-9]+)"[\s\S]*\+\s*.*AuthKey[\s\S]*\+\s*"([a-f0-9]+)"/);
+      if (!parts) throw new Error("Failed parsing password field");
+      passField = field;
+      passPrefix = parts[1];
+      passSuffix = parts[2];
+    }
+
+    else {
+      const tokenMatch = expression.match(/'([a-f0-9]+)'/);
+      if (tokenMatch) {
+        tokenField = field;
+        tokenValue = tokenMatch[1];
+      }
     }
   }
 
-  if (!usernameField) throw new Error("Username field not found");
-  if (!passwordField) throw new Error("Password field not found");
-  if (!authTokenField || !authTokenValue) throw new Error("Auth token field not found");
+  if (!userField || !passField || !tokenField) {
+    throw new Error("Failed to extract required login fields");
+  }
 
-  return { usernameField, passwordField, authTokenField, authTokenValue, capid };
+  const captchaMatch = html.match(/<img\s+src="(\/srmapstudentcorner\/stuportal\/captcha\?([a-f0-9]+)=([a-f0-9]+))"/);
+
+  if (!captchaMatch) throw new Error("Captcha not found");
+  const captchaUrl = `https://student.srmap.edu.in${captchaMatch[1]}`;
+  const captchaField = captchaMatch[2];
+
+  const payload = new URLSearchParams({
+    [userField]: `${userPrefix}${username}${userSuffix}`,
+    [passField]: `${passPrefix}${password}${passSuffix}`,
+    [tokenField]: tokenValue,
+  });
+
+  return { payload, captchaUrl, captchaField };
 }
 
 async function attemptLogin(username: string, password: string): Promise<LoginResponse> {
@@ -55,9 +76,7 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
     headers: main
   });
 
-  if (!mainRes.ok) {
-    throw new Error("SRM Student Portal is unreachable. Please try again later.");
-  }
+  if (!mainRes.ok) throw new Error("SRM Student Portal is unreachable. Please try again later.");
 
   const htmlPage = await mainRes.text();
 
@@ -66,35 +85,48 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
   if (!jsessionIdMatch) throw new Error("Session ID not found");
   const tempJsessionId = jsessionIdMatch[1];
 
-  const { usernameField, passwordField, authTokenField, authTokenValue, capid } = extractLoginFields(htmlPage);
+  const { payload, captchaField, captchaUrl } = extractLoginFields(htmlPage, username, password);
 
-  const captchaRes = await fetch(`https://student.srmap.edu.in/srmapstudentcorner/captchas?capid=${capid}`, {
+  const captchaRes = await fetch(captchaUrl, {
     method: "GET",
     headers: captcha(tempJsessionId)
   });
 
   const captchaBuffer = Buffer.from(await captchaRes.arrayBuffer());
-  const captchaText = await solveCaptcha(captchaBuffer);
-  if (!captchaText) throw new Error("Captcha solving failed");
+  const captchaTextRaw = await solveCaptcha(captchaBuffer);
+  if (!captchaTextRaw) throw new Error("Captcha solving failed");
 
-  const payload = new URLSearchParams({
-    [usernameField]: username,
-    [passwordField]: password,
-    [authTokenField]: authTokenValue,
-    ccode: captchaText
-  });
+  const captchaText = captchaTextRaw.trim().toUpperCase();
+  payload.append(captchaField, captchaText);
 
-  const loginRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginToPortal", {
-    method: "POST",
-    headers: authenticate(tempJsessionId),
-    body: payload
-  });
+  const loginRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginToPortal",
+    {
+      method: "POST",
+      headers: authenticate(tempJsessionId),
+      body: payload.toString(),
+      redirect: "manual",
+    }
+  );
 
-  const html = await loginRes.text();
-  const nameMatch = html.match(/<h2>(.*?)<\/h2>/);
-  if (!nameMatch) throw new Error("Invalid credentials");
+  if (loginRes.status !== 302) throw new Error("Invalid credentials");
+  const setCookie1 = loginRes.headers.get("set-cookie") || "";
+  const match = setCookie1.match(/JSESSIONID=([^;]+)/);
+  if (!match) throw new Error("Session not found after login");
+  const finalSessionId = match[1];
 
-  return { success: true, sessionId: tempJsessionId };
+  const dashboardRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/HRDSystem",
+    {
+      method: "GET",
+      headers: authenticate(finalSessionId)
+    }
+  );
+
+  const dashboardHtml = await dashboardRes.text();
+  if (!dashboardHtml.includes("Logout")) {
+    throw new Error("Login failed after redirect");
+  }
+
+  return { success: true, sessionId: finalSessionId };
 }
 
 async function login(username: string, password: string): Promise<LoginResponse> {
