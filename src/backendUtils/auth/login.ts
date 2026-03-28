@@ -1,5 +1,5 @@
-import { solveCaptcha } from "@/server/utils/functions";
-import { main, captcha, authenticate } from "@/server/utils/headers";
+import { solveCaptcha } from "@/backendUtils/utils/functions";
+import { main, captcha, authenticate } from "@/backendUtils/utils/headers";
 
 export interface LoginResponse {
   success: boolean;
