@@ -1,4 +1,4 @@
-//single comment
+
 import * as cheerio from "cheerio";
 import { createClient } from "@/backendUtils/utils/functions";
 import { getFacultyCabin } from "@/backendUtils/faculty/faculty";
