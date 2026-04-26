@@ -1,5 +1,5 @@
 /.next
-/node_modules
+node_modules
 package-lock.json
 /python/venv
 .DS_Store
