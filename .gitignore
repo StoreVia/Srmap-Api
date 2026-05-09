@@ -6,3 +6,4 @@ package-lock.json
 public/sw.js
 workbox-*.js
 .env
+replacements.txt
