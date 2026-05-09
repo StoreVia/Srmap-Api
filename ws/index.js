@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { WebSocket, WebSocketServer } from "ws";
 
 const port = Number(process.env.PORT || 8080);
-const accessSecret = "REMOVED_SECRET";
+const accessSecret = "REMOVED_SECRET=";
 
 if (!accessSecret) {
   throw new Error("Missing ACCESS_SECRET");
