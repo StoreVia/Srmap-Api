@@ -266,7 +266,7 @@ export default function Landing() {
                             onClick={() => router.push("/login")}
                             className="px-4 py-2 rounded-lg bg-black text-white dark:bg-white dark:text-gray-900 font-medium shadow-sm hover:shadow-md transition-all duration-300"
                         >
-                            Dashboard - Test
+                            Dashboard
                         </motion.button>
                     </div>
                 </nav>
