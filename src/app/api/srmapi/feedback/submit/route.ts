@@ -1,13 +1,13 @@
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { isSessionValid } from "@/fullStackUtils/utils/functions";
-import { submitFeedback } from "@/backendUtils/srmapi/submitFeedback";
-import { PARAMETERS, UNAUTHORIZED } from "@/fullStackUtils/utils/messages";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import { isSessionValid } from "@/shared/utils/functions";
+import { PARAMETERS, UNAUTHORIZED } from "@/shared/utils/messages";
+import { submitFeedback } from "@/server/srmapi/feedback/feedbackSubmit";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    let { sessionId, comment, optionNo } = body;
+    let { sessionId, comment, optionNo, selectedSubjectIds } = body;
 
     if (!sessionId || !comment || !optionNo) {
         return errorResponse(PARAMETERS);
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const initDb = await useMongo();
-        const db = initDb.db('college_db').collection("users1");
+        const db = initDb.db('college_db').collection("users");
         const settingsDb = initDb.db('college_db').collection("settings");
 
         const user = await db.findOne({ username: auth.payload.username });
@@ -36,11 +36,11 @@ export async function POST(req: NextRequest) {
 
         if (validSession && sessionId) {
             try {
-                const { success, message } = await submitFeedback(sessionId, comment, optionNo);
-                if(!success){
+                const { success, message } = await submitFeedback(sessionId, comment, optionNo, selectedSubjectIds);
+                if (!success) {
                     return NextResponse.json({ success: false, message }, { status: 200 });
                 }
-                const result = await settingsDb.findOneAndUpdate({ id: "feedback" }, { $inc: { count: 1 } }, { upsert: true, returnDocument: "after" });
+                await settingsDb.findOneAndUpdate({ id: "feedback" }, { $inc: { count: 1 } }, { upsert: true, returnDocument: "after" });
                 return NextResponse.json({ success, message });
             } catch (error) {
                 console.error("Error From /api/srmapi/feedback(Submittion):- ", error);

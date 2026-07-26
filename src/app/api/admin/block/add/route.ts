@@ -1,7 +1,7 @@
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { getTime } from "@/fullStackUtils/utils/functions";
-import { requireAuthResponseAdmin, errorResponse, isAdmin } from "@/backendUtils/utils/functions";
+import { getTime } from "@/shared/utils/functions";
+import { requireAuthResponseAdmin, errorResponse, isAdmin } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     try {
         const initDb = await useMongo();
         const db = initDb.db('college_db').collection("blocked");
-        const userDb = initDb.db('college_db').collection("users1");
+        const userDb = initDb.db('college_db').collection("users");
         const blockedAt = getTime();
 
         if(await db.findOne({ username })) {

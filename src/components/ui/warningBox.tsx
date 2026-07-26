@@ -52,7 +52,7 @@ const InfoBox: React.FC<InfoBoxProps> = ({
   onConfirm,
 }) => {
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 px-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-[100] px-4">
       <div className="bg-white dark:bg-gray-900 w-full max-w-md p-6 rounded-xl shadow-xl space-y-4 border border-gray-200 dark:border-gray-700">
         <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{title}</h2>
         <div className="text-sm text-gray-700 dark:text-gray-300">

@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { PARAMETERS, VALIDATION } from "@/fullStackUtils/utils/messages";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import { PARAMETERS, VALIDATION } from "@/shared/utils/messages";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
   const auth = await requireAuthResponse(req);

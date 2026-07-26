@@ -1,18 +1,12 @@
 import * as crypto from "crypto";
 import { DateTime } from "luxon";
 import { useMongo } from "@/lib/database/useMongo";
-import { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
-import { fetchFromWebsite } from "@/backendUtils/srmapi/fetchData";
-import { fetchTimetable } from "@/backendUtils/srmapi/extractTimetable";
-import { INVALID_CREDENTIALS } from "@/fullStackUtils/utils/messages";
-import { UNAUTHORIZED } from "@/fullStackUtils/utils/messages";
-import { isSessionValid } from "@/fullStackUtils/utils/functions";
-import { getTime } from "@/fullStackUtils/utils/functions";
-import { requireAuthResponse } from "@/backendUtils/utils/functions";
-import { errorResponse } from "@/backendUtils/utils/functions";
-import { decryptData } from "@/backendUtils/utils/functions";
-import { encryptData } from "@/backendUtils/utils/functions";
+import { NextResponse, NextRequest } from "next/server";
+import { fetchFromWebsite } from "@/server/srmapi/fetchData";
+import { fetchTimetable } from "@/server/srmapi/utils/extractTimetable";
+import { getTime, isSessionValid } from "@/shared/utils/functions";
+import { UNAUTHORIZED, INVALID_CREDENTIALS } from "@/shared/utils/messages";
+import { encryptData, decryptData, errorResponse, requireAuthResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -23,7 +17,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const initDb = await useMongo();
-        const db = initDb.db("college_db").collection<any>("users1");
+        const db = initDb.db("college_db").collection<any>("users");
 
         const time = getTime();
         const user = await db.findOne({ username: auth.payload.username });
@@ -109,8 +103,11 @@ export async function POST(req: NextRequest) {
         }
 
         return errorResponse(undefined, { action: "logout" });
-    } catch (err) {
+    } catch (err: any) {
         console.log("Error From /api/srmapi/fetch:- ", err);
+        if (err?.message?.includes("SRM server is unreachable")) {
+            return errorResponse(err.message, {}, 503);
+        }
         return errorResponse(undefined, {}, 500);
     }
 }

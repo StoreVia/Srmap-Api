@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import getRandomFeedback from "@/backendUtils/srmapi/feedback";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import getRandomFeedback from "@/server/srmapi/feedback/feedbackComments";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuthResponse(req);

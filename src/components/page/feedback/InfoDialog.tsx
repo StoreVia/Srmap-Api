@@ -18,7 +18,7 @@ const FeedbackInfoDialog = ({ open, onOpenChange }: FeedbackInfoDialogProps) => 
                         Feedback Feature
                     </DialogTitle>
                     <DialogDescription>
-                        Starting 27-OCT-2025, you'll need to submit end-term feedback for each faculty, totaling around 150 questions. This tool allows you to auto-submit your feedback with one click.
+                        Starting 30-Mar-2026, you'll need to submit end-term feedback for each faculty, totaling around 150 questions. This tool allows you to auto-submit your feedback with one click.
                     </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 py-4">

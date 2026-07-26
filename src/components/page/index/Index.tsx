@@ -492,7 +492,6 @@ export default function Landing() {
                     </motion.div>
                 </section>
 
-                {/* CTA */}
                 <section className="container mx-auto px-6 py-12">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}

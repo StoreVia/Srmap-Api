@@ -1,17 +1,17 @@
 "use client";
 import { useCallback } from "react";
-import { toast } from "@/hooks/useToast";
+import { toast } from "@/hooks/utils/useToast";
 import { useAuth } from "@/context/AuthContext";
-import API from "@/components/client/api/AxiosClient";
-import { extractErrorMessage, isSessionValid, needsRefresh } from "@/fullStackUtils/utils/functions";
+import API from "@/lib/api/axiosClient";
+import { extractErrorMessage, isSessionValid, needsRefresh } from "@/shared/utils/functions";
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { Profile, CGPA, Subject, Attendance, TimetableEntry, StudentDataContextType } from "@/types/context/studentContext";
-import { useLocalStorageContext } from "./LocalStorageContext";
+import { useLocalStorageContext } from "@/context/LocalStorageContext";
 
 const StudentDataContext = createContext<StudentDataContextType | undefined>(undefined);
 export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
   const { logout, isAuthenticated } = useAuth();
-  const { updateProfile, updateSettings, profile: lProfile } = useLocalStorageContext();
+  const { updateActiveAccount, profile: lProfile } = useLocalStorageContext();
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [cgpa, setCgpa] = useState<CGPA | null>(null);
@@ -21,6 +21,7 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
   const [error, setError] = useState<any>(null);
+  const [loadCachedDataPrompt, setLoadCachedDataPrompt] = useState(false);
 
   const loadDataToState = async (data: any) => {
     if (!data) return;
@@ -42,51 +43,96 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
       const sid = override?.sessionId ?? lProfile.sessionId;
       const stime = override?.sessionTime ?? lProfile.sessionTime;
 
-      if (isSessionValid(stime)) {
+      // Force database fetch if they opted into cached data, even if session is technically valid
+      if (isSessionValid(stime) && !lProfile.hasCachedData) {
         payload.sessionId = sid;
       }
 
       const res = await API.post('/srmapi/fetch', payload);
       const { data } = res.data;
-      updateProfile({ data });
+      updateActiveAccount({ data });
       loadDataToState(data);
     } catch (err) {
-      toast.error(extractErrorMessage(err));
+      const errMsg = extractErrorMessage(err);
+      if (errMsg.includes("SRM server is unreachable")) {
+        setLoadCachedDataPrompt(true);
+      } else {
+        toast.error(errMsg);
+      }
     } finally {
       setLoading(false);
     }
   }, [lProfile.sessionTime, lProfile.sessionId]);
 
+  const useCachedData = useCallback(async () => {
+    updateActiveAccount({ hasCachedData: true });
+    setLoadCachedDataPrompt(false);
+    if (lProfile.data) {
+      loadDataToState(lProfile.data);
+    } else {
+      await fetchFreshData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lProfile.data, fetchFreshData, updateActiveAccount]);
+
+  const initiateSession = useCallback(async (): Promise<{ sessionId?: string; sessionTime?: string; } | null> => {
+    try {
+      const res = await API.get('/srmapi/initiate/session');
+      const { sessionId: newSessionId, sessionTime: newSessionTime } = res.data;
+
+      updateActiveAccount({ sessionId: newSessionId, sessionTime: newSessionTime, hasCachedData: false });
+      await fetchFreshData({ sessionId: newSessionId, sessionTime: newSessionTime });
+      return { sessionId: newSessionId, sessionTime: newSessionTime };
+    } catch (err) {
+      const errMsg = extractErrorMessage(err);
+      if (errMsg.includes("SRM server is unreachable")) {
+        setLoadCachedDataPrompt(true);
+      }
+      console.error("Session initiation failed:", err);
+      return null;
+    }
+  }, [lProfile.sessionId, lProfile.sessionTime, updateActiveAccount, fetchFreshData, lProfile.data]);
+
+  const initializeStudentData = useCallback(async () => {
+    try {
+      const data = lProfile.data;
+      const sessionId = lProfile.sessionId;
+      const sessionTime = lProfile.sessionTime;
+      const accessToken = lProfile.accessToken;
+
+      if (!sessionTime) return;
+      if (accessToken && !sessionTime) return logout();
+
+      const shouldRefresh = needsRefresh(sessionTime);
+
+      if (shouldRefresh && !lProfile.hasCachedData) {
+        return await initiateSession();
+      }
+      
+      if (lProfile.hasCachedData) {
+        if (data) {
+          loadDataToState(data);
+          setLoadCachedDataPrompt(false);
+        } else {
+          return await fetchFreshData();
+        }
+      } else if (isSessionValid(sessionTime) && sessionId) {
+        return await fetchFreshData();
+      } else {
+        if (data) loadDataToState(data);
+      }
+    } catch (error) {
+      console.error("Initialization error:", error);
+      setError(error);
+    }
+  }, [logout, lProfile.data, lProfile.sessionId, lProfile.sessionTime, lProfile.accessToken, lProfile.hasCachedData, fetchFreshData, initiateSession]);
+
   useEffect(() => {
     if (!isAuthenticated) return;
-    const init = async () => {
-      try {
-        const data = lProfile.data;
-        const sessionId = lProfile.sessionId;
-        const sessionTime = lProfile.sessionTime;
-        const accessToken = lProfile.accessToken;
-        if (!sessionTime) return;
-        if (accessToken && !sessionTime) return logout();
-
-        const shouldRefresh = needsRefresh(sessionTime);
-        if (shouldRefresh) {
-          const res = await API.get('/srmapi/refresh');
-          const { sessionId: newSessionId, sessionTime: newSessionTime } = res.data;
-
-          updateProfile({ sessionId: newSessionId, sessionTime: newSessionTime });
-          return await fetchFreshData({ sessionId: newSessionId, sessionTime: newSessionTime });
-        }
-
-        if((isSessionValid(sessionTime) && sessionId) || !data) await fetchFreshData();
-        if(data) loadDataToState(data);
-        return;
-      } catch (error) {
-        console.error("Initialization error:", error);
-        setError(error);
-      }
-    };
-    init();
-  }, [isAuthenticated]);
+    setInitialized(false);
+    initializeStudentData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, lProfile.activeAccountId]);
 
   return (
     <StudentDataContext.Provider
@@ -99,7 +145,11 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
         loading,
         initialized,
         error,
-        fetchFreshData
+        fetchFreshData,
+        initializeStudentData,
+        initiateSession,
+        loadCachedDataPrompt,
+        useCachedData
       }}
     >
       {children}

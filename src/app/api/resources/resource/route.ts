@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import resourcesData from "@/jsons/resources/resource.json";
-import { PARAMETERS } from "@/fullStackUtils/utils/messages";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import resourcesData from "@/static/resources/resource.json";
+import { PARAMETERS } from "@/shared/utils/messages";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuthResponse(req);

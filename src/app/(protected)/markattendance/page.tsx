@@ -1,14 +1,14 @@
 "use client";
 import { useState } from "react";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/utils/useToast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Check, X, Loader2 } from "lucide-react";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import SessionCard from "@/components/utils/SessionCard";
-import { useSessionValidator } from "@/hooks/useSessionValidator";
-import { extractErrorMessage } from "@/fullStackUtils/utils/functions";
+import { useSessionValidator } from "@/hooks/auth/useSessionValidator";
+import { extractErrorMessage } from "@/shared/utils/functions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const AttendanceCode = () => {

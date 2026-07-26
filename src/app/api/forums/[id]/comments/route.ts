@@ -1,8 +1,8 @@
 import { ObjectId } from "mongodb";
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { VALIDATION } from "@/fullStackUtils/utils/messages";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import { VALIDATION } from "@/shared/utils/messages";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 // GET METHOD
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {

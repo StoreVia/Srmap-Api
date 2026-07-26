@@ -1,5 +1,5 @@
 "use client";
-import { useAuthActions } from "@/hooks/useAuthActions";
+import { useAuthActions } from "@/hooks/context/useAuthActions";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import React, { createContext, useContext, useEffect } from "react";
 
@@ -8,14 +8,17 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   isLoginLoading: boolean;
-  login: (username: string, password: string) => void;
+  accounts: Array<{ id: string; username: string }>;
+  activeAccountId: string;
+  login: (username: string, password: string, wantCachedData?: boolean) => Promise<{ success: boolean; error?: string | null; hasCachedData?: boolean; accessToken?: string; sessionId?: string; sessionTime?: string; } | void>;
+  switchAccount: (accountId: string) => void;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { profile, ready } = useLocalStorageContext();
-  const { login, logout, checkAuthStatus, isLoading, isLoginLoading, isAuthenticated, isAdmin } = useAuthActions();
+  const { login, logout, switchAccount, checkAuthStatus, isLoading, isLoginLoading, isAuthenticated, isAdmin } = useAuthActions();
 
   useEffect(() => {
     if(ready) checkAuthStatus();
@@ -28,7 +31,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAdmin,
         isLoading,
         isLoginLoading,
+        accounts: (profile.accounts || []).map((a: any) => ({ id: a.id, username: a.username })),
+        activeAccountId: profile.activeAccountId || "",
         login,
+        switchAccount,
         logout,
       }}
     >

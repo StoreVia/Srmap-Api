@@ -1,6 +1,6 @@
 "use client";
 import { X, Plus } from "lucide-react";
-import { toast } from "@/hooks/useToast";
+import { toast } from "@/hooks/utils/useToast";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -214,7 +214,7 @@ const CGPACalculator = () => {
                                 <CardDescription>Enter Your Grades For Each Subject</CardDescription>
                             </div>
                             {isManualMode && (
-                                <Button onClick={addNewSubject} size="sm" className="bg-university-700 hover:bg-university-800">
+                                <Button onClick={addNewSubject} size="sm" className="text-white bg-university-700 hover:bg-university-800">
                                     <Plus className="h-4 w-4 mr-1" /> Add Subject
                                 </Button>
                             )}

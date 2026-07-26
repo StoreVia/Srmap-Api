@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/utils/useToast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 

@@ -1,82 +1,70 @@
 "use client";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import API from "@/lib/api/axiosClient";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/useToast";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Toggle } from "@/components/ui/toggle";
+import { toast } from "@/hooks/utils/useToast";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
 import { Textarea } from "@/components/ui/textarea";
-import { Skeleton } from "@/components/ui/skeleton";
-import API from "@/components/client/api/AxiosClient";
 import WarningPopup from "@/components/ui/warningBox";
 import { useStudentData } from "@/context/StudentContext";
 import ReportIssue from "@/components/page/settings/ReportIssue";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
-import { Sun, Moon, Mail, Database, Expand, Shrink, ChevronDown, ChevronUp, Lock, User, Calendar, Clock, Hash } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+import { Sun, Moon, Database, Lock, User, Calendar, Clock, Hash, Expand, Shrink, ChevronDown, ChevronUp, RefreshCw, Trash2, Flag, LayoutDashboard, Fingerprint, CalendarDays, CheckSquare, Sunrise, Check } from "lucide-react";
 
 const FIELD_META: Record<string, { label: string; icon: React.ReactNode; sensitive?: boolean }> = {
-  _id:               { label: "Document ID",         icon: <Hash className="h-3.5 w-3.5" /> },
-  username:          { label: "Username",             icon: <User className="h-3.5 w-3.5" /> },
-  name:              { label: "Full Name",            icon: <User className="h-3.5 w-3.5" /> },
-  createdAt:         { label: "Account Created",      icon: <Calendar className="h-3.5 w-3.5" /> },
-  session_time:      { label: "Last Session Time",    icon: <Clock className="h-3.5 w-3.5" /> },
-  limit:             { label: "Remaining Limit",      icon: <Hash className="h-3.5 w-3.5" /> },
-  data:              { label: "Encrypted Data",       icon: <Lock className="h-3.5 w-3.5" />, sensitive: true },
-  attendanceHistory: { label: "Attendance History",   icon: <Calendar className="h-3.5 w-3.5" /> },
+  username: { label: "Username", icon: <User className="h-3.5 w-3.5" /> },
+  name: { label: "Full Name", icon: <User className="h-3.5 w-3.5" /> },
+  createdAt: { label: "Account Created", icon: <Calendar className="h-3.5 w-3.5" /> },
+  session_time: { label: "Last Session Time", icon: <Clock className="h-3.5 w-3.5" /> },
+  data: { label: "Encrypted Data", icon: <Lock className="h-3.5 w-3.5" />, sensitive: true },
+  attendanceHistory: { label: "Attendance History", icon: <Calendar className="h-3.5 w-3.5" /> },
+  session_id: { label: "Session Id", icon: <Fingerprint className="h-3.5 w-3.5" /> },
 };
 
-const FIELD_ORDER = ["_id", "username", "name", "createdAt", "session_time", "limit", "data", "attendanceHistory"];
+const FIELD_ORDER = ["username", "name", "createdAt", "session_id", "session_time", "data", "attendanceHistory"];
 
 function formatDate(raw: unknown): string {
   if (!raw) return String(raw);
   const iso = typeof raw === "object" && raw !== null && "$date" in (raw as any)
-    ? (raw as any).$date
-    : raw;
-  try {
-    return new Date(iso as string).toLocaleString();
-  } catch {
-    return String(iso);
-  }
+    ? (raw as any).$date : raw;
+  try { return new Date(iso as string).toLocaleString(); }
+  catch { return String(iso); }
 }
 
 function EncryptedField({ value }: { value: string }) {
   const [expanded, setExpanded] = useState(false);
   const preview = value.substring(0, 200);
-
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <Badge variant="outline" className="text-xs gap-1">
           <Lock className="h-3 w-3" /> Encrypted · {value.length} chars
         </Badge>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 px-2 text-xs"
+        <button
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md hover:bg-muted"
           onClick={() => setExpanded(v => !v)}
         >
-          {expanded ? <><Shrink className="h-3 w-3 mr-1" />Collapse</> : <><Expand className="h-3 w-3 mr-1" />Expand</>}
-        </Button>
+          {expanded ? <><Shrink className="h-3 w-3" />Collapse</> : <><Expand className="h-3 w-3" />Expand</>}
+        </button>
       </div>
       <div className={`bg-muted p-3 rounded-md text-xs font-mono break-all overflow-y-auto transition-all ${expanded ? "max-h-96" : "max-h-20"}`}>
         {expanded ? value : `${preview}…`}
       </div>
-      {!expanded && (
-        <p className="text-xs text-muted-foreground">Showing first 200 of {value.length} characters.</p>
-      )}
+      {!expanded && <p className="text-xs text-muted-foreground">Showing first 200 of {value.length} characters.</p>}
     </div>
   );
 }
 
 function AttendanceRow({ entry }: { entry: { date: string; data: string } }) {
   const [open, setOpen] = useState(false);
-
   return (
     <div className="border rounded-lg overflow-hidden">
       <button
@@ -88,9 +76,7 @@ function AttendanceRow({ entry }: { entry: { date: string; data: string } }) {
           <span>{entry.date}</span>
         </div>
         <div className="flex items-center gap-2 text-muted-foreground">
-          <Badge variant="secondary" className="text-xs">
-            <Lock className="h-3 w-3 mr-1" />Encrypted
-          </Badge>
+          <Badge variant="secondary" className="text-xs"><Lock className="h-3 w-3 mr-1" />Encrypted</Badge>
           {open ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </div>
       </button>
@@ -104,13 +90,9 @@ function AttendanceRow({ entry }: { entry: { date: string; data: string } }) {
 }
 
 function FieldValue({ fieldKey, value }: { fieldKey: string; value: unknown }) {
-  if (fieldKey === "data" && typeof value === "string") {
-    return <EncryptedField value={value} />;
-  }
+  if (fieldKey === "data" && typeof value === "string") return <EncryptedField value={value} />;
   if (fieldKey === "attendanceHistory" && Array.isArray(value)) {
-    if (value.length === 0) {
-      return <span className="text-sm text-muted-foreground italic">No history recorded yet.</span>;
-    }
+    if (value.length === 0) return <span className="text-sm text-muted-foreground italic">No history recorded yet.</span>;
     return (
       <div className="space-y-2 w-full">
         <div className="flex items-center gap-2 mb-1">
@@ -140,7 +122,6 @@ function DatabaseDataViewer({ data }: { data: Record<string, unknown> }) {
     ...FIELD_ORDER.filter(k => k in data),
     ...Object.keys(data).filter(k => !FIELD_ORDER.includes(k)),
   ];
-
   return (
     <div className="space-y-3">
       {allKeys.map(key => {
@@ -158,7 +139,6 @@ function DatabaseDataViewer({ data }: { data: Record<string, unknown> }) {
                 </Badge>
               )}
             </div>
-            {/* Field value */}
             <div className="pl-5">
               <FieldValue fieldKey={key} value={data[key]} />
             </div>
@@ -169,30 +149,108 @@ function DatabaseDataViewer({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+const STARTUP_PAGES = [
+  { value: "attendance", label: "Attendance", icon: <CheckSquare className="h-4 w-4" /> },
+  { value: "timetable", label: "Timetable", icon: <CalendarDays className="h-4 w-4" /> },
+  { value: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
+] as const;
+
+function AccordionRow({
+  icon,
+  label,
+  sub,
+  children,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub?: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-left"
+      >
+        <span className="text-muted-foreground shrink-0">{icon}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground leading-none">{label}</p>
+          {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
+        </div>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground shrink-0 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="px-4 pb-3 border-t bg-muted/20">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ActionRow({
+  icon,
+  label,
+  sub,
+  onClick,
+  disabled,
+  loading,
+  loadingLabel,
+  destructive,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  sub?: string;
+  onClick: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  loadingLabel?: string;
+  destructive?: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed ${
+        destructive ? "hover:bg-destructive/8" : "hover:bg-muted/50"
+      }`}
+    >
+      <span className={`shrink-0 ${destructive ? "text-red-600" : "text-muted-foreground"}`}>{icon}</span>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-medium leading-none ${destructive ? "text-red-600" : "text-foreground"}`}>
+          {loading && loadingLabel ? loadingLabel : label}
+        </p>
+        {sub && <p className={`text-xs mt-0.5 ${destructive ? "text-red-600" : ""}`}>{sub}</p>}
+      </div>
+    </button>
+  );
+}
+
+function SettingsCard({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground px-1">{label}</p>
+      <div className="rounded-xl border bg-card overflow-hidden divide-y divide-border">
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const Settings = () => {
   const router = useRouter();
-  const { logout } = useAuth();
-  const { profile, fetchFreshData } = useStudentData();
-  const { toast } = useToast();
-  const { updateProfile } = useLocalStorageContext();
+  const { logout, login, isLoginLoading, accounts, activeAccountId, switchAccount } = useAuth();
+  const { initiateSession } = useStudentData();
   const { theme, setTheme } = useTheme();
+  const { settings, updateSettings, removeAccount } = useLocalStorageContext();
 
   const [showReportModal, setShowReportModal] = useState(false);
   const [loadingFetch, setLoadingFetch] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [warningBox, setWarningBox] = useState<{
-    open: boolean;
-    title: string;
-    description: string;
-    warning: string;
-    onConfirm: () => void;
-  }>({
-    open: false,
-    title: "",
-    description: "",
-    warning: "",
-    onConfirm: () => {},
-  });
+    open: boolean; title: string; description: string; warning: string; onConfirm: () => void;
+  }>({ open: false, title: "", description: "", warning: "", onConfirm: () => {} });
 
   const [deleteReasonDialogOpen, setDeleteReasonDialogOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
@@ -201,25 +259,9 @@ const Settings = () => {
   const [databaseDataDialogOpen, setDatabaseDataDialogOpen] = useState(false);
   const [databaseData, setDatabaseData] = useState<Record<string, unknown> | null>(null);
   const [loadingDatabaseData, setLoadingDatabaseData] = useState(false);
-
-  const [dailyLimit, setDailyLimit] = useState<number>(20);
-  const [limitLeft, setLimitLeft] = useState<number | null>(null);
-  const [isLoadingLimit, setIsLoadingLimit] = useState(true);
-
-  const fetchLimitUsage = async () => {
-    try {
-      setIsLoadingLimit(true);
-      const res = await API.get(`/srmapi/limit`);
-      if (res.data) {
-        setDailyLimit(20);
-        setLimitLeft(res.data.limit);
-      }
-    } catch {
-      toast({ title: "Error", description: "Error Fetching Data!", variant: "destructive" });
-    } finally {
-      setIsLoadingLimit(false);
-    }
-  };
+  const [addAccountDialogOpen, setAddAccountDialogOpen] = useState(false);
+  const [newAccountUsername, setNewAccountUsername] = useState("");
+  const [newAccountPassword, setNewAccountPassword] = useState("");
 
   const fetchDatabaseData = async () => {
     setLoadingDatabaseData(true);
@@ -241,34 +283,14 @@ const Settings = () => {
   const handleFetchData = async () => {
     setLoadingFetch(true);
     try {
-      const limitRes = await API.get(`/srmapi/limit`);
-      if (limitRes.data.limit > 0) {
-        try {
-          const newData = await API.get("/srmapi/initiate/session");
-          const { sessionId, sessionTime } = newData.data;
-          updateProfile({ sessionId, sessionTime });
-          toast.success("Data Fetched Successfully!");
-          setLimitLeft(limitRes.data.limit - 1);
-          fetchFreshData({ sessionId, sessionTime });
-          setTimeout(() => router.push("/attendance"), 1000);
-        } catch (err) {
-          if (axios.isAxiosError(err)) {
-            const status = err.response?.status;
-            const message = err.response?.data?.message || "Error Fetching Data!";
-            toast({
-              title: "Error",
-              description: status === 429 ? "Daily Limit Exceeded, Try Again Tomorrow!" : message,
-              variant: "destructive",
-            });
-          } else {
-            toast({ title: "Error", description: "Unexpected Error!", variant: "destructive" });
-          }
-        }
+      await initiateSession();
+      setTimeout(() => router.push("/attendance"), 1000);
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        toast.error(err.response?.data?.message || "Error Fetching Data!");
       } else {
-        toast({ title: "Error", description: "Daily Limit Exceeded, Try Again Tomorrow!", variant: "destructive" });
+        toast.error("Unexpected Error!");
       }
-    } catch {
-      toast({ title: "Error", description: "Error Checking Limit!", variant: "destructive" });
     } finally {
       setLoadingFetch(false);
     }
@@ -290,22 +312,54 @@ const Settings = () => {
   };
 
   const submitDeleteReason = () => {
-    if (!deleteReason.trim()) {
-      setDeleteReasonError("Please Provide A Reason To Delete Account.");
-      return;
-    }
-    if (deleteReason.trim().length < 10) {
-      setDeleteReasonError("Please provide a more detailed reason (at least 10 characters).");
-      return;
-    }
+    if (!deleteReason.trim()) { setDeleteReasonError("Please provide a reason to delete your account."); return; }
+    if (deleteReason.trim().length < 10) { setDeleteReasonError("Please provide a more detailed reason (at least 10 characters)."); return; }
     setDeleteReasonError("");
     handleDelete(deleteReason.trim());
   };
 
-  useEffect(() => { fetchLimitUsage(); }, []);
+  const handleAddAccount = async () => {
+    if (!newAccountUsername.trim() || !newAccountPassword.trim()) {
+      toast({ title: "Missing fields", description: "Please enter registration number and password.", variant: "destructive" });
+      return;
+    }
+    const result = await login(newAccountUsername, newAccountPassword);
+    if (result && result.success) {
+      toast({ title: "Account added", description: "Account saved and switched successfully." });
+      setAddAccountDialogOpen(false);
+      setNewAccountUsername("");
+      setNewAccountPassword("");
+      setTimeout(() => router.push("/dashboard"), 200);
+    } else if (result?.hasCachedData) {
+      setAddAccountDialogOpen(false);
+      setWarningBox({
+        open: true,
+        title: "Portal Down",
+        description: "The college portal is currently down, but we found cached data for this account in our database.",
+        warning: "Would you like to add this account using the cached data?",
+        onConfirm: async () => {
+          const cachedResult = await login(newAccountUsername, newAccountPassword, true);
+          if (cachedResult?.success) {
+            toast({ title: "Account added", description: "Account saved and switched successfully using cached data." });
+            setNewAccountUsername("");
+            setNewAccountPassword("");
+            setTimeout(() => router.push("/dashboard"), 200);
+          } else {
+            toast({ title: "Failed to add account", description: cachedResult?.error || "Unknown error occurred.", variant: "destructive" });
+          }
+        }
+      });
+    } else {
+      toast({ title: "Failed to add account", description: result?.error || "Unknown error occurred.", variant: "destructive" });
+    }
+  };
+
+  const activeStartupPage = STARTUP_PAGES.find(p => p.value === settings.startupPage);
+  const hasAccounts = (accounts?.length || 0) > 0;
+  const activeAccount = accounts.find((a) => a.id === activeAccountId);
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-5">
       {warningBox.open && (
         <WarningPopup
           title={warningBox.title}
@@ -314,27 +368,19 @@ const Settings = () => {
           buttonName="Continue"
           buttonTheme="bg-university-700 hover:bg-university-800 text-white"
           onCancel={() => setWarningBox({ ...warningBox, open: false })}
-          onConfirm={() => {
-            setWarningBox({ ...warningBox, open: false });
-            warningBox.onConfirm();
-          }}
+          onConfirm={() => { setWarningBox({ ...warningBox, open: false }); warningBox.onConfirm(); }}
         />
       )}
 
       {showReportModal && (
-        <ReportIssue
-          onClose={() => setShowReportModal(false)}
-          issueTypes={["Bug", "UI Issue", "Feature Request", "Contact"]}
-        />
+        <ReportIssue onClose={() => setShowReportModal(false)} issueTypes={["Bug", "UI Issue", "Feature Request", "Contact"]} />
       )}
 
       <Dialog open={deleteReasonDialogOpen} onOpenChange={setDeleteReasonDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Delete Account</DialogTitle>
-            <DialogDescription>
-              Please help us improve by telling us why you're deleting your account.
-            </DialogDescription>
+            <DialogDescription>Please help us improve by telling us why you're deleting your account.</DialogDescription>
           </DialogHeader>
           <div className="grid gap-2 py-4">
             <div className="grid gap-2">
@@ -343,10 +389,7 @@ const Settings = () => {
                 id="delete-reason"
                 placeholder="Please share your reason (minimum 10 characters)..."
                 value={deleteReason}
-                onChange={e => {
-                  setDeleteReason(e.target.value);
-                  if (deleteReasonError) setDeleteReasonError("");
-                }}
+                onChange={e => { setDeleteReason(e.target.value); if (deleteReasonError) setDeleteReasonError(""); }}
                 className={deleteReasonError ? "border-destructive" : ""}
                 disabled={loadingDelete}
                 rows={4}
@@ -355,18 +398,10 @@ const Settings = () => {
               <p className="text-xs text-muted-foreground">{deleteReason.length}/10 characters minimum</p>
             </div>
             <div className="flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => { setDeleteReasonDialogOpen(false); setDeleteReason(""); setDeleteReasonError(""); }}
-                disabled={loadingDelete}
-              >
+              <Button variant="outline" onClick={() => { setDeleteReasonDialogOpen(false); setDeleteReason(""); setDeleteReasonError(""); }} disabled={loadingDelete}>
                 Cancel
               </Button>
-              <Button
-                variant="destructive"
-                onClick={submitDeleteReason}
-                disabled={loadingDelete || deleteReason.trim().length < 10}
-              >
+              <Button variant="destructive" onClick={submitDeleteReason} disabled={loadingDelete || deleteReason.trim().length < 10}>
                 {loadingDelete ? (
                   <span className="flex items-center gap-2">
                     <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -379,23 +414,15 @@ const Settings = () => {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={databaseDataDialogOpen}
-        onOpenChange={open => {
-          setDatabaseDataDialogOpen(open);
-        }}
-      >
+      <Dialog open={databaseDataDialogOpen} onOpenChange={setDatabaseDataDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Database className="h-5 w-5" />
               Your Data in Database
             </DialogTitle>
-            <DialogDescription>
-              Exactly how your account is stored. Sensitive fields are encrypted end-to-end.
-            </DialogDescription>
+            <DialogDescription>Exactly how your account is stored. Sensitive fields are encrypted end-to-end.</DialogDescription>
           </DialogHeader>
-
           <div className="py-2">
             {loadingDatabaseData ? (
               <div className="flex flex-col items-center justify-center py-12 gap-3">
@@ -408,128 +435,217 @@ const Settings = () => {
               <p className="text-sm text-muted-foreground text-center py-8">No data available.</p>
             )}
           </div>
-
           <div className="flex justify-end pt-2 border-t">
-            <Button variant="outline" onClick={() => setDatabaseDataDialogOpen(false)}>
-              Close
-            </Button>
+            <Button variant="outline" onClick={() => setDatabaseDataDialogOpen(false)}>Close</Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      <div className="w-full space-y-5">
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>Switch Between Themes</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <Toggle pressed={theme === "light"} onClick={() => setTheme("light")} aria-label="Light theme">
-                <Sun className="h-4 w-4 mr-1" /> Light
-              </Toggle>
-              <Toggle pressed={theme === "dark"} onClick={() => setTheme("dark")} aria-label="Dark theme">
-                <Moon className="h-4 w-4 mr-1" /> Dark
-              </Toggle>
+      <Dialog open={addAccountDialogOpen} onOpenChange={setAddAccountDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Another Account</DialogTitle>
+            <DialogDescription>Sign in with another account. You can store up to 5 accounts.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <div className="grid gap-2">
+              <Label htmlFor="account-username">Registration Number</Label>
+              <Input
+                id="account-username"
+                placeholder="AP24110000000"
+                value={newAccountUsername}
+                onChange={(e) => setNewAccountUsername(handleRegNumberChange(e))}
+                className="uppercase"
+                disabled={isLoginLoading}
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div className="grid gap-2">
+              <Label htmlFor="account-password">Password</Label>
+              <Input
+                id="account-password"
+                type="password"
+                placeholder="Student Portal Password"
+                value={newAccountPassword}
+                onChange={(e) => setNewAccountPassword(e.target.value)}
+                disabled={isLoginLoading}
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                variant="outline"
+                onClick={() => setAddAccountDialogOpen(false)}
+                disabled={isLoginLoading}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleAddAccount} disabled={isLoginLoading}>
+                {isLoginLoading ? "Adding..." : "Add Account"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle>Account</CardTitle>
-            <CardDescription>Account Controls</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm sm:text-base break-words">
-              Registration Number:{" "}
-              <span className="font-medium break-all">{profile?.registerNo}</span>
-            </p>
+      <SettingsCard label="Appearance">
+        <AccordionRow
+          icon={<Sun className="h-4 w-4" />}
+          label="Theme"
+          sub={theme === "light" ? "Light" : "Dark"}
+        >
+          <div className="flex gap-2 pt-3">
+            {(["light", "dark"] as const).map(t => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                className={`flex items-center gap-2 flex-1 justify-center px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
+                  theme === t
+                    ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
+                    : "border-border text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {t === "light" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+                {t === "light" ? "Light" : "Dark"}
+                {theme === t && <Check className="h-3 w-3 ml-auto" />}
+              </button>
+            ))}
+          </div>
+        </AccordionRow>
 
-            {isLoadingLimit ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-2 w-full" />
-              </div>
-            ) : dailyLimit !== null && limitLeft !== null ? (
-              <div className="space-y-1">
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  Daily Fetch Limit Left: {Math.min(limitLeft, dailyLimit)}/{dailyLimit}
-                </p>
-                <div className="w-full bg-muted h-2 rounded overflow-hidden">
-                  <div
-                    className="h-2 rounded bg-blue-600 transition-all duration-300"
-                    style={{ width: `${(Math.min(limitLeft, dailyLimit) / dailyLimit) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ) : (
-              <Skeleton className="h-2 w-full" />
+        <AccordionRow
+          icon={<Sunrise className="h-4 w-4" />}
+          label="Startup Page"
+          sub={activeStartupPage?.label ?? "Not set"}
+        >
+          <div className="flex flex-col gap-0.5 pt-2">
+            {STARTUP_PAGES.map(({ value, label, icon }) => {
+              const active = settings.startupPage === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => updateSettings({ startupPage: value })}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
+                    active
+                      ? "bg-university-700/10 text-university-600 dark:bg-university-500/10 dark:text-university-400 font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  }`}
+                >
+                  {icon}
+                  {label}
+                  {active && <Check className="h-3.5 w-3.5 ml-auto" />}
+                </button>
+              );
+            })}
+          </div>
+        </AccordionRow>
+      </SettingsCard>
+
+      <SettingsCard label="Data Control">
+        <ActionRow
+          icon={<RefreshCw className={`h-4 w-4 ${loadingFetch ? "animate-spin" : ""}`} />}
+          label="Fetch New Data"
+          sub="Manually sync your latest attendance"
+          loading={loadingFetch}
+          loadingLabel="Fetching..."
+          disabled={loadingFetch}
+          onClick={() =>
+            setWarningBox({
+              open: true,
+              title: "Fetch New Data",
+              description: "Srmapi automatically fetches your data when you login after 1 AM.",
+              warning: "Do you want to still continue?",
+              onConfirm: handleFetchData,
+            })
+          }
+        />
+        <ActionRow
+          icon={<Database className="h-4 w-4" />}
+          label="View Database Record"
+          sub="See exactly how your data is stored"
+          loading={loadingDatabaseData}
+          loadingLabel="Loading..."
+          disabled={loadingDatabaseData}
+          onClick={fetchDatabaseData}
+        />
+      </SettingsCard>
+
+      <SettingsCard label="Accounts">
+        <AccordionRow
+          icon={<User className="h-4 w-4" />}
+          label="Switch Account"
+          sub={activeAccount ? `Active: ${activeAccount.username}` : "No active account"}
+        >
+          <div className="flex flex-col gap-2 pt-3">
+            {!hasAccounts && (
+              <p className="text-sm text-muted-foreground">No accounts found. Login to add an account.</p>
             )}
+            {accounts.map((account) => {
+              const isActive = account.id === activeAccountId;
+              return (
+                <div
+                  key={account.id}
+                  className="flex flex-col gap-2 rounded-lg border px-3 py-2 sm:flex-row sm:items-center"
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{account.username}</p>
+                    <p className="text-xs text-muted-foreground">{isActive ? "Currently active" : "Stored account"}</p>
+                  </div>
+                  <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
+                    {!isActive && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 sm:flex-none"
+                        onClick={() => {
+                          switchAccount(account.id);
+                        }}
+                      >
+                        Switch
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="flex-1 sm:flex-none text-red-600 hover:text-destructive"
+                      onClick={() => removeAccount(account.id)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
+            <Button
+              variant="outline"
+              className="mt-1"
+              onClick={() => setAddAccountDialogOpen(true)}
+              disabled={(accounts?.length || 0) >= 5}
+            >
+              Add Another Account
+            </Button>
+            <p className="text-xs text-muted-foreground">You can store up to 5 accounts.</p>
+          </div>
+        </AccordionRow>
+      </SettingsCard>
 
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() =>
-                  setWarningBox({
-                    open: true,
-                    title: "Fetch New Data",
-                    description:
-                      "Srmapi automatically fetches your data when you login after 1 AM. This will count in your daily limit of 20 times.",
-                    warning: "Do you want to still continue?",
-                    onConfirm: handleFetchData,
-                  })
-                }
-                disabled={loadingFetch}
-                className="bg-university-700 hover:bg-university-800 dark:bg-university-500 dark:hover:bg-university-600 text-white w-full"
-              >
-                {loadingFetch ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Fetching...
-                  </span>
-                ) : "Fetch New Data"}
-              </Button>
+      <SettingsCard label="Other">
+        <ActionRow
+          icon={<Flag className="h-4 w-4" />}
+          label="Report an Issue"
+          sub="Bugs, UI issues, or feature requests"
+          onClick={() => setShowReportModal(true)}
+        />
+        <ActionRow
+          icon={<Trash2 className="h-4 w-4" />}
+          label="Delete Account"
+          sub="Permanently remove your account and all data"
+          loading={loadingDelete}
+          loadingLabel="Deleting..."
+          disabled={loadingDelete}
+          destructive
+          onClick={() => setDeleteReasonDialogOpen(true)}
+        />
+      </SettingsCard>
 
-              <Button
-                variant="secondary"
-                onClick={fetchDatabaseData}
-                disabled={loadingDatabaseData}
-                className="w-full"
-              >
-                {loadingDatabaseData ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                    Loading...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <Database className="h-4 w-4" />
-                    View Your Data in Database
-                  </span>
-                )}
-              </Button>
-
-              <Button variant="secondary" onClick={() => setShowReportModal(true)} className="w-full">
-                Report Issue
-              </Button>
-
-              <Button
-                variant="destructive"
-                onClick={() => setDeleteReasonDialogOpen(true)}
-                disabled={loadingDelete}
-                className="w-full"
-              >
-                {loadingDelete ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Deleting...
-                  </span>
-                ) : "Delete Account"}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };

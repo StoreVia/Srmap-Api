@@ -1,6 +1,6 @@
 "use client";
 import * as React from "react";
-import { cn } from "@/fullStackUtils/utils/functions";
+import { cn } from "@/shared/utils/functions";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;

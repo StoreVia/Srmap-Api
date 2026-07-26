@@ -8,10 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
-import usePasswordToggle from "@/hooks/usePasswordToggle";
+import { useLocalStorageContext } from "@/context/LocalStorageContext";
+import usePasswordToggle from "@/hooks/utils/usePasswordToggle";
+import { toast } from "@/hooks/utils/useToast";
+import { CachedDataPrompt } from "@/components/utils/CachedDataPrompt";
 import Logo from "../../../../public/icons/round_corner_logo.png";
 import Logo_White from "../../../../public/icons/round_corner_logo.png";
-import { handleRegNumberChange } from "@/fullStackUtils/utils/functions";
+import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 
 const Login = () => {
@@ -19,27 +22,44 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const passwordToggle = usePasswordToggle();
   const { login, isLoginLoading } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { theme, toggleTheme } = useTheme();
+  const { profile, upsertAccount } = useLocalStorageContext();
   const router = useRouter();
 
-  const toggleTheme = () => setTheme(theme === "light" ? "dark" : "light");
+  const [showCachedPrompt, setShowCachedPrompt] = useState(false);
+  const [cachedUsername, setCachedUsername] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(username, password);
+    const result: any = await login(username, password);
+    if (result && !result.success && result.error?.includes("SRM server is unreachable")) {
+      if (result.hasCachedData) {
+        const normalizedUsername = username.toUpperCase();
+        setCachedUsername(normalizedUsername);
+        setShowCachedPrompt(true);
+      } else {
+        toast.error("College portal was down and since its your first login your data isnt cached.");
+      }
+    }
+  };
+
+  const handleUseCachedData = async () => {
+    setShowCachedPrompt(false);
+    await login(username, password, true);
   };
 
   return (
-    <div className={`min-h-screen relative ${theme === "dark" ? "bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800" : "bg-gradient-to-br from-blue-50 via-white to-blue-100"}`}>
-      <nav className="flex items-center justify-between p-6">
+    <div className={`min-h-screen transition-colors duration-500 ${theme === "dark" ? "bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" : "bg-gradient-to-br from-blue-50 via-white to-blue-100"}`}>
+      <nav className="container mx-auto px-6 py-6 flex items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-to-r from-blue-400 to-purple-500 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-md">
             <Image
               src={Logo_White}
               alt="Profile"
+              className="w-8 h-8 object-contain"
             />
           </div>
-          <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-slate-800"
+          <span className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-gray-900"
             }`}>SRMAP API</span>
         </Link>
         <Button
@@ -47,8 +67,8 @@ const Login = () => {
           size="icon"
           onClick={() => toggleTheme()}
           className={`transition-colors duration-200 ${theme === "dark"
-            ? "text-white hover:bg-white/10"
-            : "text-slate-800 hover:bg-slate-200"
+            ? "bg-gray-800 border border-gray-700 text-gray-300 hover:text-white"
+            : "bg-white border border-gray-200 text-gray-600 hover:text-gray-900"
             }`}
           aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
         >
@@ -71,8 +91,8 @@ const Login = () => {
 
       <div className="flex items-center justify-center min-h-[calc(100vh-100px)] p-4">
         <Card className={`w-full max-w-md shadow-2xl ${theme === "dark"
-          ? "bg-slate-800/90 border-slate-700"
-          : "bg-white/90 border-slate-200"
+          ? "bg-gray-800 border-gray-700"
+          : "bg-white border-gray-200"
           }`}>
           <CardHeader className="space-y-1 text-center pb-6">
             <div className="mx-auto mb-4 relative group">
@@ -86,9 +106,9 @@ const Login = () => {
                 />
               </div>
             </div>
-            <CardTitle className={`text-xl font-semibold ${theme === "dark" ? "text-white" : "text-slate-800"
+            <CardTitle className={`text-xl font-semibold ${theme === "dark" ? "text-white" : "text-gray-900"
               }`}>Srmap API - Portal</CardTitle>
-            <CardDescription className={`text-sm leading-relaxed ${theme === "dark" ? "text-slate-400" : "text-slate-600"
+            <CardDescription className={`text-sm leading-relaxed ${theme === "dark" ? "text-gray-400" : "text-gray-600"
               }`}>
               Enter Your Registration Number And Password, Using Same Credentials As Srmap Student Portal.
             </CardDescription>
@@ -105,11 +125,11 @@ const Login = () => {
                   onChange={(e) => setUsername(handleRegNumberChange(e))}
                   required
                   className={`uppercase h-11 focus:ring-blue-500 ${theme === "dark"
-                    ? "bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500"
-                    : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500"
+                    ? "bg-gray-900/40 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500"
                     }`}
                 />
-                <p className={`text-xs ${theme === "dark" ? "text-slate-400" : "text-slate-500"
+                <p className={`text-xs ${theme === "dark" ? "text-gray-400" : "text-gray-500"
                   }`}>Must Start With AP</p>
               </div>
               <div className="space-y-2">
@@ -125,8 +145,8 @@ const Login = () => {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       className={`h-11 pr-12 focus:ring-blue-500 ${theme === "dark"
-                        ? "bg-slate-700/50 border-slate-600 text-white placeholder:text-slate-400 focus:border-blue-500"
-                        : "bg-white border-slate-300 text-slate-900 placeholder:text-slate-500 focus:border-blue-500"
+                        ? "bg-gray-900/40 border-gray-700 text-white placeholder:text-gray-400 focus:border-blue-500"
+                        : "bg-white border-gray-300 text-gray-900 placeholder:text-gray-500 focus:border-blue-500"
                         }`}
                     />
                     {passwordToggle.toggleButton}
@@ -137,7 +157,7 @@ const Login = () => {
             <CardFooter className="flex flex-col gap-3 px-6 pb-6">
               <Button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none h-11 font-medium"
+                className="w-full h-11 font-medium bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
                 disabled={isLoginLoading}
               >
                 {isLoginLoading ? (
@@ -150,7 +170,7 @@ const Login = () => {
               <button
                 type="button"
                 onClick={() => router.push('/forgot')}
-                className="text-sm text-blue-400 hover:text-blue-300 underline transition-colors"
+                className={`text-sm underline transition-colors ${theme === "dark" ? "text-blue-300 hover:text-blue-200" : "text-blue-600 hover:text-blue-700"}`}
               >
                 Forgot Password?
               </button>
@@ -158,6 +178,14 @@ const Login = () => {
           </form>
         </Card>
       </div>
+
+      <CachedDataPrompt
+        open={showCachedPrompt}
+        onOpenChange={setShowCachedPrompt}
+        onConfirm={handleUseCachedData}
+        onCancel={() => setShowCachedPrompt(false)}
+        description="The college portal is currently down, but you have previously logged in. Would you like to view your last updated data?"
+      />
     </div>
   );
 };

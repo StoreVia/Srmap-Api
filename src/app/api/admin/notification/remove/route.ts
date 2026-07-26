@@ -1,7 +1,7 @@
 import { ObjectId } from "mongodb";
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthResponseAdmin, errorResponse } from "@/backendUtils/utils/functions";
+import { requireAuthResponseAdmin, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();

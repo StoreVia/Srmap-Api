@@ -2,13 +2,13 @@ import { DateTime } from "luxon";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { useMongo } from "@/lib/database/useMongo";
-import { PARAMETERS } from "@/fullStackUtils/utils/messages";
-import { errorResponse } from "@/backendUtils/utils/functions";
-import { UNAUTHORIZED } from "@/fullStackUtils/utils/messages";
-import { isSessionValid } from "@/fullStackUtils/utils/functions";
-import { requireAuthResponse } from "@/backendUtils/utils/functions";
-import { INVALID_CREDENTIALS } from "@/fullStackUtils/utils/messages";
-import { fetchAttendance } from "@/backendUtils/srmapi/fetchCheckAttendance";
+import { PARAMETERS } from "@/shared/utils/messages";
+import { errorResponse } from "@/server/utils/functions";
+import { UNAUTHORIZED } from "@/shared/utils/messages";
+import { isSessionValid } from "@/shared/utils/functions";
+import { requireAuthResponse } from "@/server/utils/functions";
+import { INVALID_CREDENTIALS } from "@/shared/utils/messages";
+import { fetchAttendance } from "@/server/srmapi/utils/fetchCheckAttendance";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const initDb = await useMongo();
-        const db = initDb.db("college_db").collection("users1");
+        const db = initDb.db("college_db").collection("users");
         const user = await db.findOne({ username: auth.payload.username });
 
         if (!user) {

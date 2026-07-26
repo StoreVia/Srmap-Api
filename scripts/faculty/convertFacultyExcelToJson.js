@@ -3,7 +3,7 @@ const path = require("path");
 const XLSX = require("xlsx");
 
 const excelPath = path.join(process.cwd(), "faculty.xlsx");
-const jsonDir = path.join(process.cwd(), "../../src", "jsons");
+const jsonDir = path.join(process.cwd(), "../../src", "static");
 const jsonPath = path.join(jsonDir, "faculty.json");
 
 if (!fs.existsSync(excelPath)) {

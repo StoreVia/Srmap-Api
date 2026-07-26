@@ -1,5 +1,5 @@
 "use client";
-import { toast } from "@/hooks/useToast";
+import { toast } from "@/hooks/utils/useToast";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";

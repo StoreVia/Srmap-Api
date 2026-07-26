@@ -1,10 +1,10 @@
 "use client";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/utils/useToast";
 import { Button } from "@/components/ui/button";
 import React, { useEffect, useState } from "react";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import SessionCard from "@/components/utils/SessionCard";
-import { useSessionValidator } from "@/hooks/useSessionValidator";
+import { useSessionValidator } from "@/hooks/auth/useSessionValidator";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronDown, ChevronUp, BookOpen, Calendar, RefreshCw, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";

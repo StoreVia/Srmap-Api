@@ -1,7 +1,7 @@
 "use client";
 import Male from "../../../../public/avatars/male.png";
-import { trimText } from "@/fullStackUtils/utils/functions";
-import { toTitleCase } from "@/fullStackUtils/utils/functions";
+import { trimText } from "@/shared/utils/functions";
+import { toTitleCase } from "@/shared/utils/functions";
 import { useStudentData } from "@/context/StudentContext";
 import Female from "../../../../public/avatars/female.png";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

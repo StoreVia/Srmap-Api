@@ -1,24 +1,29 @@
-const withPWA = require("next-pwa")({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === "development",
-});
+const withSerwistInit = require("@serwist/next").default;
 
-module.exports = withPWA({
-  reactStrictMode: true,
+const isDev = process.env.NODE_ENV === "development";
+
+const config = {
+  reactStrictMode: !isDev,
   trailingSlash: false,
   devIndicators: false,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: '**',
-      },
-    ],
+    unoptimized: isDev,
   },
-});
+  typescript: {
+    ignoreBuildErrors: isDev,
+  },
+};
+
+if (isDev) {
+  module.exports = config;
+} else {
+  const withSerwist = withSerwistInit({
+    swSrc: "src/app/sw.ts",
+    swDest: "public/sw.js",
+    exclude: [
+      /.*/,
+    ],
+  });
+
+  module.exports = withSerwist(config);
+}

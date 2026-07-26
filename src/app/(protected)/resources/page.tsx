@@ -1,8 +1,8 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useIsMobile } from "@/hooks/useMobile";
+import { useIsMobile } from "@/hooks/utils/useMobile";
 import React, { useState, useEffect } from "react";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import { Download, FileText, ChevronDown, ChevronUp } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -300,7 +300,6 @@ const Resources = () => {
                                         </TabsTrigger>
                                     </TabsList>
 
-                                    {/* Rest of the TabsContent remains the same as before */}
                                     <TabsContent value="previousYearPapers" className="mt-0">
                                         {resources.previousYearPapers ? (
                                             <div>

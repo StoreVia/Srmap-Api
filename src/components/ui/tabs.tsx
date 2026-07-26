@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
-import { cn } from "@/fullStackUtils/utils/functions"
+import { cn } from "@/shared/utils/functions"
 
 const Tabs = TabsPrimitive.Root
 

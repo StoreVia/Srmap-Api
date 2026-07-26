@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react"
-import API from "@/components/client/api/AxiosClient"
+import API from "@/lib/api/axiosClient"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"

@@ -1,7 +1,7 @@
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { UNAUTHORIZED } from "@/fullStackUtils/utils/messages";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import { UNAUTHORIZED } from "@/shared/utils/messages";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
     try {
         const initDb = await useMongo();
-        const db = initDb.db('college_db').collection("users1");
+        const db = initDb.db('college_db').collection("users");
 
         const user = await db.findOne({ username: auth.payload.username });
         if (!user) {

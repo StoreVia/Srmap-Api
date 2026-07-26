@@ -1,14 +1,14 @@
 "use client";
-import { toast } from "@/hooks/useToast";
+import { toast } from "@/hooks/utils/useToast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useAdmin } from "@/context/AdminContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import { useEffect, useState, useCallback } from "react";
 import { Users, Calendar, SquarePen, Unlock, Plus } from "lucide-react";
-import { handleRegNumberChange } from "@/fullStackUtils/utils/functions";
+import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 

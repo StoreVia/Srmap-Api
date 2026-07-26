@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Logo from "../../public/icons/round_corner_logo.png";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Home, ArrowLeft, Search, AlertTriangle, Sparkles } from "lucide-react";
+import { Home, ArrowLeft } from "lucide-react";
 
 const NotFound = () => {
     const [isAnimating, setIsAnimating] = useState(false);
@@ -30,18 +30,6 @@ const NotFound = () => {
                 <div className="absolute bottom-1/3 left-1/2 w-40 h-40 bg-purple-200/20 dark:bg-purple-500/10 rounded-full blur-2xl animate-bounce delay-1500"></div>
             </div>
 
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-1/4 left-1/6 animate-float">
-                    <Search className="h-8 w-8 text-university-300/50 dark:text-university-600/30" />
-                </div>
-                <div className="absolute top-3/4 right-1/4 animate-float-delayed">
-                    <AlertTriangle className="h-6 w-6 text-red-300/50 dark:text-red-600/30" />
-                </div>
-                <div className="absolute top-1/2 right-1/6 animate-float-slow">
-                    <Sparkles className="h-10 w-10 text-yellow-300/40 dark:text-yellow-600/30" />
-                </div>
-            </div>
-
             <Card className="w-full max-w-lg shadow-2xl border-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl relative z-10 transition-all duration-300 hover:shadow-3xl">
                 <div className="absolute inset-0 bg-gradient-to-r from-university-500/5 to-blue-500/5 dark:from-university-400/5 dark:to-blue-400/5 rounded-lg"></div>
                 <CardHeader className="space-y-6 text-center relative z-10">
@@ -65,9 +53,7 @@ const NotFound = () => {
                             Page Not Found
                         </CardTitle>
                         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                            <AlertTriangle className="h-4 w-4 text-red-500" />
                             <span>The page you are looking not found!</span>
-                            <Sparkles className="h-4 w-4 text-yellow-500" />
                         </div>
                     </div>
                 </CardHeader>
@@ -96,36 +82,6 @@ const NotFound = () => {
                     </div>
                 </CardContent>
             </Card>
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                    @keyframes float {
-                        0%, 100% { transform: translateY(0px); }
-                        50% { transform: translateY(-20px); }
-                    }
-                    
-                    @keyframes float-delayed {
-                        0%, 100% { transform: translateY(0px) rotate(0deg); }
-                        50% { transform: translateY(-15px) rotate(5deg); }
-                    }
-                    
-                    @keyframes float-slow {
-                        0%, 100% { transform: translateY(0px) scale(1); }
-                        50% { transform: translateY(-10px) scale(1.1); }
-                    }
-                    
-                    .animate-float {
-                        animation: float 3s ease-in-out infinite;
-                    }
-                    
-                    .animate-float-delayed {
-                        animation: float-delayed 4s ease-in-out infinite 1s;
-                    }
-                    
-                    .animate-float-slow {
-                        animation: float-slow 5s ease-in-out infinite 2s;
-                    }
-                `
-            }}/>
         </div>
     );
 };

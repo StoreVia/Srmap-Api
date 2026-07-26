@@ -10,6 +10,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "vacant",
     "checkattendance",
     "exams/internals",
+    "exams/past-internals",
+    "exams/semester-results",
     "privacy",
     "resources",
     "subjects",

@@ -1,9 +1,10 @@
+.DS_Store
 /.next
+__pycache__
 node_modules
 package-lock.json
-/python/venv
-.DS_Store
 public/sw.js
 workbox-*.js
-.env
-replacements.txt
+venv
+*.tsbuildinfo
+empty_classrooms.json

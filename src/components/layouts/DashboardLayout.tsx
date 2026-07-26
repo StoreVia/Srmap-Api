@@ -1,18 +1,21 @@
 "use client";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
-import { useIsMobile } from "@/hooks/useMobile";
+import { useIsMobile } from "@/hooks/utils/useMobile";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/context/ThemeContext";
 import React, { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useStudentData } from "@/context/StudentContext";
-import { useNotifications } from "@/hooks/useNotification";
+import { toast } from "@/hooks/utils/useToast";
+import { useNotifications } from "@/hooks/utils/useNotification";
 import Logo_White from "../../../public/icons/round_corner_logo.png";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
-import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, CheckSquare } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, MessageCircle, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, CheckSquare, MoreVertical, Check, Loader2 } from "lucide-react";
+import { needsRefresh } from "@/shared/utils/functions";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -118,19 +121,21 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const routeRegex = /\/[a-zA-Z0-9\/-]+/g;
   const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
   const REFRESH_INTERVAL = 30 * 1000;
-  const { logout, isAdmin } = useAuth();
-  const { profile } = useStudentData();
+  const MOBILE_NAV_SCROLL_KEY = "mobileNavScrollLeft";
+  const { logout, isAdmin, accounts, activeAccountId, switchAccount } = useAuth();
+  const { profile, fetchFreshData, initiateSession } = useStudentData();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { state } = useSidebar();
-  const { settings, updateSettings } = useLocalStorageContext();
+  const { settings, updateSettings, profile: lProfile } = useLocalStorageContext();
 
   const notifications = useNotifications();
   const isCollapsed = state === "collapsed";
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isFetchingNewData, setIsFetchingNewData] = useState(false);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
   const lastRefreshRef = React.useRef<number>(0);
@@ -151,12 +156,16 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     isOpen: false,
     menuItem: null
   });
+  const mobileNavScrollRef = React.useRef<HTMLDivElement | null>(null);
 
   const isActive = (path: string) => pathname === path;
   const isSubPathActive = (basePath: string) => pathname.startsWith(basePath);
 
-  const handleRefresh = () => window.location.reload();
+  const handleRefresh = () => fetchFreshData();
   const handleHomeNavigation = () => router.push("/dashboard");
+  const handleAccountSwitch = (accountId: string) => {
+    switchAccount(accountId);
+  };
 
   const openMobileSubMenu = (menuItem: MenuItem) => {
     setMobileSubMenuDrawer({ isOpen: true, menuItem });
@@ -396,23 +405,39 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
+  const handleMobileNavScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    try {
+      localStorage.setItem(MOBILE_NAV_SCROLL_KEY, String(e.currentTarget.scrollLeft));
+    } catch (error) { }
+  };
+
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", path: "/dashboard", icon: Home },
-      { title: "Apps", path: "/apps", icon: AppWindow },
+      // { title: "Omegle", path: "/omegle", icon: MessageCircle, highlight: true },
       { title: "Attendance Details", path: "/attendance", icon: List },
       { title: "Time Table", path: "/timetable", icon: Calendar },
       { title: "Check Attendance", path: "/checkattendance", icon: CheckSquare },
       { title: "Code Attendance", path: "/markattendance", icon: ListChecks },
       { title: "Vacant", path: "/vacant", icon: Building },
-      { title: "Exams", path: "/exams", icon: FileSpreadsheet, subItems: [{ title: "Internals", path: "/exams/internals" }] },
+      {
+        title: "Exams",
+        path: "/exams",
+        icon: FileSpreadsheet,
+        subItems: [
+          { title: "Internals", path: "/exams/internals" },
+          { title: "Past Internals", path: "/exams/past-internals" },
+          { title: "Semester Results", path: "/exams/semester-results" },
+        ],
+      },
       { title: "Resources", path: "/resources", icon: Folder },
       { title: "Cgpa Calculator", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", path: "/calender", icon: CalendarDays },
       { title: "Forums", path: "/forums", icon: MessageSquare },
       { title: "Subjects", path: "/subjects", icon: Library },
       { title: "Profile", path: "/profile", icon: User },
-      { title: "Feedback", path: "/feedback", icon: Edit, highlight: false },
+      { title: "Feedback", path: "/feedback", icon: Edit },
+      // { title: "Apps", path: "/apps", icon: AppWindow },
       { title: "Settings", path: "/settings", icon: Settings },
       { title: "About Us", path: "/aboutus", icon: Users },
     ];
@@ -424,7 +449,8 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           title: "Admin Panel",
           path: "/admin",
           icon: Shield,
-        });
+        }
+      );
     }
     setMenuItems(menu);
   }, [isAdmin]);
@@ -452,6 +478,22 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       localStorage.setItem("sidebarState", "expanded");
     }
   }, [isMobile]);
+
+  useEffect(() => {
+    if (!isMobile) return;
+    try {
+      const savedScroll = localStorage.getItem(MOBILE_NAV_SCROLL_KEY);
+      if (!savedScroll) return;
+      const scrollLeft = Number(savedScroll);
+      if (Number.isNaN(scrollLeft)) return;
+
+      requestAnimationFrame(() => {
+        if (mobileNavScrollRef.current) {
+          mobileNavScrollRef.current.scrollLeft = scrollLeft;
+        }
+      });
+    } catch (error) { }
+  }, [isMobile, menuItems.length]);
 
   useEffect(() => {
     localStorage.setItem("sidebarState", state);
@@ -648,7 +690,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                   <Button
                     variant="outline"
                     size="icon"
-                    className="w-8 h-8 bg-transparent border-sidebar-border hover:bg-destructive hover:text-destructive-foreground hover:border-destructive transition-all duration-200 rounded-md"
+                    className="w-8 h-8 bg-transparent border-sidebar-border hover:bg-destructive hover:text-red-600 hover:border-destructive transition-all duration-200 rounded-md"
                     onClick={() => logout()}
                     title="Logout"
                   >
@@ -662,6 +704,33 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       )}
 
       <div className="flex-1 flex flex-col min-w-0">
+        {lProfile?.hasCachedData && (
+          <div className="w-full bg-red-500 text-white text-center text-xs sm:text-sm py-2 px-4 font-medium z-30 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+            <span>Showing cached data from {lProfile.sessionTime} since college portal is down. Click below button if portal was up again!</span>
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="h-7 text-xs bg-transparent border-white text-white hover:bg-white hover:text-red-500" 
+              disabled={isFetchingNewData}
+              onClick={async () => {
+                setIsFetchingNewData(true);
+                try {
+                  const res = await initiateSession();
+                  if (res) {
+                    toast({ title: "Success", description: `New data fetched for session: ${res.sessionTime}` });
+                  } else {
+                    toast({ variant: "destructive", title: "Error", description: "SRM portal is still unreachable." });
+                  }
+                } finally {
+                  setIsFetchingNewData(false);
+                }
+              }}
+            >
+              {isFetchingNewData && <Loader2 className="mr-2 h-3 w-3 animate-spin" />}
+              {isFetchingNewData ? "Fetching..." : "Fetch new data"}
+            </Button>
+          </div>
+        )}
         <header className="h-16 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-20">
           <div className="flex items-center px-6 h-full">
             {!isMobile && (
@@ -698,50 +767,125 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                   return "Dashboard";
                 })()}
               </h1>
-              {!isMobile && (
+              {!isMobile ? (
                 <p className="text-sm text-muted-foreground truncate">
                   {profile?.studentName}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground truncate">
+                  {profile?.registerNo}
                 </p>
               )}
             </div>
 
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleHomeNavigation}
-                className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 disabled:cursor-not-allowed"
-                aria-label="Go to dashboard"
-              >
-                <Home className={`h-4 w-4 transition-all duration-300 scale-100 hover:scale-105`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleRefresh}
-                className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200 disabled:cursor-not-allowed"
-                aria-label="Refresh page"
-              >
-                <RotateCcw className={`h-4 w-4 transition-transform duration-500`} />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setTheme(theme === "light" ? "dark" : "light")}
-                className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
-                aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-              >
-                <div className="relative w-4 h-4">
-                  <Sun
-                    className={`absolute inset-0 h-4 w-4 transition-all duration-300 ${theme === "light" ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-0 opacity-0"
-                      }`}
-                  />
-                  <Moon
-                    className={`absolute inset-0 h-4 w-4 transition-all duration-300 ${theme === "dark" ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
-                      }`}
-                  />
-                </div>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-full overflow-hidden hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                    aria-label="Switch account"
+                  >
+                    {profile?.picture ? (
+                      <Image
+                        src={profile.picture}
+                        alt="Profile"
+                        width={32}
+                        height={32}
+                        className="h-8 w-8 rounded-full object-cover"
+                      />
+                    ) : (
+                      <User className="h-4 w-4" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-64">
+                  <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {(accounts?.length || 0) > 0 ? (
+                    accounts.map((account) => {
+                      const isActiveAccount = account.id === activeAccountId;
+                      return (
+                        <DropdownMenuItem
+                          key={account.id}
+                          onClick={() => {
+                            if (!isActiveAccount) {
+                              handleAccountSwitch(account.id);
+                            }
+                          }}
+                          className="cursor-pointer flex items-center justify-between"
+                        >
+                          <span>{account.username}</span>
+                          {isActiveAccount && <Check className="h-4 w-4" />}
+                        </DropdownMenuItem>
+                      );
+                    })
+                  ) : (
+                    <DropdownMenuItem
+                      className="cursor-pointer"
+                      onClick={() => router.push("/settings")}
+                    >
+                      No accounts found
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer"
+                    onClick={() => router.push("/settings")}
+                  >
+                    Manage accounts
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                    aria-label="Open actions menu"
+                  >
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52">
+                  <DropdownMenuItem
+                    onClick={handleHomeNavigation}
+                    className="cursor-pointer"
+                  >
+                    <Home className="mr-2 h-4 w-4" />
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={handleRefresh}
+                    className="cursor-pointer"
+                  >
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Reload
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+                    className="cursor-pointer"
+                  >
+                    {theme === "light" ? (
+                      <Moon className="mr-2 h-4 w-4" />
+                    ) : (
+                      <Sun className="mr-2 h-4 w-4" />
+                    )}
+                    Theme Change
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => logout()}
+                    className="cursor-pointer text-red-600 focus:text-destructive"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </header>
@@ -800,11 +944,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </div>
               )}
 
-              {!isMobile && (
-                <p className="text-xs text-muted-foreground">
-                  Version 4.3 • Last updated: 28-Mar-2026
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground">
+                Version 5.0 • Last updated: 26-July-2026
+              </p>
             </div>
           </footer>
         </main>
@@ -812,14 +954,18 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         {isMobile && (
           <>
             <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border rounded-3xl bg-background/95 backdrop-blur-sm">
-              <div className="flex overflow-x-auto no-scrollbar h-20 px-2">
+              <div
+                ref={mobileNavScrollRef}
+                onScroll={handleMobileNavScroll}
+                className="flex overflow-x-auto no-scrollbar h-20 px-2"
+              >
                 {menuItems.map((item) => (
                   <button
                     key={item.path}
                     onClick={() => handleMobileNavClick(item)}
                     className={`relative flex flex-col items-center justify-center p-1 min-w-[70px]
                           rounded-lg transition-all duration-200 mx-1 my-1
-                          ${selectedMobileNav === item.path || isActive(item.path)
+                          ${selectedMobileNav === item.path || isSubPathActive(item.path)
                         ? "text-primary font-semibold bg-primary/15 border border-primary/30 shadow-md"
                         : "text-foreground/70 hover:text-foreground hover:bg-accent/10 border border-transparent"
                       }`}
@@ -838,13 +984,6 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                     <span className="text-[10px] truncate max-w-[70px] text-center block">{item.title}</span>
                   </button>
                 ))}
-                <button
-                  onClick={() => logout()}
-                  className="flex flex-col items-center justify-center p-1 -ml-1 min-w-[70px] text-foreground/70 hover:text-destructive hover:bg-accent/10 rounded-lg transition-all duration-200 mx-1 my-1"
-                >
-                  <LogOut className="h-4 w-4 mb-0.5" />
-                  <span className="text-[10px]">Logout</span>
-                </button>
               </div>
             </div>
 

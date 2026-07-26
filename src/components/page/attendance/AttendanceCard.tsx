@@ -34,25 +34,35 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
   }, [subject]);
 
   useEffect(() => {
+    const odMlRate = subject.od_ml_percentage / 100;
+
     const totalConducted = subject.conducted + simulatedBunks + futureAttendedClasses;
     const totalAttended = subject.attended + futureAttendedClasses;
 
-    const odMlEquivalentClasses = (subject.od_ml_percentage / 100) * totalConducted;
+    const odMlEquivalentClasses = odMlRate * totalConducted;
     const totalEffectiveAttended = totalAttended + odMlEquivalentClasses;
 
-    const effectivePercentage = totalConducted === 0 ? 0 : (totalEffectiveAttended / totalConducted) * 100;
-    setSimulatedPercentage(Math.round(effectivePercentage));
+    const effectivePercentage =
+      totalConducted === 0 ? 0 : (totalEffectiveAttended / totalConducted) * 100;
+    setSimulatedPercentage(effectivePercentage);
 
     const absent = totalConducted - totalAttended;
     setAbsentClasses(absent);
 
-    const remaining = Math.floor((0.25 * totalConducted - (totalConducted - totalEffectiveAttended)) / 0.75);
+    const remaining = Math.floor(
+      (0.25 * totalConducted - (totalConducted - totalEffectiveAttended)) / 0.75
+    );
     setRemainingBunks(remaining > 0 ? remaining : 0);
 
     if (effectivePercentage >= 75 || totalConducted === 0) {
       setClassesNeeded(0);
     } else {
-      const needed = Math.ceil((0.75 * totalConducted - totalEffectiveAttended) / 0.25);
+      // Each attended future class adds 1 to both attended and conducted,
+      // so OD/ML equivalent also grows → correct denominator is (0.25 + odMlRate).
+      // Computed from current simulated state (including future) so it reacts live.
+      const needed = Math.ceil(
+        (0.75 * totalConducted - totalEffectiveAttended) / (0.25 + odMlRate)
+      );
       setClassesNeeded(needed > 0 ? needed : 0);
     }
   }, [simulatedBunks, futureAttendedClasses, subject]);
@@ -80,13 +90,25 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
     <>
       <Card className="mb-4">
         <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
-            <div className="max-w-[70%]">
+          <div className="flex justify-between items-start gap-2">
+            <div className="min-w-0 flex-1">
               <CardTitle className="text-lg">{subject.subject_name}</CardTitle>
               <p className="text-muted-foreground text-xs">{subject.subject_code}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">{simulatedPercentage.toFixed(0)}%</span>
+            <div className="flex items-center gap-1 shrink-0">
+              <div className="bg-muted px-2 py-1.5 rounded-lg">
+                <span
+                  className={`text-base font-bold ${
+                    simulatedPercentage < 75
+                      ? "text-red-600"
+                      : simulatedPercentage <= 80
+                      ? "text-orange-500"
+                      : "text-blue-600"
+                  }`}
+                >
+                  {simulatedPercentage.toFixed(2)}%
+                </span>
+              </div>
               <AttendanceDialog subject={subject} />
             </div>
           </div>
@@ -95,14 +117,19 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
           <div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className={`h-2 rounded-full transition-all duration-300 ${simulatedPercentage < 75 ? "bg-red-600" : simulatedPercentage <= 80 ? "bg-orange-500" : "bg-blue-600"
-                  }`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  simulatedPercentage < 75
+                    ? "bg-red-600"
+                    : simulatedPercentage <= 80
+                    ? "bg-orange-500"
+                    : "bg-blue-600"
+                }`}
                 style={{ width: `${Math.min(simulatedPercentage, 100)}%` }}
               />
             </div>
             <div className="flex justify-between mt-1 text-xs">
               <span>Min: 75%</span>
-              <span>Current: {simulatedPercentage.toFixed(0)}%</span>
+              <span>Current: {simulatedPercentage.toFixed(2)}%</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -133,7 +160,12 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
             <div className="flex justify-between items-center mb-1">
               <p className="text-sm font-medium">Calculators</p>
               {hasSimulations && (
-                <Button onClick={handleRevertChanges} variant="ghost" size="sm" className={`p-1 h-7 w-7 ${isRotating ? "animate-spin" : ""}`}>
+                <Button
+                  onClick={handleRevertChanges}
+                  variant="ghost"
+                  size="sm"
+                  className={`p-1 h-7 w-7 ${isRotating ? "animate-spin" : ""}`}
+                >
                   <RotateCcw className="h-3 w-3" />
                 </Button>
               )}

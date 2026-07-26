@@ -1,9 +1,9 @@
 "use client";
-import { toast } from "@/hooks/useToast";
+import { toast } from "@/hooks/utils/useToast";
 import { useAuth } from "@/context/AuthContext";
-import API from "@/components/client/api/AxiosClient";
+import API from "@/lib/api/axiosClient";
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { extractErrorMessage } from "@/fullStackUtils/utils/functions";
+import { extractErrorMessage } from "@/shared/utils/functions";
 
 interface AdminContextType {
     isAdmin: boolean;

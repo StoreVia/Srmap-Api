@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthResponseAdmin, errorResponse } from "@/backendUtils/utils/functions";
+import { requireAuthResponseAdmin, errorResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuthResponseAdmin(req);
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
     const initDb = await useMongo();
     const db = initDb.db("college_db");
 
-    const usersDb = db.collection("users1");
+    const usersDb = db.collection("users");
     const blockedDb = db.collection("blocked");
     const notificationsDb = db.collection("notifications");
     const settingsDb = db.collection("settings");

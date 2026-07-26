@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { useMongo } from "@/lib/database/useMongo";
-import { requireAuthResponse } from "@/backendUtils/utils/functions";
-import { errorResponse } from "@/backendUtils/utils/functions";
-import { decryptData } from "@/backendUtils/utils/functions";
-import { UNAUTHORIZED } from "@/fullStackUtils/utils/messages";
+import { requireAuthResponse } from "@/server/utils/functions";
+import { errorResponse } from "@/server/utils/functions";
+import { decryptData } from "@/server/utils/functions";
+import { UNAUTHORIZED } from "@/shared/utils/messages";
 import { DateTime } from "luxon";
 
 export async function GET(req: NextRequest) {
@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
     try {
         const initDb = await useMongo();
-        const db = initDb.db("college_db").collection<any>("users1");
+        const db = initDb.db("college_db").collection<any>("users");
 
         const user = await db.findOne(
             { username: auth.payload.username },
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
         if (auth instanceof NextResponse) return auth;
 
         const initDb = await useMongo();
-        const db = initDb.db("college_db").collection<any>("users1");
+        const db = initDb.db("college_db").collection<any>("users");
 
         const user = await db.findOne(
             { username: auth.payload.username },

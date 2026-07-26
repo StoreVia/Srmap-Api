@@ -1,4 +1,4 @@
-import { cn } from "@/fullStackUtils/utils/functions"
+import { cn } from "@/shared/utils/functions"
 
 function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (

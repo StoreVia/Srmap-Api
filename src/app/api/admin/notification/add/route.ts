@@ -1,8 +1,8 @@
 import { useMongo } from "@/lib/database/useMongo";
-import { getTime } from "@/fullStackUtils/utils/functions";
+import { getTime } from "@/shared/utils/functions";
 import { NextRequest, NextResponse } from "next/server";
-import { extractErrorMessage } from "@/fullStackUtils/utils/functions";
-import { requireAuthResponseAdmin, errorResponse } from "@/backendUtils/utils/functions";
+import { extractErrorMessage } from "@/shared/utils/functions";
+import { requireAuthResponseAdmin, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();

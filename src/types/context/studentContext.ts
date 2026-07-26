@@ -55,4 +55,8 @@ export interface StudentDataContextType {
   initialized: boolean;
   error: any;
   fetchFreshData: (override?: { sessionId?: string; sessionTime?: string }) => Promise<void>;
+  initializeStudentData: () => Promise<any>;
+  initiateSession: () => Promise<{ sessionId?: string; sessionTime?: string; } | null>;
+  loadCachedDataPrompt: boolean;
+  useCachedData: () => void;
 }

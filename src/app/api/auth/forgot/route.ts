@@ -4,9 +4,9 @@ import { CookieJar } from "tough-cookie";
 import { wrapper } from "axios-cookiejar-support";
 import { NextRequest, NextResponse } from "next/server";
 import { isValidPassword } from "@/validators/auth/forgot";
-import { PARAMETERS } from "@/fullStackUtils/utils/messages";
-import { userBlockedResponseLogin } from "@/backendUtils/utils/responses";
-import { isBlocked, solveCaptcha, errorResponse } from "@/backendUtils/utils/functions";
+import { PARAMETERS } from "@/shared/utils/messages";
+import { userBlockedResponse } from "@/server/utils/responses";
+import { isBlocked, solveCaptcha, errorResponse } from "@/server/utils/functions";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     try {
         if(await isBlocked(username)){
-            return userBlockedResponseLogin();
+            return userBlockedResponse();
         }
 
         if (type === 'initiate') {

@@ -1,40 +1,35 @@
 "use client";
+import axios from "axios";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/useToast";
+import { useToast } from "@/hooks/utils/useToast";
 import { Button } from "@/components/ui/button";
-import API from "@/components/client/api/AxiosClient";
 import { useStudentData } from "@/context/StudentContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useSessionValidator } from "@/hooks/useSessionValidator";
-import { useLocalStorageContext } from "@/context/LocalStorageContext";
-import { extractErrorMessage } from "@/fullStackUtils/utils/functions";
+import { useSessionValidator } from "@/hooks/auth/useSessionValidator";
 
 const SessionCard = () => {
   const { toast } = useToast();
-  const { fetchFreshData } = useStudentData();
-  const { updateProfile } = useLocalStorageContext();
+  const { initiateSession } = useStudentData();
   const { sessionValid } = useSessionValidator();
   const [loadingFetch, setLoadingFetch] = useState(false);
 
   const handleFetchData = async () => {
     setLoadingFetch(true);
     try {
-      const limitRes = await API.get(`/srmapi/limit`);
-      if (limitRes.data.limit <= 0) {
-        toast({
-          title: "Error",
-          description: "Daily Limit Exceeded, Try Again Tomorrow!",
-          variant: "destructive",
-        });
-        return;
+      const res = await initiateSession();
+      if (res) {
+        toast({ title: "Success", description: `Session successfully initiated. New time: ${res.sessionTime}` });
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "Failed to initiate session. SRM server might be unreachable." });
       }
-      const newData = await API.get("/srmapi/initiate/session");
-      const { sessionId, sessionTime } = newData.data;
-      updateProfile({ sessionId, sessionTime });
-      fetchFreshData({ sessionId, sessionTime });
     } catch (err) {
-      toast.error(extractErrorMessage(err));
+      if (axios.isAxiosError(err)) {
+        const message = err.response?.data?.message || "Error Fetching Data!";
+        toast({ variant: "destructive", title: "Error", description: message });
+      } else {
+        toast({ variant: "destructive", title: "Error", description: "Unexpected Error!" });
+      }
     } finally {
       setLoadingFetch(false);
     }

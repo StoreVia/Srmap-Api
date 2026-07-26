@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthResponseAdmin, errorResponse } from "@/backendUtils/utils/functions";
+import { requireAuthResponseAdmin, errorResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
 

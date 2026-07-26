@@ -1,8 +1,24 @@
 "use client";
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 import { useTheme } from "@/context/ThemeContext";
+import { useStudentData } from "@/context/StudentContext";
+import { CachedDataPrompt } from "@/components/utils/CachedDataPrompt";
 
 export default function LoadingPage() {
   const { theme } = useTheme();
+  const { logout } = useAuth();
+  const { loadCachedDataPrompt, useCachedData } = useStudentData();
+  const [showLogout, setShowLogout] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowLogout(true);
+    }, 15000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className={`min-h-screen flex flex-col items-center justify-center transition-colors duration-200 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'}`}>
@@ -264,7 +280,21 @@ export default function LoadingPage() {
         <p className={`text-lg ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
           Fetching Data From Portal
         </p>
+        {showLogout && (
+          <div className="mt-6">
+            <Button variant="destructive" onClick={() => logout()}>
+              Logout
+            </Button>
+          </div>
+        )}
       </div>
+
+      <CachedDataPrompt
+        open={loadCachedDataPrompt}
+        onConfirm={useCachedData}
+        onCancel={() => logout()}
+        cancelText="Logout"
+      />
     </div>
   );
 }

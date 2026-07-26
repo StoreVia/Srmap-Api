@@ -1,6 +1,6 @@
 import { useMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
-import { requireAuthResponse } from "@/backendUtils/utils/functions";
+import { requireAuthResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuthResponse(req);

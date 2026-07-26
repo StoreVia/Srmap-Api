@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import coursesData from "@/jsons/resources/courses.json";
-import { requireAuthResponse, errorResponse } from "@/backendUtils/utils/functions";
+import coursesData from "@/static/resources/courses.json";
+import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
 export async function GET(req: NextRequest) {
     const auth = await requireAuthResponse(req);
