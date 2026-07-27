@@ -10,6 +10,7 @@ import SessionCard from "@/components/utils/SessionCard";
 import { useSessionValidator } from "@/hooks/auth/useSessionValidator";
 import { extractErrorMessage } from "@/shared/utils/functions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import AttendanceCheckCard from "@/components/page/attendance/AttendanceCheckCard";
 
 const AttendanceCode = () => {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const AttendanceCode = () => {
   const [submissionResult, setSubmissionResult] = useState<boolean | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [attendanceRefreshKey, setAttendanceRefreshKey] = useState(0);
 
   const isValidCodeFormat = (code: string) => /^[A-Z]\d{6}$/.test(code);
 
@@ -56,6 +58,7 @@ const AttendanceCode = () => {
       if (response.data.success) {
         setSubmissionResult(true);
         toast({ title: "Success", description: response.data.message });
+        setAttendanceRefreshKey((key) => key + 1);
       } else {
         setSubmissionResult(false);
         const msg = response.data.message || "Incorrect Attendance Code!";
@@ -147,6 +150,12 @@ const AttendanceCode = () => {
           )}
         </CardContent>
       </Card>
+
+      <AttendanceCheckCard
+        sessionValid={sessionValid}
+        sessionId={sessionId}
+        refreshKey={attendanceRefreshKey}
+      />
     </div>
   );
 };

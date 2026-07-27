@@ -1,12 +1,11 @@
 {
   "name": "srmapi.next",
-  "version": "5.1",
+  "version": "5.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "PORT=3000 next start",
-    "full": "concurrently \"node preload.js\" \"PORT=3000 next start\"",
     "lint": "next lint",
     "faculty": "cd scripts/faculty && node convertFacultyExcelToJson.js"
   },

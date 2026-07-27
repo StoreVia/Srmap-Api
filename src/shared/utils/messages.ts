@@ -1,4 +1,4 @@
-export const USER_BLOCKED = "User Blocked From Website Access. Contact: srmapi.dev@gmail.com (or) Join Our Discord Server. (https://discord.gg/bYmG7q7Q6j)!";
+export const USER_BLOCKED = "User Blocked From Website Access. Contact: srmapi.dev@gmail.com";
 export const SERVER_LOGOUT = "Logout Triggered By Server."
 export const PARAMETERS = "Required Parameters Not Matched!";
 export const UNAUTHORIZED = "Unauthorized Access!";

@@ -3,7 +3,7 @@ import { RotateCcw } from "lucide-react";
 import AttendanceDialog from "./OdMlDialog";
 import { Button } from "@/components/ui/button";
 import SimulationDialog from "./SimulationDialog";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export interface Subject {

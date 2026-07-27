@@ -14,8 +14,7 @@ import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, MessageCircle, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, CheckSquare, MoreVertical, Check, Loader2 } from "lucide-react";
-import { needsRefresh } from "@/shared/utils/functions";
+import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, MessageCircle, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, MoreVertical, Check, Loader2 } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -414,11 +413,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", path: "/dashboard", icon: Home },
-      // { title: "Omegle", path: "/omegle", icon: MessageCircle, highlight: true },
       { title: "Attendance Details", path: "/attendance", icon: List },
       { title: "Time Table", path: "/timetable", icon: Calendar },
-      { title: "Check Attendance", path: "/checkattendance", icon: CheckSquare },
-      { title: "Code Attendance", path: "/markattendance", icon: ListChecks },
+      { title: "Mark Attendance", path: "/markattendance", icon: ListChecks },
       { title: "Vacant", path: "/vacant", icon: Building },
       {
         title: "Exams",
@@ -945,7 +942,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
               )}
 
               <p className="text-xs text-muted-foreground">
-                Version 5.1 • Last updated: 26-July-2026
+                Version 5.2 • Last updated: 27-July-2026
               </p>
             </div>
           </footer>
