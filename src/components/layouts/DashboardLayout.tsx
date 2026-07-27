@@ -525,6 +525,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                     alt="Profile"
                     width={200}
                     height={200}
+                    unoptimized={Boolean(profile?.picture)}
                     className="w-full h-full object-contain"
                   />
                 </div>
@@ -790,6 +791,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                         alt="Profile"
                         width={32}
                         height={32}
+                        unoptimized
                         className="h-8 w-8 rounded-full object-cover"
                       />
                     ) : (
