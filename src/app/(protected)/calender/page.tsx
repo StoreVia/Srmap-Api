@@ -177,7 +177,7 @@ const AcademicCalendar = () => {
       </div>
 
       <Tabs
-        defaultValue="even"
+        value={activeTab}
         className="w-full"
         onValueChange={setActiveTab}
       >

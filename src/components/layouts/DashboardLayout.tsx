@@ -944,7 +944,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
               )}
 
               <p className="text-xs text-muted-foreground">
-                Version 5.2 • Last updated: 27-July-2026
+                Version 5.3 • Last updated: 28-July-2026
               </p>
             </div>
           </footer>

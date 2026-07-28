@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
     const blockedDb = db.collection("blocked");
     const notificationsDb = db.collection("notifications");
     const settingsDb = db.collection("settings");
+    const timetablesDb = db.collection("empty_classes");
 
     const feedbackCountDoc = await settingsDb.findOne({ id: "feedback" });
     const appSettingsDoc = await settingsDb.findOne({ id: "app-settings" });
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
     });
 
     const totalCount = await usersDb.countDocuments();
+    const timetableCount = await timetablesDb.countDocuments();
 
     const blockedUsers = await blockedDb.find({}).sort({ blockedAt: -1 }).toArray();
     const notifications = await notificationsDb.find({}).sort({ createdAt: -1 }).toArray();
@@ -43,10 +45,12 @@ export async function GET(req: NextRequest) {
         today: todayCount,
         total: totalCount,
         todayRegistered: todayRegisteredCount,
-        feedback: feedbackCountDoc?.count ?? 0
+        feedback: feedbackCountDoc?.count ?? 0,
+        timetables: timetableCount
       },
       settings: {
-        feedbackEnabled: appSettingsDoc?.feedback ?? false
+        feedbackEnabled: appSettingsDoc?.feedback ?? false,
+        timetableCollectionEnabled: appSettingsDoc?.timetableCollection ?? true,
       },
       blockedUsers,
       notifications

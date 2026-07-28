@@ -40,7 +40,6 @@ export async function POST(req: NextRequest) {
                 { username: auth.payload.username },
                 {
                     $set: {
-                        name: result.name,
                         data: encryptedData,
                         session_time: time
                     }
@@ -73,6 +72,10 @@ export async function POST(req: NextRequest) {
 
             (async () => {
                 try {
+                    const settingsDb = initDb.db("college_db").collection("settings");
+                    const appSettings = await settingsDb.findOne({ id: "app-settings" });
+                    if (appSettings?.timetableCollection === false) return;
+
                     const emptyClassesDb = initDb.db("college_db").collection("empty_classes");
                     const emptyClassesData = fetchTimetable(result);
                     const dataHash = crypto
@@ -94,7 +97,7 @@ export async function POST(req: NextRequest) {
         } else if ((!validSession && user.data) || (validSession && !sessionId)) {
             try {
                 const data = decryptData(user.data, auth.payload.password);
-                return NextResponse.json({ success: true, message: "Success!", data, student: { name: user.name, id: user.username }, source: "Database" });
+                return NextResponse.json({ success: true, message: "Success!", data, student: { id: user.username }, source: "Database" });
             } catch {
                 return errorResponse("Invalid session data!", { action: "logout" });
             }

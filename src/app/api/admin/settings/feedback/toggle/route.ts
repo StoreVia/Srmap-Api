@@ -6,10 +6,6 @@ export async function POST(req: NextRequest) {
     const auth = await requireAuthResponseAdmin(req);
     if (auth instanceof NextResponse) return auth;
 
-    if (auth.payload.username?.trim() != "AP24110010198") {
-        return errorResponse("You don't have main admin permissions.");
-    }
-
     try {
         const initDb = await useMongo();
         const db = initDb.db("college_db").collection("settings");
