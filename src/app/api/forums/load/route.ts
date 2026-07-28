@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { useMongo } from "@/lib/database/useMongo";
+import { useForumsMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const lastCreatedAtParam = url.searchParams.get("lastCreatedAt");
     const lastIdParam = url.searchParams.get("lastId");
 
-    const initDb = await useMongo();
+    const initDb = await useForumsMongo();
     const db = initDb.db("forums").collection("data");
 
     let query: any = {};

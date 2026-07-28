@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { useMongo } from "@/lib/database/useMongo";
+import { useForumsMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
 import { VALIDATION } from "@/shared/utils/messages";
 import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       return errorResponse("Invalid Forum Id!", {}, 400);
     }
 
-    const initDb = await useMongo();
+    const initDb = await useForumsMongo();
     const db = initDb.db("forums");
     const commentsCollection = db.collection("comments");
 
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return errorResponse(VALIDATION);
     }
 
-    const initDb = await useMongo();
+    const initDb = await useForumsMongo();
     const db = initDb.db("forums");
     const postsCollection = db.collection("data");
     const commentsCollection = db.collection("comments");

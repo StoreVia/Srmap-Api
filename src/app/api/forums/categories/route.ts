@@ -1,4 +1,4 @@
-import { useMongo } from "@/lib/database/useMongo";
+import { useForumsMongo } from "@/lib/database/useMongo";
 import { NextRequest, NextResponse } from "next/server";
 import { requireAuthResponse } from "@/server/utils/functions";
 
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   if (auth instanceof NextResponse) return auth;
 
   try {
-    const initDb = await useMongo();
+    const initDb = await useForumsMongo();
     const db = initDb.db("forums");
     const categoriesCollection = db.collection("categories");
 

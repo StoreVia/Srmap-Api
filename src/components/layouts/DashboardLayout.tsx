@@ -923,7 +923,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         )}
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6">
             {children}
           </div>
           <footer className={`flex-shrink-0 p-6 pt-4 border-t border-border bg-background/80 backdrop-blur-sm ${isMobile ? 'pb-28' : ''}`}>

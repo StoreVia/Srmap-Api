@@ -47,6 +47,7 @@ Create a `.env` file in the repository root.
 ```dotenv
 NODE_ENV=development
 MONGO_URI="mongodb://127.0.0.1:27017"
+FORUMS_MONGO_URI="mongodb://127.0.0.1:27018"
 ACCESS_SECRET="replace-with-a-long-random-signing-secret"
 ACCESS_EXPIRE=365
 D_REPORT="https://example.invalid/webhook"
@@ -247,6 +248,17 @@ MongoDB has two logical databases.
 | `forums.categories` | forum routes | category documents; create-post expects the document ObjectId. |
 
 Vacancy generation supports the hard-coded C-block rooms and eight daily slots from 09:00 through 16:50, Monday to Friday. It scans each stored timetable for venue text matching `(BlockRoom)`, marks those rooms occupied, and writes `src/static/empty_classrooms.json`. `ensureVacantFresh` generates the file when missing and refreshes it once per India-time day after 01:00; the module-global running promise prevents duplicate work inside one Node process. The output file is ignored by Git.
+
+### Multiple MongoDB databases
+
+The application uses two MongoDB connections:
+
+| Connection | Environment Variable | Purpose |
+| --- | --- | --- |
+| Main Database | `MONGO_URI` | Stores application data such as users, authentication, cached SRM data, notifications, and other core collections. |
+| Forums Database | `FORUMS_MONGO_URI` | Stores all forum-related collections, including posts, comments, reactions, categories, and other forum-specific data. |
+
+The backend maintains separate MongoDB client instances for each connection. Only the forum API routes use `FORUMS_MONGO_URI`; all other APIs continue using `MONGO_URI`. This separation allows the forums to be hosted, scaled, backed up, or migrated independently without affecting the main application database.
 
 ## Authentication, credentials, and security
 
