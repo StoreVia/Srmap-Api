@@ -32,6 +32,12 @@ interface MenuItem {
   }>;
 }
 
+const GitHubMark: React.FC<{ className?: string }> = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.486 2 12.02c0 4.428 2.865 8.184 6.839 9.51.5.093.682-.217.682-.483 0-.237-.009-.868-.014-1.704-2.782.605-3.369-1.342-3.369-1.342-.455-1.158-1.11-1.467-1.11-1.467-.908-.62.069-.608.069-.608 1.004.071 1.532 1.032 1.532 1.032.892 1.531 2.341 1.089 2.91.833.091-.647.349-1.089.635-1.34-2.22-.253-4.555-1.112-4.555-4.946 0-1.092.39-1.985 1.029-2.685-.103-.253-.446-1.27.098-2.647 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.748-1.026 2.748-1.026.546 1.377.203 2.394.1 2.647.64.7 1.028 1.593 1.028 2.685 0 3.843-2.339 4.69-4.566 4.938.359.31.678.921.678 1.855 0 1.34-.012 2.421-.012 2.75 0 .269.18.581.688.482A10.02 10.02 0 0022 12.02C22 6.486 17.523 2 12 2Z" clipRule="evenodd" />
+  </svg>
+);
+
 interface HoverMenuProps {
   item: MenuItem;
   isVisible: boolean;
@@ -436,6 +442,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       { title: "Feedback", path: "/feedback", icon: Edit },
       // { title: "Apps", path: "/apps", icon: AppWindow },
       { title: "Settings", path: "/settings", icon: Settings },
+      { title: "GitHub", path: "/github", icon: GitHubMark },
       { title: "About Us", path: "/aboutus", icon: Users },
     ];
 

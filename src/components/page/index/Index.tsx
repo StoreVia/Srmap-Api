@@ -494,6 +494,30 @@ export default function Landing() {
 
                 <section className="container mx-auto px-6 py-12">
                     <motion.div
+                        initial={{ opacity: 0, y: 16 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ duration: 0.5 }}
+                        className="overflow-hidden rounded-3xl border border-gray-200 bg-gradient-to-br from-slate-950 via-slate-900 to-blue-950 p-8 text-white shadow-xl sm:p-10"
+                    >
+                        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                            <div className="max-w-2xl">
+                                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white text-slate-950">
+                                    <svg className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fillRule="evenodd" d="M12 2C6.477 2 2 6.486 2 12.02c0 4.428 2.865 8.184 6.839 9.51.5.093.682-.217.682-.483 0-.237-.009-.868-.014-1.704-2.782.605-3.369-1.342-3.369-1.342-.455-1.158-1.11-1.467-1.11-1.467-.908-.62.069-.608.069-.608 1.004.071 1.532 1.032 1.532 1.032.892 1.531 2.341 1.089 2.91.833.091-.647.349-1.089.635-1.34-2.22-.253-4.555-1.112-4.555-4.946 0-1.092.39-1.985 1.029-2.685-.103-.253-.446-1.27.098-2.647 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844a9.59 9.59 0 012.504.337c1.909-1.296 2.748-1.026 2.748-1.026.546 1.377.203 2.394.1 2.647.64.7 1.028 1.593 1.028 2.685 0 3.843-2.339 4.69-4.566 4.938.359.31.678.921.678 1.855 0 1.34-.012 2.421-.012 2.75 0 .269.18.581.688.482A10.02 10.02 0 0022 12.02C22 6.486 17.523 2 12 2Z" clipRule="evenodd" /></svg>
+                                </div>
+                                <h3 className="text-2xl font-bold sm:text-3xl">Want to contribute?</h3>
+                                <p className="mt-3 text-sm leading-6 text-slate-300 sm:text-base">Srmapi is open source. Star the project, report issues, suggest improvements, or contribute code to make the portal better for SRM AP students.</p>
+                            </div>
+                            <a href="https://github.com/StoreVia/Srmap-Api" target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-slate-200">
+                                View on GitHub
+                                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M7 17 17 7M7 7h10v10" /></svg>
+                            </a>
+                        </div>
+                    </motion.div>
+                </section>
+
+                <section className="container mx-auto px-6 py-12">
+                    <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.25 }}
