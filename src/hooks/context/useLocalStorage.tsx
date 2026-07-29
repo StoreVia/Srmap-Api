@@ -10,6 +10,7 @@ export const DEFAULT_STORAGE = {
     attendanceSortOption: "default",
     feedbackExplanationSeen: false,
     sidebarTutorialDone: false,
+    mobileNavigationLayout: "single" as "single" | "double",
     startupPage: "dashboard" as "dashboard" | "timetable" | "dashboard",
   },
   profile: {

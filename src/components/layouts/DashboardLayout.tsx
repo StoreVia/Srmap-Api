@@ -22,6 +22,7 @@ interface DashboardLayoutProps {
 
 interface MenuItem {
   title: string;
+  shortTitle?: string;
   path: string;
   group?: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -135,6 +136,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   const { state } = useSidebar();
   const { settings, updateSettings, profile: lProfile } = useLocalStorageContext();
+  const usesDoubleRowMobileNav = settings.mobileNavigationLayout === "double";
 
   const notifications = useNotifications();
   const isCollapsed = state === "collapsed";
@@ -418,13 +420,14 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const baseMenu: MenuItem[] = [
-      { title: "Dashboard", path: "/dashboard", icon: Home },
-      { title: "Attendance Details", path: "/attendance", icon: List },
-      { title: "Time Table", path: "/timetable", icon: Calendar },
-      { title: "Mark Attendance", path: "/markattendance", icon: ListChecks },
-      { title: "Vacant", path: "/vacant", icon: Building },
+      { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
+      { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
+      { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
+      { title: "Mark Attendance", shortTitle: "Mark", path: "/markattendance", icon: ListChecks },
+      { title: "Vacant", shortTitle: "Empty", path: "/vacant", icon: Building },
       {
         title: "Exams",
+        shortTitle: "Exam",
         path: "/exams",
         icon: FileSpreadsheet,
         subItems: [
@@ -433,17 +436,17 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           { title: "Semester Results", path: "/exams/semester-results" },
         ],
       },
-      { title: "Resources", path: "/resources", icon: Folder },
-      { title: "Cgpa Calculator", path: "/cgpa", icon: Calculator },
-      { title: "Academic Calender", path: "/calender", icon: CalendarDays },
-      { title: "Forums", path: "/forums", icon: MessageSquare },
-      { title: "Subjects", path: "/subjects", icon: Library },
-      { title: "Profile", path: "/profile", icon: User },
-      { title: "Feedback", path: "/feedback", icon: Edit },
+      { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
+      { title: "Cgpa Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
+      { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
+      { title: "Forums", shortTitle: "Forum", path: "/forums", icon: MessageSquare },
+      { title: "Subjects", shortTitle: "Subs", path: "/subjects", icon: Library },
+      { title: "Profile", shortTitle: "Me", path: "/profile", icon: User },
+      { title: "Feedback", shortTitle: "Feed", path: "/feedback", icon: Edit },
       // { title: "Apps", path: "/apps", icon: AppWindow },
-      { title: "Settings", path: "/settings", icon: Settings },
-      { title: "GitHub", path: "/github", icon: GitHubMark },
-      { title: "About Us", path: "/aboutus", icon: Users },
+      { title: "Settings", shortTitle: "Set", path: "/settings", icon: Settings },
+      { title: "GitHub", shortTitle: "Git", path: "/github", icon: GitHubMark },
+      { title: "About Us", shortTitle: "About", path: "/aboutus", icon: Users },
     ];
 
     let menu = [...baseMenu];
@@ -451,6 +454,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       menu.push(
         {
           title: "Admin Panel",
+          shortTitle: "Admin",
           path: "/admin",
           icon: Shield,
         }
@@ -963,14 +967,17 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
               <div
                 ref={mobileNavScrollRef}
                 onScroll={handleMobileNavScroll}
-                className="flex overflow-x-auto no-scrollbar h-20 px-2"
+                className={usesDoubleRowMobileNav
+                  ? "grid h-20 grid-flow-col grid-rows-2 auto-cols-[68px] gap-px overflow-x-auto no-scrollbar p-1"
+                  : "flex h-20 overflow-x-auto no-scrollbar px-2"
+                }
               >
                 {menuItems.map((item) => (
                   <button
                     key={item.path}
                     onClick={() => handleMobileNavClick(item)}
-                    className={`relative flex flex-col items-center justify-center p-1 min-w-[70px]
-                          rounded-lg transition-all duration-200 mx-1 my-1
+                    className={`relative flex items-center justify-center rounded-lg transition-all duration-200
+                          ${usesDoubleRowMobileNav ? "min-w-0 flex-col gap-0 px-0.5 py-0" : "mx-1 my-1 min-w-[70px] flex-col p-1"}
                           ${selectedMobileNav === item.path || isSubPathActive(item.path)
                         ? "text-primary font-semibold bg-primary/15 border border-primary/30 shadow-md"
                         : "text-foreground/70 hover:text-foreground hover:bg-accent/10 border border-transparent"
@@ -986,8 +993,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                         <ChevronUp className="h-2.5 w-2.5 text-foreground/60" />
                       </span>
                     ) : null}
-                    <item.icon className="h-4 w-4 mb-0.5" />
-                    <span className="text-[10px] truncate max-w-[70px] text-center block">{item.title}</span>
+                    <item.icon className={`shrink-0 ${usesDoubleRowMobileNav ? "h-3.5 w-3.5" : "h-4 w-4 mb-0.5"}`} />
+                    <span className={`truncate text-center block ${usesDoubleRowMobileNav ? "max-w-[62px] text-[8px] leading-tight" : "max-w-[70px] text-[10px]"}`}>
+                      {usesDoubleRowMobileNav ? item.shortTitle ?? item.title : item.title}
+                    </span>
                   </button>
                 ))}
               </div>

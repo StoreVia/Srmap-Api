@@ -537,6 +537,38 @@ const Settings = () => {
             })}
           </div>
         </AccordionRow>
+
+        <AccordionRow
+          icon={<LayoutDashboard className="h-4 w-4" />}
+          label="Mobile Navigation"
+          sub={settings.mobileNavigationLayout === "double" ? "Double rows" : "Single row"}
+        >
+          <p className="pt-3 text-xs text-muted-foreground">
+            Double rows keeps the same navigation height while showing two items in each column.
+          </p>
+          <div className="flex gap-2 pt-3">
+            {([
+              { value: "single", label: "Single row" },
+              { value: "double", label: "Double rows" },
+            ] as const).map(({ value, label }) => {
+              const active = settings.mobileNavigationLayout === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => updateSettings({ mobileNavigationLayout: value })}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
+                    active
+                      ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
+                      : "border-border text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {label}
+                  {active && <Check className="h-3 w-3" />}
+                </button>
+              );
+            })}
+          </div>
+        </AccordionRow>
       </SettingsCard>
 
       <SettingsCard label="Data Control">
