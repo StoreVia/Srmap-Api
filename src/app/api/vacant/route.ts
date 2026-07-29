@@ -5,14 +5,30 @@ import { PARAMETERS } from "@/shared/utils/messages";
 import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 import ROOM_TYPES from "../../../types/server/room";
 import { ensureVacantFresh } from "@/server/vacant/vacant";
+import { useMongo } from "@/lib/database/useMongo";
+
+const MINIMUM_TIMETABLES = 100;
 
 export async function GET(req: NextRequest) {
   const auth = await requireAuthResponse(req);
   if (auth instanceof NextResponse) return auth;
 
-  await ensureVacantFresh();
-
   try {
+    const db = (await useMongo()).db("college_db");
+    const timetableCount = await db.collection("empty_classes").countDocuments();
+
+    if (timetableCount < MINIMUM_TIMETABLES) {
+      return NextResponse.json({
+        success: false,
+        code: "INSUFFICIENT_TIMETABLES",
+        timetableCount,
+        minimumRequired: MINIMUM_TIMETABLES,
+        message: "Vacant Classes needs at least 100 collected timetables before it can provide reliable results.",
+      });
+    }
+
+    await ensureVacantFresh();
+
     const filePath = resolve("src/static/empty_classrooms.json");
     const raw = await readFile(filePath, "utf-8");
     const vacantData = JSON.parse(raw);

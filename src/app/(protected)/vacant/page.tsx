@@ -9,6 +9,7 @@ import { DoorClosed } from "lucide-react"
 
 type RoomItem = { room: string; type: string }
 type VacantResult = Record<string, RoomItem[]>
+type Availability = { timetableCount: number; minimumRequired: number } | null
 
 const BLOCKS = ["C"]
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
@@ -22,13 +23,16 @@ export default function VacantPage() {
   const [activeFloor, setActiveFloor] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [availability, setAvailability] = useState<Availability>(null)
 
   useEffect(() => {
     setLoading(true)
     setError(null)
+    setAvailability(null)
     API.get(`/vacant?block=${block}&day=${day}&slot=${slot}`)
       .then(res => {
         if (res.data.success) {
+          setAvailability(null)
           const newData: VacantResult = res.data.data
           const floors = Object.keys(newData)
           setData(newData)
@@ -36,6 +40,12 @@ export default function VacantPage() {
         } else {
           setData({})
           setActiveFloor(null)
+          if (res.data.code === "INSUFFICIENT_TIMETABLES") {
+            setAvailability({
+              timetableCount: res.data.timetableCount,
+              minimumRequired: res.data.minimumRequired,
+            })
+          }
         }
       })
       .catch(() => {
@@ -67,7 +77,20 @@ export default function VacantPage() {
         </Select>
       </div>
 
-      {error ? (
+      {availability ? (
+        <Card className="border-amber-300 bg-amber-50/70 dark:border-amber-900 dark:bg-amber-950/30">
+          <CardContent className="flex min-h-56 flex-col items-center justify-center px-6 py-10 text-center">
+            <DoorClosed className="mb-4 h-11 w-11 text-amber-700 dark:text-amber-400" />
+            <h2 className="text-lg font-semibold text-amber-950 dark:text-amber-100">Vacant Classes is not available yet</h2>
+            <p className="mt-2 max-w-md text-sm text-amber-900/80 dark:text-amber-200/80">
+              We need at least {availability.minimumRequired} collected timetables to provide reliable classroom availability.
+            </p>
+            <p className="mt-4 rounded-full border border-amber-300 bg-white px-3 py-1 text-sm font-medium text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100">
+              {availability.timetableCount} of {availability.minimumRequired} timetables collected
+            </p>
+          </CardContent>
+        </Card>
+      ) : error ? (
         <div className="text-center text-red-500 py-10">{error}</div>
       ) : floors.length === 0 && !loading ? (
         <div className="flex flex-col items-center justify-center h-48 border border-dashed rounded-lg text-gray-500">
