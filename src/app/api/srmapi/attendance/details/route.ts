@@ -1,11 +1,10 @@
-import { DateTime } from "luxon";
 import { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { useMongo } from "@/lib/database/useMongo";
 import { PARAMETERS } from "@/shared/utils/messages";
 import { errorResponse } from "@/server/utils/functions";
 import { UNAUTHORIZED } from "@/shared/utils/messages";
-import { isSessionValid } from "@/shared/utils/functions";
+import { getFullDateAndTime, isSessionValid } from "@/shared/utils/functions";
 import { requireAuthResponse } from "@/server/utils/functions";
 import { INVALID_CREDENTIALS } from "@/shared/utils/messages";
 import { fetchAttendance } from "@/server/srmapi/utils/fetchCheckAttendance";
@@ -47,7 +46,7 @@ export async function POST(req: NextRequest) {
             message: "Success!",
             attendance: {
                 data: result.attendance,
-                last_fetched: DateTime.now().toFormat("dd-MMMM-yyyy, hh:mm:ss a")
+                last_fetched: getFullDateAndTime()
             }
         });
     } catch (err) {

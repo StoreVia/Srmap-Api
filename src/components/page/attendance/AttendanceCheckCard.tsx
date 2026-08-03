@@ -78,17 +78,17 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
   const isPresent = (status: string) => status.toUpperCase() === "P";
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <CardTitle>Check Attendance</CardTitle>
-            <CardDescription>Today&apos;s attendance from the active SRM session.</CardDescription>
+    <Card className="min-w-0 max-w-full overflow-hidden">
+      <CardHeader className="min-w-0 px-4 sm:px-6">
+        <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+          <div className="min-w-0">
+            <CardTitle className="break-words">Check Attendance</CardTitle>
+            <CardDescription className="break-words">Today&apos;s attendance from the active SRM session.</CardDescription>
           </div>
           {sessionValid && (
-            <div className="flex items-center gap-3">
-              {lastFetched && <span className="text-xs text-muted-foreground">Updated: {lastFetched}</span>}
-              <Button variant="outline" size="sm" onClick={fetchAttendance} disabled={isLoading}>
+            <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3 xl:flex-nowrap">
+              {lastFetched && <span className="min-w-0 break-words text-xs text-muted-foreground">Updated: {lastFetched}</span>}
+              <Button className="shrink-0" variant="outline" size="sm" onClick={fetchAttendance} disabled={isLoading}>
                 <RefreshCw className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")} />
                 Refresh
               </Button>
@@ -97,7 +97,7 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="min-w-0 space-y-4 px-4 sm:px-6">
         {!sessionValid && <SessionCard />}
 
         {error && sessionValid && (
@@ -119,7 +119,7 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: index * 0.03 }}
                 >
-                  <div className="flex flex-col gap-3 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex min-w-0 flex-col gap-3 rounded-lg border p-3 sm:p-4 xl:flex-row xl:items-center xl:justify-between">
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="rounded-lg border border-primary/20 bg-primary/10 p-2">
                         <BookOpen className="h-5 w-5 text-primary" />
@@ -132,7 +132,7 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                       <span className="flex items-center gap-1 text-xs text-muted-foreground"><Clock className="h-3 w-3" />{item.hour}</span>
                       <Badge variant="outline" className={cn("rounded-full px-3 py-1", isPresent(item.status) ? "border-green-300 bg-green-100 text-green-800 dark:border-green-700 dark:bg-green-900/30 dark:text-green-400" : "border-red-300 bg-red-100 text-red-800 dark:border-red-700 dark:bg-red-900/30 dark:text-red-700")}>
                         {isPresent(item.status) ? "Present" : "Absent"}
