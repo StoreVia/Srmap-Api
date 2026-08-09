@@ -1,6 +1,6 @@
 {
   "name": "srmapi.next",
-  "version": "5.3",
+  "version": "5.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -41,6 +41,7 @@
     "eslint-config-next": "^16.2.10",
     "form-data": "^4.0.4",
     "framer-motion": "^12.23.24",
+    "hls.js": "^1.6.17",
     "jiti": "^2.5.1",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",

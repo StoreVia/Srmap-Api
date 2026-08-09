@@ -57,9 +57,6 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
     if (effectivePercentage >= 75 || totalConducted === 0) {
       setClassesNeeded(0);
     } else {
-      // Each attended future class adds 1 to both attended and conducted,
-      // so OD/ML equivalent also grows → correct denominator is (0.25 + odMlRate).
-      // Computed from current simulated state (including future) so it reacts live.
       const needed = Math.ceil(
         (0.75 * totalConducted - totalEffectiveAttended) / (0.25 + odMlRate)
       );

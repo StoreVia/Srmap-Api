@@ -15,6 +15,7 @@ import { LocalStorageProvider } from "@/context/LocalStorageContext";
 import GoogleAnalytics from "@/components/client/analytics/GoogleAnalytics";
 
 export const metadata: Metadata = {
+  referrer: "no-referrer",
   title: "Srmapi - Alternative Portal For Srmap Students",
   description: "Srmapi is an alternative portal designed for SRMAP students to access track academics, resources, and manage student data easily.",
   keywords: ["Srmap", "Srmapi", "student portal", "alternative portal", "SRM University"],

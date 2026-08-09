@@ -43,7 +43,6 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
       const sid = override?.sessionId ?? lProfile.sessionId;
       const stime = override?.sessionTime ?? lProfile.sessionTime;
 
-      // Force database fetch if they opted into cached data, even if session is technically valid
       if (isSessionValid(stime) && !lProfile.hasCachedData) {
         payload.sessionId = sid;
       }

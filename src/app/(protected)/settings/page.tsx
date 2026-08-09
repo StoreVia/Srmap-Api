@@ -15,6 +15,7 @@ import WarningPopup from "@/components/ui/warningBox";
 import { useStudentData } from "@/context/StudentContext";
 import ReportIssue from "@/components/page/settings/ReportIssue";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
+import { useIsMobile } from "@/hooks/utils/useMobile";
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sun, Moon, Database, Lock, User, Calendar, Clock, Hash, Expand, Shrink, ChevronDown, ChevronUp, RefreshCw, Trash2, Flag, LayoutDashboard, Fingerprint, CalendarDays, CheckSquare, Sunrise, Check } from "lucide-react";
@@ -155,6 +156,13 @@ const STARTUP_PAGES = [
   { value: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
 ] as const;
 
+const MOBILE_NAVIGATION_OPTIONS = [
+  { value: "single", label: "Single row", description: "Shows every navigation option in one horizontally scrollable bar at the bottom." },
+  { value: "double", label: "Double rows", description: "Uses two compact rows in the bottom bar, so more navigation options are visible at once." },
+  { value: "mini", label: "Mini options", description: "Places tiny icon-only navigation bars on the left and right edges of the screen." },
+  { value: "sidebar", label: "Sidebar", description: "Uses a compact vertical icon sidebar on the left side of the screen." },
+] as const;
+
 function AccordionRow({
   icon,
   label,
@@ -212,9 +220,8 @@ function ActionRow({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed ${
-        destructive ? "hover:bg-destructive/8" : "hover:bg-muted/50"
-      }`}
+      className={`w-full flex items-center gap-3 px-4 py-3 transition-colors text-left disabled:opacity-50 disabled:cursor-not-allowed ${destructive ? "hover:bg-destructive/8" : "hover:bg-muted/50"
+        }`}
     >
       <span className={`shrink-0 ${destructive ? "text-red-600" : "text-muted-foreground"}`}>{icon}</span>
       <div className="flex-1 min-w-0">
@@ -239,6 +246,7 @@ function SettingsCard({ label, children }: { label: string; children: React.Reac
 }
 
 const Settings = () => {
+  const isMobile = useIsMobile();
   const router = useRouter();
   const { logout, login, isLoginLoading, accounts, activeAccountId, switchAccount } = useAuth();
   const { initiateSession } = useStudentData();
@@ -250,7 +258,7 @@ const Settings = () => {
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [warningBox, setWarningBox] = useState<{
     open: boolean; title: string; description: string; warning: string; onConfirm: () => void;
-  }>({ open: false, title: "", description: "", warning: "", onConfirm: () => {} });
+  }>({ open: false, title: "", description: "", warning: "", onConfirm: () => { } });
 
   const [deleteReasonDialogOpen, setDeleteReasonDialogOpen] = useState(false);
   const [deleteReason, setDeleteReason] = useState("");
@@ -497,11 +505,10 @@ const Settings = () => {
               <button
                 key={t}
                 onClick={() => setTheme(t)}
-                className={`flex items-center gap-2 flex-1 justify-center px-3 py-2 rounded-lg border text-sm font-medium transition-all ${
-                  theme === t
+                className={`flex items-center gap-2 flex-1 justify-center px-3 py-2 rounded-lg border text-sm font-medium transition-all ${theme === t
                     ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
                     : "border-border text-muted-foreground hover:bg-muted"
-                }`}
+                  }`}
               >
                 {t === "light" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
                 {t === "light" ? "Light" : "Dark"}
@@ -523,11 +530,10 @@ const Settings = () => {
                 <button
                   key={value}
                   onClick={() => updateSettings({ startupPage: value })}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${
-                    active
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${active
                       ? "bg-university-700/10 text-university-600 dark:bg-university-500/10 dark:text-university-400 font-medium"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                  }`}
+                    }`}
                 >
                   {icon}
                   {label}
@@ -538,37 +544,35 @@ const Settings = () => {
           </div>
         </AccordionRow>
 
-        <AccordionRow
-          icon={<LayoutDashboard className="h-4 w-4" />}
-          label="Mobile Navigation"
-          sub={settings.mobileNavigationLayout === "double" ? "Double rows" : "Single row"}
-        >
-          <p className="pt-3 text-xs text-muted-foreground">
-            Double rows keeps the same navigation height while showing two items in each column.
-          </p>
-          <div className="flex gap-2 pt-3">
-            {([
-              { value: "single", label: "Single row" },
-              { value: "double", label: "Double rows" },
-            ] as const).map(({ value, label }) => {
-              const active = settings.mobileNavigationLayout === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => updateSettings({ mobileNavigationLayout: value })}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all ${
-                    active
-                      ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
-                      : "border-border text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {label}
-                  {active && <Check className="h-3 w-3" />}
-                </button>
-              );
-            })}
-          </div>
-        </AccordionRow>
+        {isMobile && (
+          <AccordionRow
+            icon={<LayoutDashboard className="h-4 w-4" />}
+            label="Mobile Navigation"
+            sub={MOBILE_NAVIGATION_OPTIONS.find(({ value }) => value === settings.mobileNavigationLayout)?.label ?? "Single row"}
+          >
+            <p className="pt-3 text-xs text-muted-foreground">
+              {MOBILE_NAVIGATION_OPTIONS.find(({ value }) => value === settings.mobileNavigationLayout)?.description}
+            </p>
+            <div className="grid grid-cols-2 gap-2 pt-3">
+              {MOBILE_NAVIGATION_OPTIONS.map(({ value, label }) => {
+                const active = settings.mobileNavigationLayout === value;
+                return (
+                  <button
+                    key={value}
+                    onClick={() => updateSettings({ mobileNavigationLayout: value })}
+                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all ${active
+                        ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
+                        : "border-border text-muted-foreground hover:bg-muted"
+                      }`}
+                  >
+                    {label}
+                    {active && <Check className="h-3 w-3" />}
+                  </button>
+                );
+              })}
+            </div>
+          </AccordionRow>
+        )}
       </SettingsCard>
 
       <SettingsCard label="Data Control">

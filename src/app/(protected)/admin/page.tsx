@@ -7,7 +7,7 @@ import { useAdmin } from "@/context/AdminContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import API from "@/lib/api/axiosClient";
 import { useEffect, useState, useCallback } from "react";
-import { Users, Calendar, SquarePen, Unlock, Plus, Database, CheckCircle2, Power } from "lucide-react";
+import { Users, Calendar, SquarePen, Unlock, Plus, Database, CheckCircle2, Power, Clapperboard } from "lucide-react";
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";

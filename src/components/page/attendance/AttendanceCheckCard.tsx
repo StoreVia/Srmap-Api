@@ -71,8 +71,6 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
       setLastFetched("");
       setError("");
     }
-    // fetchAttendance intentionally runs when a successful attendance submission increments refreshKey.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sessionValid, sessionId, refreshKey]);
 
   const isPresent = (status: string) => status.toUpperCase() === "P";

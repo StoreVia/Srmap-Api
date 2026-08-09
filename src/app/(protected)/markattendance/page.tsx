@@ -102,7 +102,7 @@ const AttendanceCode = () => {
                 <div className="flex space-x-2">
                   <Input
                     id="attendance-code"
-                    placeholder="Enter code (e.g. A123456)"
+                    placeholder="Enter code (e.g. C123456)"
                     value={attendanceCode}
                     onChange={(e) => {
                       let value = e.target.value.toUpperCase();
@@ -126,7 +126,7 @@ const AttendanceCode = () => {
                 </div>
 
                 <p className="text-xs text-muted-foreground">
-                  Code Format: Capital Letter Followed By 6 Digits (e.g. A123456)
+                  Code Format: Capital Letter Followed By 6 Digits (e.g. C123456)
                 </p>
               </div>
 

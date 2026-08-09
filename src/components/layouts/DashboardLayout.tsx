@@ -14,7 +14,7 @@ import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider, SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, MessageCircle, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, MoreVertical, Check, Loader2 } from "lucide-react";
+import { BookOpenText, Lock, ChevronDown, Library, Folder, MessageSquare, ChevronRight, MessageCircle, ChevronUp, Sun, Moon, LogOut, RotateCcw, Home, List, AppWindow, Calendar, Calculator, User, Users, Settings, ListChecks, CalendarDays, Shield, Edit, X, FileSpreadsheet, Building, MoreVertical, Check, Loader2, Clapperboard } from "lucide-react";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -137,6 +137,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const { state } = useSidebar();
   const { settings, updateSettings, profile: lProfile } = useLocalStorageContext();
   const usesDoubleRowMobileNav = settings.mobileNavigationLayout === "double";
+  const usesMiniMobileNav = settings.mobileNavigationLayout === "mini";
+  const usesSidebarMobileNav = settings.mobileNavigationLayout === "sidebar";
+  const usesMobileSideNav = usesSidebarMobileNav;
 
   const notifications = useNotifications();
   const isCollapsed = state === "collapsed";
@@ -166,7 +169,13 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const mobileNavScrollRef = React.useRef<HTMLDivElement | null>(null);
 
   const isActive = (path: string) => pathname === path;
-  const isSubPathActive = (basePath: string) => pathname.startsWith(basePath);
+  const isSubPathActive = (basePath: string) => {
+    if (pathname === basePath) return true;
+    if (basePath === "/admin" || basePath === "/dashboard") {
+      return pathname === basePath;
+    }
+    return pathname.startsWith(basePath + "/");
+  };
 
   const handleRefresh = () => fetchFreshData();
   const handleHomeNavigation = () => router.push("/dashboard");
@@ -421,6 +430,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
+      { title: "Movies", shortTitle: "Movies", path: "/movies", icon: Clapperboard },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark", path: "/markattendance", icon: ListChecks },
@@ -457,6 +467,12 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           shortTitle: "Admin",
           path: "/admin",
           icon: Shield,
+        },
+        {
+          title: "Movies Admin",
+          shortTitle: "M-Admin",
+          path: "/admin/movies",
+          icon: Clapperboard,
         }
       );
     }
@@ -902,7 +918,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         <div
           onClick={handleNotificationBarClick}
-          className="notifications-bar cursor-pointer bg-slate-200 text-black px-6 py-2 flex items-center justify-between shadow-md"
+          className={`notifications-bar cursor-pointer bg-slate-200 text-black py-2 pr-6 pl-6 flex items-center justify-between shadow-md ${isMobile && usesMobileSideNav ? "ml-9" : ""}`}
         >
           <span className="font-medium text-sm">
             {notifications.notifications.length > 0 ? renderNotification(notifications.notifications[0].notification) : "No Notifications"}
@@ -934,10 +950,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         )}
 
         <main className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6">
+          <div className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6 ${isMobile && usesMobileSideNav ? "pl-12" : ""}`}>
             {children}
           </div>
-          <footer className={`flex-shrink-0 p-6 pt-4 border-t border-border bg-background/80 backdrop-blur-sm ${isMobile ? 'pb-28' : ''}`}>
+          <footer className={`flex-shrink-0 p-6 pt-4 border-t border-border bg-background/80 backdrop-blur-sm ${isMobile && !usesMiniMobileNav && !usesMobileSideNav ? 'pb-28' : ''}`}>
             <div className={`pt-4 ${isMobile ? 'text-center -mt-4' : 'flex items-center justify-between'}`}>
               <p className={`text-sm text-muted-foreground ${isMobile ? 'mb-2' : ''}`}>
                 {new Date().getFullYear()} Srmapi Portal.
@@ -955,7 +971,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
               )}
 
               <p className="text-xs text-muted-foreground">
-                Version 5.3 • Last updated: 28-July-2026
+                Version 5.5 • Last updated: 11-Aug-2026
               </p>
             </div>
           </footer>
@@ -963,6 +979,14 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {isMobile && (
           <>
+            {usesMiniMobileNav ? (
+              <>
+                <MiniMobileNav items={menuItems.slice(0, Math.ceil(menuItems.length / 2))} side="left" selectedPath={selectedMobileNav} isSubPathActive={isSubPathActive} onClick={handleMobileNavClick} />
+                <MiniMobileNav items={menuItems.slice(Math.ceil(menuItems.length / 2))} side="right" selectedPath={selectedMobileNav} isSubPathActive={isSubPathActive} onClick={handleMobileNavClick} />
+              </>
+            ) : usesSidebarMobileNav ? (
+              <MobileSidebarNav items={menuItems} selectedPath={selectedMobileNav} isSubPathActive={isSubPathActive} onClick={handleMobileNavClick} />
+            ) : (
             <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border rounded-3xl bg-background/95 backdrop-blur-sm">
               <div
                 ref={mobileNavScrollRef}
@@ -1001,6 +1025,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                 ))}
               </div>
             </div>
+            )}
 
             <MobileSubMenuDrawer
               isOpen={mobileSubMenuDrawer.isOpen}
@@ -1013,6 +1038,80 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     </div>
   );
 };
+
+function MiniMobileNav({
+  items,
+  side,
+  selectedPath,
+  isSubPathActive,
+  onClick,
+}: {
+  items: MenuItem[];
+  side: "left" | "right";
+  selectedPath: string | null;
+  isSubPathActive: (path: string) => boolean;
+  onClick: (item: MenuItem) => void;
+}) {
+  const edgeClass = side === "left" ? "left-0 rounded-r-md border-r" : "right-0 rounded-l-md border-l";
+
+  return (
+    <nav className={`fixed ${edgeClass} top-1/2 z-30 -translate-y-1/2 border-y border-border bg-background/95 py-1 shadow-sm backdrop-blur-sm`} aria-label={`${side} mobile navigation`}>
+      <div className="flex flex-col gap-0.5">
+        {items.map((item) => {
+          const active = selectedPath === item.path || isSubPathActive(item.path);
+          return (
+            <button
+              key={item.path}
+              type="button"
+              title={item.title}
+              aria-label={item.title}
+              onClick={() => onClick(item)}
+              className={`relative flex h-7 w-7 items-center justify-center transition-colors ${active ? "bg-primary/15 text-primary" : "text-foreground/65 hover:bg-accent hover:text-foreground"}`}
+            >
+              <item.icon className="h-3.5 w-3.5" />
+              {item.highlight && <span className="absolute right-1 top-1 h-1 w-1 rounded-full bg-blue-600" />}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
+
+function MobileSidebarNav({
+  items,
+  selectedPath,
+  isSubPathActive,
+  onClick,
+}: {
+  items: MenuItem[];
+  selectedPath: string | null;
+  isSubPathActive: (path: string) => boolean;
+  onClick: (item: MenuItem) => void;
+}) {
+  return (
+    <nav className="fixed bottom-0 left-0 top-16 z-30 w-9 overflow-y-auto border-r border-border bg-background/95 py-1 shadow-sm backdrop-blur-sm no-scrollbar" aria-label="Mobile sidebar navigation">
+      <div className="flex flex-col items-center gap-1">
+        {items.map((item) => {
+          const active = selectedPath === item.path || isSubPathActive(item.path);
+          return (
+            <button
+              key={item.path}
+              type="button"
+              title={item.title}
+              aria-label={item.title}
+              onClick={() => onClick(item)}
+              className={`relative flex h-8 w-8 items-center justify-center rounded-md transition-colors ${active ? "bg-primary/15 text-primary" : "text-foreground/65 hover:bg-accent hover:text-foreground"}`}
+            >
+              <item.icon className="h-4 w-4" />
+              {item.highlight && <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-blue-600" />}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}
 
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
