@@ -31,12 +31,28 @@ installSerwist({
       handler: new NetworkOnly(),
     },
     {
-      matcher: ({ request, url }) => request.destination === "image" && url.origin === self.location.origin,
+      matcher: ({ url }) => url.pathname.startsWith("/student/srmapstudentcorner/resources/photos/"),
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ url }) => url.pathname.startsWith("/student/srmapstudentcorner/captchas"), 
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ url }) =>
+        url.pathname === "/student-enhancer.js",
+      handler: new NetworkOnly(),
+    },
+    {
+      matcher: ({ request, url }) =>
+        request.destination === "image" &&
+        url.origin === self.location.origin &&
+        !url.pathname.startsWith("/student/"),
       handler: new CacheFirst({
         cacheName: "site-images",
         plugins: [
           new ExpirationPlugin({
-            maxEntries: 60,
+            maxEntries: 200,
             maxAgeSeconds: 60 * 60 * 24 * 30,
           }),
         ],
@@ -46,6 +62,11 @@ installSerwist({
       matcher: ({ request }) =>
         request.destination === "script" ||
         request.destination === "style",
+      handler: new StaleWhileRevalidate(),
+    },
+    {
+      matcher: ({ request }) =>
+        request.mode === "navigate",
       handler: new StaleWhileRevalidate(),
     },
   ],
