@@ -33,10 +33,11 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/clients/WhatsappClient.js",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
+    "src/clients/WhatsappClient.js"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "deprecated"
   ]
 }
