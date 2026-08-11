@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Movie } from "@/types/movies";
+import { Movie } from "../../../types/movies";
 
 interface HeroBannerProps {
   movie?: Movie;

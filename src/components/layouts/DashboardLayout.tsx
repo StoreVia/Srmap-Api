@@ -430,7 +430,6 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
-      { title: "Movies", shortTitle: "Movies", path: "/movies", icon: Clapperboard },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark", path: "/markattendance", icon: ListChecks },
@@ -467,12 +466,6 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           shortTitle: "Admin",
           path: "/admin",
           icon: Shield,
-        },
-        {
-          title: "Movies Admin",
-          shortTitle: "M-Admin",
-          path: "/admin/movies",
-          icon: Clapperboard,
         }
       );
     }

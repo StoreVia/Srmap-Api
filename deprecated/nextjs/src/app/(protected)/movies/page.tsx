@@ -6,11 +6,11 @@ import API from "@/lib/api/axiosClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Movie } from "@/types/movies";
-import { MovieCard } from "@/components/page/movies/MovieCard";
-import { HeroBanner } from "@/components/page/movies/HeroBanner";
-import { MovieWatchView } from "@/components/page/movies/MovieWatchView";
-import { CategoryRow } from "@/components/page/movies/CategoryRow";
+import { Movie } from "../../../types/movies";
+import { MovieCard } from "../../../components/admin/movies/movies/MovieCard";
+import { HeroBanner } from "../../../components/admin/movies/movies/HeroBanner";
+import { MovieWatchView } from "../../../components/admin/movies/movies/MovieWatchView";
+import { CategoryRow } from "../../../components/admin/movies/movies/CategoryRow";
 
 interface Selection {
   movie: Movie;

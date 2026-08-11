@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMovie } from "@/server/movies/catalog";
-import { OptionItem } from "@/types/movies";
+import { OptionItem } from "../../../../../../../../../types/movies";
 
 export const dynamic = "force-dynamic";
 

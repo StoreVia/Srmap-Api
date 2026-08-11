@@ -17,7 +17,7 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import { Movie, MovieEpisode } from "@/types/movies";
+import { Movie, MovieEpisode } from "../../../types/movies";
 
 interface ParsedCue {
   start: number;

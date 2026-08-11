@@ -18,12 +18,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   MediaFormData,
   DEFAULT_FORM_DATA,
-} from "@/components/admin/movies/types";
-import { CatalogGrid } from "@/components/admin/movies/CatalogGrid";
-import { JsonViewerModal } from "@/components/admin/movies/JsonViewerModal";
-import { MediaEditorModal } from "@/components/admin/movies/MediaEditorModal";
-import { FeaturedManagerModal } from "@/components/admin/movies/FeaturedManagerModal";
-import { CategoryOrderManagerModal } from "@/components/admin/movies/CategoryOrderManagerModal";
+} from "../../../../components/admin/movies/types";
+import { CatalogGrid } from "../../../../components/admin/movies/CatalogGrid";
+import { JsonViewerModal } from "../../../../components/admin/movies/JsonViewerModal";
+import { MediaEditorModal } from "../../../../components/admin/movies/MediaEditorModal";
+import { FeaturedManagerModal } from "../../../../components/admin/movies/FeaturedManagerModal";
+import { CategoryOrderManagerModal } from "../../../../components/admin/movies/CategoryOrderManagerModal";
 
 export default function AdminMoviesPage() {
   const router = useRouter();

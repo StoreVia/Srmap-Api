@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Play } from "lucide-react";
 import API from "@/lib/api/axiosClient";
 import { Button } from "@/components/ui/button";
-import { Movie } from "@/types/movies";
-import { MoviePlayer } from "@/components/page/movies/MoviePlayer";
+import { Movie } from "../../../../types/movies";
+import { MoviePlayer } from "../../../../components/admin/movies/movies/MoviePlayer";
 
 export default function MovieSlugPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);

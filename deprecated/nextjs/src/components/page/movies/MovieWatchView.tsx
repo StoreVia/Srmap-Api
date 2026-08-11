@@ -1,7 +1,7 @@
 "use client";
 import { ArrowLeft, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Movie } from "@/types/movies";
+import { Movie } from "../../../types/movies";
 import { MoviePlayer } from "./MoviePlayer";
 
 interface MovieWatchViewProps {

@@ -1,5 +1,5 @@
 import { useMongo } from "@/lib/database/useMongo";
-import { Movie } from "@/types/movies";
+import { Movie } from "../../../deprecated/nextjs/src/types/movies";
 
 async function collection() {
   return (await useMongo()).db("movies").collection<Movie>("catalog");

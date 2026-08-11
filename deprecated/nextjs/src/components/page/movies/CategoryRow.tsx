@@ -1,7 +1,7 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight, Play, Film, Tv } from "lucide-react";
-import { Movie } from "@/types/movies";
+import { Movie } from "../../../types/movies";
 import { Badge } from "@/components/ui/badge";
 
 interface CategoryRowProps {
