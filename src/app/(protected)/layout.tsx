@@ -14,7 +14,7 @@ export default function ProtectedDashboardLayout({ children }: { children: React
   const pathname = usePathname();
 
   const [checked, setChecked] = useState(false);
-  const publicRoutes = ["/", "/privacy", "/terms", "/aboutus"];
+  const publicRoutes = ["/", "/privacy", "/privacy/mobile", "/terms", "/aboutus"];
   const isPublicRoute = publicRoutes.includes(pathname);
 
   useEffect(() => {
