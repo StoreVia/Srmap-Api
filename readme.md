@@ -1,6 +1,6 @@
 # Srmapi Next
 
-Srmapi Next is a full-stack alternative portal for SRM AP students. It is a Next.js 16 application with a React client, Next.js Route Handlers as its backend, MongoDB for application data, and a local FastAPI/ONNX CAPTCHA solver. The backend signs in to `student.srmap.edu.in` on a student's behalf, keeps the SRM `JSESSIONID` in the browser for the current session, scrapes portal pages, normalizes the results, and caches selected data in MongoDB.
+Srmapi Next is a full-stack alternative portal for SRM AP students. It is a Next.js 16 application with a React client, Next.js Route Handlers as its backend, MongoDB for application data, and an in-house Node.js TFLite CAPTCHA solver. The backend signs in to `student.srmap.edu.in` on a student's behalf, keeps the SRM `JSESSIONID` in the browser for the current session, scrapes portal pages, normalizes the results, and caches selected data in MongoDB.
 
 It is a third-party integration, not an official SRM service. SRM may change its HTML, session behavior, CAPTCHA format, or policies at any time; every scraper depends on the current portal markup.
 
@@ -24,8 +24,8 @@ flowchart LR
   Browser["Browser / React client"] -->|"Bearer JWT + JSON"| Next["Next.js app and Route Handlers"]
   Next -->|"MongoDB driver"| Mongo["MongoDB: college_db and forums"]
   Next -->|"HTTP + JSESSIONID"| SRM["student.srmap.edu.in"]
-  Next -->|"multipart image"| Captcha["FastAPI CAPTCHA solver :6000"]
-  Captcha -->|"ONNX Runtime"| Model["captcha_crnn.onnx"]
+  Next -->|"In-Memory TFLite"| Captcha["Node.js CAPTCHA solver (src/lib/captcha)"]
+  Captcha -->|"TFLite Runtime"| Model["captcha_float32.tflite"]
   Next -->|"POST webhook"| Report["D_REPORT issue-report webhook"]
 ```
 
@@ -33,13 +33,10 @@ The browser never calls SRM directly. `src/lib/api/axiosClient.ts` adds the acti
 
 ## Prerequisites and local setup
 
-Use Node.js 22 or a current Node release supported by Next.js 16, Python 3.10+ (the repository's Python service uses FastAPI, PyTorch transforms, and ONNX Runtime), and a reachable MongoDB instance.
+Use Node.js 22 or a current Node release supported by Next.js 16, and a reachable MongoDB instance. (No Python dependency required).
 
 ```bash
 npm install
-python3 -m venv python/venv
-source python/venv/bin/activate
-pip install -r python/requirements.txt
 ```
 
 Create a `.env` file in the repository root.
@@ -53,20 +50,13 @@ ACCESS_EXPIRE=365
 D_REPORT="https://example.invalid/webhook"
 ```
 
-`ENCRYPT_SECRET`, `LIMIT`, and `CRON_SECRET` appear in older documentation/deployment material, but the current application source does not read them. The cache encryption implementation derives its key from the user's password, not `ENCRYPT_SECRET`.
-
-Start the two processes in separate terminals:
+Start the application:
 
 ```bash
-# terminal 1
-source python/venv/bin/activate
-python3 python/api.py
-
-# terminal 2
 npm run dev
 ```
 
-The web application runs on the Next.js development port (normally `http://localhost:3000`) and the solver listens on `0.0.0.0:6000`.
+The web application runs on the Next.js development port (normally `http://localhost:3000`).
 
 Available npm commands:
 
@@ -77,12 +67,13 @@ Available npm commands:
 | `npm run start` | Serves the production build on port 3000. |
 | `npm run lint` | Runs the configured Next/ESLint command. |
 | `npm run faculty` | Converts `scripts/faculty/faculty.xlsx` to `src/static/faculty.json`. |
+| `npm run benchmark` | Runs the CAPTCHA solver performance & throughput benchmark. |
 
 ## How a login and data refresh work
 
 1. The login page validates the registration number locally and sends `{ username, password, wantCachedData }` to `POST /api/auth/login`.
 2. The handler uppercases and validates the registration number, rejects blocked users, and calls `handleUserSession`.
-3. `src/server/auth/login.ts` loads SRM's login page, extracts `JSESSIONID` from `Set-Cookie`, downloads the CAPTCHA, sends the image to the local solver, and posts the username, password, and predicted CAPTCHA to SRM. A missing `<h2>` in SRM's response is treated as failed login.
+3. `src/server/auth/login.ts` loads SRM's login page, extracts `JSESSIONID` from `Set-Cookie`, downloads the CAPTCHA, solves it using the cached in-house TFLite model in `src/lib/captcha`, and posts the username, password, and predicted CAPTCHA to SRM. A missing `<h2>` in SRM's response is treated as failed login.
 4. On success, the `JSESSIONID` is encrypted with the user password and written to `college_db.users`, with an India-time session date. The API returns a signed JWT plus the plain session ID and time to the browser.
 5. The React `StudentDataProvider` calls `POST /api/srmapi/fetch` while the session date is current. It requests SRM's dashboard, attendance, timetable, subject, profile, and CGPA fragments concurrently, parses them with Cheerio, saves the result encrypted in MongoDB, saves at most ten daily encrypted attendance snapshots, and returns normalized data to the client.
 6. The client stores the response data, session ID, and JWT in the active account record in browser `localStorage`; it populates the dashboard, attendance, timetable, profile, and subjects screens from that state.
@@ -228,9 +219,14 @@ Exam helpers parse report IDs `5` (current internals), `6` (exam ledger), `22` (
 
 ### CAPTCHA solver
 
-`python/api.py` loads `python/captcha_crnn.onnx` once at startup using the CPU ONNX provider. `POST /captcha` accepts a multipart `file`, converts it to grayscale, crops the image to `120x25` if necessary, resizes/normalizes it to `32x120`, and enqueues it. One background worker runs inference; the bounded queue holds 64 requests, and each caller waits no more than 10 seconds. CTC-like decoding removes blank/repeated tokens and maps output indexes to `0-9A-Z`.
+The CAPTCHA solver is implemented in Node.js within `src/lib/captcha/captcha.ts`. It loads the TFLite model from `src/assets/captcha/model/captcha_float32.tflite` once at application startup or initial login request and caches the model instance in memory. 
 
-The Next backend posts CAPTCHA images to `http://0.0.0.0:6000/captcha`. In production, ensure this address is reachable from the Next.js application.
+When a CAPTCHA buffer is passed to `solveCaptcha`:
+1. `sharp` crops the image to `(0, 0, 120, 25)` and converts it to grayscale.
+2. Normalized float values (`0..1`) are reshaped into a `[1, 25, 120, 1]` tensor.
+3. The cached TFLite model runs inference, and predictions are mapped to `A-Z, 0-9`.
+
+Because the model is cached in memory, each CAPTCHA solve takes ~2ms within Node.js, eliminating external network/HTTP overhead.
 
 ## Database and cache model
 
@@ -300,11 +296,11 @@ The server encrypts session IDs, normalized portal data, and attendance history 
 
 `next.config.ts` enables React strict mode outside development, disables dev indicators, skips TypeScript build errors only in development, and configures Serwist only in production. The production Serwist configuration writes `public/sw.js` from `src/app/sw.ts`, but currently excludes every match from precaching. `public/manifest.json`, icons, `robots.txt`, and `src/app/sitemap.ts` provide PWA/discovery metadata.
 
-For production, run MongoDB and the CAPTCHA solver, build the application with `npm run build`, and serve it with `npm run start` behind a reverse proxy. Ensure the application can communicate with both SRM and the CAPTCHA solver. If the runtime filesystem is ephemeral, configure a persistent writable location for generated vacancy data, as the application writes it under `src/static`.
+For production, run MongoDB, build the application with `npm run build`, and serve it with `npm run start` behind a reverse proxy. Ensure the application can communicate with SRM. If the runtime filesystem is ephemeral, configure a persistent writable location for generated vacancy data, as the application writes it under `src/static`.
 
 ## Complete source map
 
-This inventory covers every tracked project source/configuration area. Generated dependency folders, `.next`, Python bytecode, local environment files, Git internals, and the archived ZIP are intentionally not application source.
+This inventory covers every tracked project source/configuration area. Generated dependency folders, `.next`, local environment files, Git internals, and the archived ZIP are intentionally not application source.
 
 | Path/group | Responsibility |
 | --- | --- |
@@ -316,12 +312,14 @@ This inventory covers every tracked project source/configuration area. Generated
 | `src/app/api/forums/*` | Categories, post listing/creation/read/deletion, comments, status, and pinned answer endpoints. |
 | `src/app/api/admin/*` | Admin verification, metrics, blocks, notifications, and feedback settings. |
 | `src/app/api/resources/*`, `api/vacant`, `api/tools/*` | Static learning resources, room availability, user document, notifications, and issue reporting. |
+| `src/assets/captcha/*` | Captcha TFLite model (`src/assets/captcha/model/captcha_float32.tflite`) and path definition. |
+| `src/lib/captcha/*` | In-house Node.js TFLite captcha solver module with in-memory caching and sharp preprocessing. |
 | `src/server/auth/*` | SRM login exchange, encrypted session persistence/cached-login fallback, and bearer-token extraction. |
 | `src/server/srmapi/fetchData.ts` | Concurrent SRM report fetch and Cheerio normalization of dashboard data. |
 | `src/server/srmapi/exams/*` | SRM HTML parsers and per-user session-validity wrappers for internals, past internals, and ledger results. |
 | `src/server/srmapi/feedback/*` | Feedback subject parser, static random comment reader, answer construction, and SRM submission. |
 | `src/server/srmapi/utils/*` | Timetable projection for vacancy data and current-day attendance parser. |
-| `src/server/utils/*` | SRM headers/agents, API error helpers, JWT/auth/crypto/CAPTCHA/retry functions. |
+| `src/server/utils/*` | SRM headers/agents, API error helpers, JWT/auth/crypto/retry functions. |
 | `src/server/faculty/faculty.ts` | Normalizes faculty names and looks up cabin locations in static faculty data. |
 | `src/server/vacant/*` | Builds and freshness-controls the empty-classroom matrix. |
 | `src/context/*` | React contexts for auth, browser storage/accounts, student data, theme, and admin state. |
@@ -338,8 +336,9 @@ This inventory covers every tracked project source/configuration area. Generated
 | `src/types/*` | Type definitions for student context, login, feedback, and room type metadata. |
 | `src/static/*` | Academic calendar, feedback phrases, faculty cabins, resources, and generated vacancy JSON. |
 | `public/*` | PWA icons/manifest, robots instructions, screenshots, developer images, and gender avatar fallbacks. |
-| `python/api.py`, `python/requirements.txt`, `python/captcha_crnn.onnx` | CAPTCHA HTTP service, its Python packages, and trained inference model. |
 | `scripts/faculty/*` | Faculty spreadsheet input and Node converter that regenerates faculty JSON. |
+| `scripts/benchmarkCaptcha.ts` | Benchmark script measuring captcha solver speed, throughput, and memory usage. |
+| `scripts/benchmarkHttpApi.ts` | HTTP API benchmark script running concurrent captcha solve API requests. |
 | `deprecated/*` | Old Next.js Omegle page and standalone websocket prototype; they are not imported by the current application. |
 | `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`, `eslint.config.ts` | Build scripts/dependencies and Next/TypeScript/Tailwind/PostCSS/ESLint configuration. |
 | `.gitignore`, `next-env.d.ts`, `temp.txt` | Ignore rules, Next TypeScript declaration, and an unreferenced temporary text file. |

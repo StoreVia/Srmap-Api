@@ -6,7 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { isValidPassword } from "@/validators/auth/forgot";
 import { PARAMETERS } from "@/shared/utils/messages";
 import { userBlockedResponse } from "@/server/utils/responses";
-import { isBlocked, solveCaptcha, errorResponse } from "@/server/utils/functions";
+import { isBlocked, errorResponse } from "@/server/utils/functions";
+import { solveCaptcha } from "@/lib/captcha";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();

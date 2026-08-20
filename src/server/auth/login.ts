@@ -1,4 +1,4 @@
-import { solveCaptcha } from "@/server/utils/functions";
+import { solveCaptcha } from "@/lib/captcha";
 import { main, captcha, authenticate } from "@/server/utils/headers";
 import { LoginResponse } from "@/types/server/login";
 

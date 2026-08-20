@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { solveCaptcha } from "@/server/utils/functions";
+import { solveCaptcha } from "@/lib/captcha";
 
 export async function POST(request: NextRequest) {
   try {

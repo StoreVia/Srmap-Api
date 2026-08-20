@@ -1,6 +1,6 @@
 {
   "name": "srmapi.next",
-  "version": "5.5",
+  "version": "5.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -28,6 +28,7 @@
     "@serwist/next": "^9.5.11",
     "@serwist/precaching": "^9.5.11",
     "@serwist/sw": "^9.5.11",
+    "@tensorflow/tfjs": "^4.22.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/react": "^19.1.11",
     "autoprefixer": "^10.4.21",
@@ -57,6 +58,7 @@
     "serwist": "^9.5.11",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
+    "tfjs-tflite-node": "^0.0.2",
     "tough-cookie": "^5.1.2",
     "typescript": "^5.9.2",
     "vaul": "^1.1.2"
