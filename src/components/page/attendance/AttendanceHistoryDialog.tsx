@@ -17,11 +17,17 @@ interface AttendanceHistoryEntry {
 
 interface AttendanceHistoryDialogProps {
     trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
     onLoadToPage?: (data: any[]) => void;
 }
 
-export function AttendanceHistoryDialog({ trigger, onLoadToPage }: AttendanceHistoryDialogProps) {
-    const [open, setOpen] = useState(false);
+export function AttendanceHistoryDialog({ trigger, open: controlledOpen, onOpenChange: setControlledOpen, onLoadToPage }: AttendanceHistoryDialogProps) {
+    const [internalOpen, setInternalOpen] = useState(false);
+    const isControlled = controlledOpen !== undefined;
+    const open = isControlled ? controlledOpen : internalOpen;
+    const setOpen = isControlled ? (setControlledOpen || (() => {})) : setInternalOpen;
+
     const [loading, setLoading] = useState(false);
     const [refreshing, setRefreshing] = useState(false);
     const [history, setHistory] = useState<AttendanceHistoryEntry[]>([]);
@@ -126,14 +132,11 @@ export function AttendanceHistoryDialog({ trigger, onLoadToPage }: AttendanceHis
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-                {trigger || (
-                    <Button variant="outline" size="sm" className="gap-2">
-                        <History className="h-4 w-4" />
-                        History
-                    </Button>
-                )}
-            </DialogTrigger>
+            {trigger && (
+                <DialogTrigger asChild>
+                    {trigger}
+                </DialogTrigger>
+            )}
 
             <DialogContent className="w-full max-w-2xl max-h-[80vh] overflow-y-auto px-4 sm:px-6 box-border">
                 <DialogHeader>
