@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import * as tf from "@tensorflow/tfjs";
-import tflite from "tfjs-tflite-node";
+import * as tfliteModule from "tfjs-tflite-node";
 import { captchaModelPath } from "@/static/captcha/captchaModel";
 
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
@@ -12,6 +12,8 @@ for (let i = 0; i < CHARS.length; i++) {
 let cachedModel: any = null;
 let loadingPromise: Promise<any> | null = null;
 
+const loadTFLiteModel = tfliteModule.loadTFLiteModel;
+
 export async function getCaptchaModel(): Promise<any> {
     if (cachedModel) return cachedModel;
     if (loadingPromise) return await loadingPromise;
@@ -19,7 +21,10 @@ export async function getCaptchaModel(): Promise<any> {
     loadingPromise = (async () => {
         try {
             console.log("[Captcha Solver] Loading model from:- ", captchaModelPath);
-            cachedModel = await tflite.loadTFLiteModel(captchaModelPath);
+            if (typeof loadTFLiteModel !== "function") {
+                throw new Error("Captcha model failed to load!");
+            }
+            cachedModel = await loadTFLiteModel(captchaModelPath);
             console.log("[Captcha Solver] Model successfully loaded and cached!");
             return cachedModel;
         } catch (error) {
