@@ -219,7 +219,7 @@ Exam helpers parse report IDs `5` (current internals), `6` (exam ledger), `22` (
 
 ### CAPTCHA solver
 
-The CAPTCHA solver is implemented in Node.js within `src/lib/captcha/captcha.ts`. It loads the TFLite model from `src/assets/captcha/model/captcha_float32.tflite` once at application startup or initial login request and caches the model instance in memory. 
+The CAPTCHA solver is implemented in Node.js within `src/lib/captcha/captcha.ts`. It loads the TFLite model from `src/static/captcha/model/captcha_float32.tflite` once at application startup or initial login request and caches the model instance in memory. 
 
 When a CAPTCHA buffer is passed to `solveCaptcha`:
 1. `sharp` crops the image to `(0, 0, 120, 25)` and converts it to grayscale.
@@ -312,7 +312,7 @@ This inventory covers every tracked project source/configuration area. Generated
 | `src/app/api/forums/*` | Categories, post listing/creation/read/deletion, comments, status, and pinned answer endpoints. |
 | `src/app/api/admin/*` | Admin verification, metrics, blocks, notifications, and feedback settings. |
 | `src/app/api/resources/*`, `api/vacant`, `api/tools/*` | Static learning resources, room availability, user document, notifications, and issue reporting. |
-| `src/assets/captcha/*` | Captcha TFLite model (`src/assets/captcha/model/captcha_float32.tflite`) and path definition. |
+| `src/static/captcha/*` | Captcha TFLite model (`src/static/captcha/model/captcha_float32.tflite`) and path definition. |
 | `src/lib/captcha/*` | In-house Node.js TFLite captcha solver module with in-memory caching and sharp preprocessing. |
 | `src/server/auth/*` | SRM login exchange, encrypted session persistence/cached-login fallback, and bearer-token extraction. |
 | `src/server/srmapi/fetchData.ts` | Concurrent SRM report fetch and Cheerio normalization of dashboard data. |
@@ -337,8 +337,6 @@ This inventory covers every tracked project source/configuration area. Generated
 | `src/static/*` | Academic calendar, feedback phrases, faculty cabins, resources, and generated vacancy JSON. |
 | `public/*` | PWA icons/manifest, robots instructions, screenshots, developer images, and gender avatar fallbacks. |
 | `scripts/faculty/*` | Faculty spreadsheet input and Node converter that regenerates faculty JSON. |
-| `scripts/benchmarkCaptcha.ts` | Benchmark script measuring captcha solver speed, throughput, and memory usage. |
-| `scripts/benchmarkHttpApi.ts` | HTTP API benchmark script running concurrent captcha solve API requests. |
 | `deprecated/*` | Old Next.js Omegle page and standalone websocket prototype; they are not imported by the current application. |
 | `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`, `eslint.config.ts` | Build scripts/dependencies and Next/TypeScript/Tailwind/PostCSS/ESLint configuration. |
 | `.gitignore`, `next-env.d.ts`, `temp.txt` | Ignore rules, Next TypeScript declaration, and an unreferenced temporary text file. |
