@@ -23,6 +23,8 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<any>(null);
   const [loadCachedDataPrompt, setLoadCachedDataPrompt] = useState(false);
 
+  const hasFetchedOnLoadRef = React.useRef(false);
+
   const loadDataToState = async (data: any) => {
     if (!data) return;
     const parsed = typeof data === "string" ? JSON.parse(data) : data;
@@ -116,7 +118,14 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
           return await fetchFreshData();
         }
       } else if (isSessionValid(sessionTime) && sessionId) {
-        return await fetchFreshData();
+        if (!hasFetchedOnLoadRef.current) {
+          hasFetchedOnLoadRef.current = true;
+          return await fetchFreshData();
+        } else if (data) {
+          loadDataToState(data);
+        } else {
+          return await fetchFreshData();
+        }
       } else {
         if (data) loadDataToState(data);
       }
@@ -128,6 +137,7 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    hasFetchedOnLoadRef.current = false;
     setInitialized(false);
     initializeStudentData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
