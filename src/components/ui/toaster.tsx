@@ -1,9 +1,13 @@
 "use client";
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "@/components/ui/toast";
 import { useToast } from "@/hooks/utils/useToast";
+import { useIsMobile } from "@/hooks/utils/useMobile";
 
 export function Toaster() {
   const { toasts } = useToast();
+  const isMobile = useIsMobile();
+
+  if (isMobile) return null;
 
   return (
     <ToastProvider>
