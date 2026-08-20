@@ -1,84 +1,505 @@
 {
   "oddSemesterData": [
-    {"id":1,"details":"Semester Course Pre-Registration/Course Choice Filling","date":"03.06.2026","day":"Wednesday"},
-    {"id":2,"details":"Commencement of Academic Registration","date":"02.07.2026","day":"Thursday"},
-    {"id":3,"details":"Finalization of Timetable","date":"02.07.2026","day":"Thursday"},
-    {"id":4,"details":"Convocation-2026 (Tentative)","date":"01.08.2026","day":"Saturday"},
-    {"id":5,"details":"Commencement of Classes","date":"03.08.2026","day":"Monday"},
-    {"id":6,"details":"Last Date for the Re-registration of the Arrear Courses","date":"06.08.2026","day":"Thursday"},
-    {"id":7,"details":"Last date of Academic and Course Registration with Late Fee","date":"17.08.2026","day":"Monday"},
-    {"id":8,"details":"Issue of Struck off notice and course registration with readmission fee","date":"18.08.2026","day":"Tuesday"},
-    {"id":9,"details":"Last Date to Enter CLA-1 Marks in ERP","date":"23.09.2026","day":"Wednesday"},
-    {"id":10,"details":"Midterm Examinations/ Assessments","date":"28.09.2026 - 01.10.2026","day":"Monday - Thursday"},
-    {"id":11,"details":"Last Date to Enter Midterm Marks in ERP","date":"09.10.2026","day":"Friday"},
-    {"id":12,"details":"Date of Release of End Term Exam Schedule","date":"26.10.2026","day":"Monday"},
-    {"id":13,"details":"Window for filling End-Term Feedback","date":"28.10.2026 - 05.11.2026","day":"Wednesday - Thursday"},
-    {"id":14,"details":"Examination Registration","date":"29.10.2026 - 06.11.2026","day":"Thursday - Friday"},
-    {"id":15,"details":"Last Date to Enter CLA-2 Marks in ERP","date":"02.11.2026","day":"Monday"},
-    {"id":15,"details":"Gta 6 release","date":"19.11.2026","day":"Monday"},
-    {"id":16,"details":"Window for Semester Practical Examinations","date":"13.11.2026 - 27.11.2026","day":"Friday - Friday"},
-    {"id":17,"details":"Last Date to Enter CLA-3 Marks in ERP","date":"27.11.2026","day":"Friday"},
-    {"id":18,"details":"Last Day of Teaching","date":"30.11.2026","day":"Monday"},
-    {"id":19,"details":"Last Date for Submission of Assessment Marks of Project/ Seminar/ Internship/ Practical Courses","date":"30.11.2026","day":"Monday"},
-    {"id":20,"details":"Publishing Students Attendance Shortage","date":"02.12.2026","day":"Wednesday"},
-    {"id":21,"details":"Window for End-Term Examinations","date":"07.12.2026 - 21.12.2026","day":"Monday - Monday"},
-    {"id":22,"details":"Window for End-Term Examinations Grade Submission to the office of Controller of Examinations","date":"10.12.2026 - 26.12.2026","day":"Thursday - Saturday"},
-    {"id":23,"details":"Window for End-Semester Arrear Examinations","date":"22.12.2026 - 31.12.2026","day":"Tuesday - Thursday"},
-    {"id":24,"details":"Date of Result Declaration","date":"05.01.2027","day":"Tuesday"},
-    {"id":25,"details":"Last Date to Submit the Course Files by Faculty to the Respective Departments","date":"12.01.2027","day":"Tuesday"},
-    {"id":26,"details":"Faculty Semester Data Submission in Intranet Portal","date":"12.01.2027","day":"Tuesday"},
-    {"id":27,"details":"Last Date to Apply for End-term Re-evaluation","date":"15.01.2027","day":"Friday"},
-    {"id":28,"details":"Winter Break for Students","date":"22.12.2026 - 03.01.2027","day":"Tuesday - Sunday"}
+    {
+      "id": 1,
+      "details": "Semester Course Pre-Registration/Course Choice Filling",
+      "date": "03.06.2026",
+      "day": "Wednesday"
+    },
+    {
+      "id": 2,
+      "details": "Commencement of Academic Registration",
+      "date": "02.07.2026",
+      "day": "Thursday"
+    },
+    {
+      "id": 3,
+      "details": "Finalization of Timetable",
+      "date": "02.07.2026",
+      "day": "Thursday"
+    },
+    {
+      "id": 4,
+      "details": "Convocation-2026 (Tentative)",
+      "date": "01.08.2026",
+      "day": "Saturday"
+    },
+    {
+      "id": 5,
+      "details": "Commencement of Classes",
+      "date": "03.08.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 6,
+      "details": "Last Date for the Re-registration of the Arrear Courses",
+      "date": "06.08.2026",
+      "day": "Thursday"
+    },
+    {
+      "id": 7,
+      "details": "Last date of Academic and Course Registration with Late Fee",
+      "date": "17.08.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 8,
+      "details": "Issue of Struck off notice and course registration with readmission fee",
+      "date": "18.08.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 9,
+      "details": "Last Date to Enter CLA-1 Marks in ERP",
+      "date": "23.09.2026",
+      "day": "Wednesday"
+    },
+    {
+      "id": 10,
+      "details": "Midterm Examinations/ Assessments",
+      "date": "28.09.2026 - 01.10.2026",
+      "day": "Monday - Thursday"
+    },
+    {
+      "id": 11,
+      "details": "Last Date to Enter Midterm Marks in ERP",
+      "date": "09.10.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 12,
+      "details": "Date of Release of End Term Exam Schedule",
+      "date": "26.10.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 13,
+      "details": "Window for filling End-Term Feedback",
+      "date": "28.10.2026 - 05.11.2026",
+      "day": "Wednesday - Thursday"
+    },
+    {
+      "id": 14,
+      "details": "Examination Registration",
+      "date": "29.10.2026 - 06.11.2026",
+      "day": "Thursday - Friday"
+    },
+    {
+      "id": 15,
+      "details": "Last Date to Enter CLA-2 Marks in ERP",
+      "date": "02.11.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 16,
+      "details": "Window for Semester Practical Examinations",
+      "date": "13.11.2026 - 27.11.2026",
+      "day": "Friday - Friday"
+    },
+    {
+      "id": 17,
+      "details": "Last Date to Enter CLA-3 Marks in ERP",
+      "date": "27.11.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 18,
+      "details": "Last Day of Teaching",
+      "date": "30.11.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 19,
+      "details": "Last Date for Submission of Assessment Marks of Project/ Seminar/ Internship/ Practical Courses",
+      "date": "30.11.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 20,
+      "details": "Publishing Students Attendance Shortage",
+      "date": "02.12.2026",
+      "day": "Wednesday"
+    },
+    {
+      "id": 21,
+      "details": "Window for End-Term Examinations",
+      "date": "07.12.2026 - 21.12.2026",
+      "day": "Monday - Monday"
+    },
+    {
+      "id": 22,
+      "details": "Window for End-Term Examinations Grade Submission to the office of Controller of Examinations",
+      "date": "10.12.2026 - 26.12.2026",
+      "day": "Thursday - Saturday"
+    },
+    {
+      "id": 23,
+      "details": "Window for End-Semester Arrear Examinations",
+      "date": "22.12.2026 - 31.12.2026",
+      "day": "Tuesday - Thursday"
+    },
+    {
+      "id": 24,
+      "details": "Date of Result Declaration",
+      "date": "05.01.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 25,
+      "details": "Last Date to Submit the Course Files by Faculty to the Respective Departments",
+      "date": "12.01.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 26,
+      "details": "Faculty Semester Data Submission in Intranet Portal",
+      "date": "12.01.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 27,
+      "details": "Last Date to Apply for End-term Re-evaluation",
+      "date": "15.01.2027",
+      "day": "Friday"
+    },
+    {
+      "id": 28,
+      "details": "Winter Break for Students",
+      "date": "22.12.2026 - 03.01.2027",
+      "day": "Tuesday - Sunday"
+    }
   ],
   "evenSemesterData": [
-    {"id":1,"details":"Semester Course Pre-Registration/Course Choice Filling","date":"23.11.2026","day":"Monday"},
-    {"id":2,"details":"Commencement of Academic Registration","date":"14.12.2026","day":"Tuesday"},
-    {"id":3,"details":"Finalization of Timetable","date":"14.12.2026","day":"Tuesday"},
-    {"id":4,"details":"Commencement of Classes","date":"04.01.2027","day":"Monday"},
-    {"id":5,"details":"Last Date for the Re-registration of the Arrear Courses","date":"07.01.2027","day":"Thursday"},
-    {"id":6,"details":"Issue of Struck off notice and course registration with readmission fee","date":"19.01.2027","day":"Tuesday"},
-    {"id":7,"details":"Last Date to Enter CLA-1 Marks in ERP","date":"24.02.2027","day":"Wednesday"},
-    {"id":8,"details":"Mid-Term Examinations/Assessments","date":"01.03.2027 - 04.03.2027","day":"Monday - Thursday"},
-    {"id":9,"details":"Last Date to Enter Midterm Marks in ERP","date":"12.03.2027","day":"Friday"},
-    {"id":10,"details":"Date of Release of End Term Exam Schedule","date":"25.03.2027","day":"Thursday"},
-    {"id":11,"details":"Window for Filling End-Term Feedback","date":"31.03.2027 - 08.04.2027","day":"Wednesday - Thursday"},
-    {"id":12,"details":"Examination Registration","date":"01.04.2027 - 09.04.2027","day":"Thursday - Friday"},
-    {"id":13,"details":"Last Date to Enter CLA-2 Marks in ERP","date":"07.04.2027","day":"Wednesday"},
-    {"id":14,"details":"Window for Semester Practical Examinations","date":"13.04.2027 - 29.04.2027","day":"Tuesday - Thursday"},
-    {"id":15,"details":"Publishing Students Attendance Shortage","date":"29.04.2027","day":"Thursday"},
-    {"id":16,"details":"Last Date to Enter CLA-3 Marks in ERP","date":"29.04.2027","day":"Thursday"},
-    {"id":17,"details":"Last Day of Teaching","date":"30.04.2027","day":"Friday"},
-    {"id":18,"details":"Last Date for Submission of Assessment Marks of Project/ Seminar/ Internship/ Practical Courses","date":"03.05.2027","day":"Monday"},
-    {"id":19,"details":"Window for End-Term Examinations","date":"03.05.2027 - 15.05.2027","day":"Monday - Saturday"},
-    {"id":20,"details":"Window for End-Term Examinations Grade Submission to the office of Controller of Examinations","date":"07.05.2027 - 19.05.2027","day":"Friday - Wednesday"},
-    {"id":21,"details":"Window for End-Semester Arrear Examinations","date":"15.05.2027 - 31.05.2027","day":"Saturday - Monday"},
-    {"id":22,"details":"Date of Result Declaration","date":"31.05.2027","day":"Monday"},
-    {"id":23,"details":"Last Date to Apply for End-term Re-evaluation","date":"10.06.2027","day":"Thursday"},
-    {"id":24,"details":"Last Date to Submit the Course Files by Faculty to the Respective Departments","date":"10.06.2027","day":"Thursday"},
-    {"id":25,"details":"Faculty Semester Data Submission in Intranet Portal","date":"10.06.2027","day":"Thursday"},
-    {"id":26,"details":"Commencement of Summer Break for Students","date":"22.05.2027","day":"Saturday"}
+    {
+      "id": 1,
+      "details": "Semester Course Pre-Registration/Course Choice Filling",
+      "date": "23.11.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 2,
+      "details": "Commencement of Academic Registration",
+      "date": "14.12.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 3,
+      "details": "Finalization of Timetable",
+      "date": "14.12.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 4,
+      "details": "Commencement of Classes",
+      "date": "04.01.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 5,
+      "details": "Last Date for the Re-registration of the Arrear Courses",
+      "date": "07.01.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 6,
+      "details": "Issue of Struck off notice and course registration with readmission fee",
+      "date": "19.01.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 7,
+      "details": "Last Date to Enter CLA-1 Marks in ERP",
+      "date": "24.02.2027",
+      "day": "Wednesday"
+    },
+    {
+      "id": 8,
+      "details": "Mid-Term Examinations/Assessments",
+      "date": "01.03.2027 - 04.03.2027",
+      "day": "Monday - Thursday"
+    },
+    {
+      "id": 9,
+      "details": "Last Date to Enter Midterm Marks in ERP",
+      "date": "12.03.2027",
+      "day": "Friday"
+    },
+    {
+      "id": 10,
+      "details": "Date of Release of End Term Exam Schedule",
+      "date": "25.03.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 11,
+      "details": "Window for Filling End-Term Feedback",
+      "date": "31.03.2027 - 08.04.2027",
+      "day": "Wednesday - Thursday"
+    },
+    {
+      "id": 12,
+      "details": "Examination Registration",
+      "date": "01.04.2027 - 09.04.2027",
+      "day": "Thursday - Friday"
+    },
+    {
+      "id": 13,
+      "details": "Last Date to Enter CLA-2 Marks in ERP",
+      "date": "07.04.2027",
+      "day": "Wednesday"
+    },
+    {
+      "id": 14,
+      "details": "Window for Semester Practical Examinations",
+      "date": "13.04.2027 - 29.04.2027",
+      "day": "Tuesday - Thursday"
+    },
+    {
+      "id": 15,
+      "details": "Publishing Students Attendance Shortage",
+      "date": "29.04.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 16,
+      "details": "Last Date to Enter CLA-3 Marks in ERP",
+      "date": "29.04.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 17,
+      "details": "Last Day of Teaching",
+      "date": "30.04.2027",
+      "day": "Friday"
+    },
+    {
+      "id": 18,
+      "details": "Last Date for Submission of Assessment Marks of Project/ Seminar/ Internship/ Practical Courses",
+      "date": "03.05.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 19,
+      "details": "Window for End-Term Examinations",
+      "date": "03.05.2027 - 15.05.2027",
+      "day": "Monday - Saturday"
+    },
+    {
+      "id": 20,
+      "details": "Window for End-Term Examinations Grade Submission to the office of Controller of Examinations",
+      "date": "07.05.2027 - 19.05.2027",
+      "day": "Friday - Wednesday"
+    },
+    {
+      "id": 21,
+      "details": "Window for End-Semester Arrear Examinations",
+      "date": "15.05.2027 - 31.05.2027",
+      "day": "Saturday - Monday"
+    },
+    {
+      "id": 22,
+      "details": "Date of Result Declaration",
+      "date": "31.05.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 23,
+      "details": "Last Date to Apply for End-term Re-evaluation",
+      "date": "10.06.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 24,
+      "details": "Last Date to Submit the Course Files by Faculty to the Respective Departments",
+      "date": "10.06.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 25,
+      "details": "Faculty Semester Data Submission in Intranet Portal",
+      "date": "10.06.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 26,
+      "details": "Commencement of Summer Break for Students",
+      "date": "22.05.2027",
+      "day": "Saturday"
+    }
   ],
   "summerTermData": [
-    {"id":1,"details":"Last Date for Summer Term Registration","date":"01.06.2027","day":"Tuesday"},
-    {"id":2,"details":"Commencement of Classes","date":"02.06.2027","day":"Wednesday"},
-    {"id":3,"details":"Window for Summer Term Examinations","date":"02.08.2027 - 04.08.2027","day":"Monday - Wednesday"},
-    {"id":4,"details":"Date of Result Declaration","date":"09.08.2027","day":"Monday"}
+    {
+      "id": 1,
+      "details": "Last Date for Summer Term Registration",
+      "date": "01.06.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 2,
+      "details": "Commencement of Classes",
+      "date": "02.06.2027",
+      "day": "Wednesday"
+    },
+    {
+      "id": 3,
+      "details": "Window for Summer Term Examinations",
+      "date": "02.08.2027 - 04.08.2027",
+      "day": "Monday - Wednesday"
+    },
+    {
+      "id": 4,
+      "details": "Date of Result Declaration",
+      "date": "09.08.2027",
+      "day": "Monday"
+    }
   ],
   "oddSemesterHolidays": [
-    {"id":1,"occasion":"Independence Day","date":"15.08.2026","day":"Saturday"},
-    {"id":2,"occasion":"Onam","date":"02.09.2026","day":"Wednesday"},
-    {"id":3,"occasion":"Krishna Janmashtami","date":"03.09.2026","day":"Thursday"},
-    {"id":4,"occasion":"Ganesh Chaturthi","date":"11.09.2026","day":"Friday"},
-    {"id":5,"occasion":"Gandhi Jayanti","date":"02.10.2026","day":"Friday"},
-    {"id":6,"occasion":"Diwali","date":"08.11.2026","day":"Sunday"},
-    {"id":7,"occasion":"Christmas","date":"25.12.2026","day":"Friday"}
+    {
+      "id": 1,
+      "occasion": "Varalakshmi Vratam",
+      "date": "21.08.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 2,
+      "occasion": "Eid Milad-Un-Nabi",
+      "date": "25.08.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 3,
+      "occasion": "Sri Krishna Astami",
+      "date": "04.09.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 4,
+      "occasion": "Vinayakachavithi",
+      "date": "14.09.2026",
+      "day": "Monday"
+    },
+    {
+      "id": 5,
+      "occasion": "Mahatma Gandhi Jayanthi",
+      "date": "02.10.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 6,
+      "occasion": "Vijayadasami/Dussehra",
+      "date": "20.10.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 7,
+      "occasion": "Guru Nanak Jayanthi/Karthika Purnima",
+      "date": "24.11.2026",
+      "day": "Tuesday"
+    },
+    {
+      "id": 8,
+      "occasion": "Christmas",
+      "date": "25.12.2026",
+      "day": "Friday"
+    },
+    {
+      "id": 9,
+      "occasion": "Independence Day",
+      "date": "15.08.2026",
+      "day": "Saturday"
+    },
+    {
+      "id": 10,
+      "occasion": "Durgastami",
+      "date": "18.10.2026",
+      "day": "Sunday"
+    },
+    {
+      "id": 11,
+      "occasion": "Deepavali",
+      "date": "08.11.2026",
+      "day": "Sunday"
+    }
   ],
   "evenSemesterHolidays": [
-    {"id":1,"occasion":"Pongal","date":"14.01.2027","day":"Thursday"},
-    {"id":2,"occasion":"Republic Day","date":"26.01.2027","day":"Tuesday"},
-    {"id":3,"occasion":"Holi","date":"23.03.2027","day":"Tuesday"},
-    {"id":4,"occasion":"Ugadi / Ramadan / Easter (Celebration)","date":"17.03.2027","day":"Wednesday"},
-    {"id":5,"occasion":"B.R. Ambedkar Remembrance Day","date":"14.04.2027","day":"Wednesday"}
+    {
+      "id": 1,
+      "occasion": "Bhogi",
+      "date": "14.01.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 2,
+      "occasion": "Pongal/Sankranthi",
+      "date": "15.01.2027",
+      "day": "Friday"
+    },
+    {
+      "id": 3,
+      "occasion": "Republic Day",
+      "date": "26.01.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 4,
+      "occasion": "Ramzan (EID-UL-FITR)",
+      "date": "10.03.2027",
+      "day": "Wednesday"
+    },
+    {
+      "id": 5,
+      "occasion": "Holi",
+      "date": "22.03.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 6,
+      "occasion": "Good Friday",
+      "date": "26.03.2027",
+      "day": "Friday"
+    },
+    {
+      "id": 7,
+      "occasion": "Babu Jagjivan Ram's Birthday",
+      "date": "05.04.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 8,
+      "occasion": "Ugadi",
+      "date": "08.04.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 9,
+      "occasion": "Dr. B.R Ambedkar 's Birthday",
+      "date": "14.04.2027",
+      "day": "Wednesday"
+    },
+    {
+      "id": 10,
+      "occasion": "Sri Rama Navami",
+      "date": "15.04.2027",
+      "day": "Thursday"
+    },
+    {
+      "id": 11,
+      "occasion": "Bakrid (EID-UL-ZUHA)",
+      "date": "17.05.2027",
+      "day": "Monday"
+    },
+    {
+      "id": 12,
+      "occasion": "Muharrum",
+      "date": "15.06.2027",
+      "day": "Tuesday"
+    },
+    {
+      "id": 13,
+      "occasion": "Kanuma",
+      "date": "16.01.2027",
+      "day": "Saturday"
+    }
   ],
   "importantNotes": [
     "The academic calendar is applicable to All Semesters All Programs of UG, PG & PhD.",
@@ -86,12 +507,5 @@
     "Convocation-2026 is tentative.",
     "Summer Term is optional.",
     "Holidays listed are derived from the official events; additional state/national holidays may be declared."
-  ],
-  "randomVerificationDates": [
-    {"id":1,"details":"Commencement of Classes (Odd Semester)","date":"03.08.2026","day":"Monday"},
-    {"id":2,"details":"Last Date to Enter CLA-1 Marks (Even Semester)","date":"24.02.2027","day":"Wednesday"},
-    {"id":3,"details":"Date of Result Declaration (Odd Semester)","date":"05.01.2027","day":"Tuesday"},
-    {"id":4,"details":"Winter Break for Students (Odd Semester)","date":"22.12.2026 - 03.01.2027","day":"Tuesday - Sunday"},
-    {"id":5,"details":"Commencement of Summer Break (Even Semester)","date":"22.05.2027","day":"Saturday"}
   ]
 }
