@@ -40,12 +40,18 @@ export type StorageData = typeof DEFAULT_STORAGE;
 
 export default function useLocalStorage<T extends StorageType>(key: T) {
   const [data, setData] = useState<StorageData[T]>(DEFAULT_STORAGE[key]);
-  const mountedRef = useRef(false);
-  const writeTimeout = useRef<number | null>(null);
+
+  const persistData = useCallback((newData: StorageData[T]) => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(key, JSON.stringify(newData));
+      }
+    } catch (e) { }
+  }, [key]);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(key);
+      const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
       if (raw) {
         const parsed = JSON.parse(raw);
         setData(prev => ({ ...DEFAULT_STORAGE[key], ...prev, ...parsed }));
@@ -55,27 +61,17 @@ export default function useLocalStorage<T extends StorageType>(key: T) {
     } catch (e) {
       persistData(DEFAULT_STORAGE[key]);
     }
-    mountedRef.current = true;
-    return () => {
-      if (writeTimeout.current) window.clearTimeout(writeTimeout.current);
-    };
-  }, [key]);
-
-  const persistData = useCallback((newData: StorageData[T]) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(newData));
-    } catch (e) { }
-  }, [key]);
+  }, [key, persistData]);
 
   const set = useCallback((newData: StorageData[T]) => {
     setData(newData);
-    if (mountedRef.current) persistData(newData);
+    persistData(newData);
   }, [persistData]);
 
   const update = useCallback((patch: Partial<StorageData[T]> | ((current: StorageData[T]) => StorageData[T])) => {
     setData((prev) => {
       const next = typeof patch === "function" ? patch(prev) : { ...prev, ...patch };
-      if (mountedRef.current) persistData(next);
+      persistData(next);
       return next;
     });
   }, [persistData]);
@@ -92,7 +88,7 @@ export default function useLocalStorage<T extends StorageType>(key: T) {
         fields.forEach(field => {
           delete next[field];
         });
-        if (mountedRef.current) persistData(next);
+        persistData(next);
         return next;
       });
     }

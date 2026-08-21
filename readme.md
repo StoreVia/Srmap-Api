@@ -169,7 +169,8 @@ All API responses are JSON. With the exception of `POST /api/auth/login` and `PO
 | `GET /api/resources/subjects` | `?course=&year=` | Returns static subject data for a course/year. |
 | `GET /api/resources/resource` | `?course=&year=&subjectId=` | Returns static resource payload for one subject. |
 | `GET /api/vacant` | `?block=&day=&slot=` | Ensures empty-room JSON is current, reads a requested slot, and enriches each room with a type from `ROOM_TYPES`. |
-| `GET /api/tools/notifications` | none | Returns notifications without IDs or author fields. |
+| `GET /api/sync` | none | Returns notifications and synced user settings from database. |
+| `POST /api/sync` | `settings` | Updates synced user settings in database and returns updated settings and notifications. |
 | `POST /api/tools/report` | `title`, `reason`, optional `time`, optional `id` | Checks title and user existence, then posts an embed to `D_REPORT`. Accepted titles are `Bug`, `Feature Request`, `UI Issue`, `Contact`, and `Error`. |
 
 ### Forums

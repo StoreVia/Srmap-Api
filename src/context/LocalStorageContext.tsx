@@ -1,9 +1,22 @@
 "use client";
+import API from "@/lib/api/axiosClient";
 import { Themes } from "@/context/ThemeContext";
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import useLocalStorage, { DEFAULT_STORAGE, StorageType, StorageData } from '@/hooks/context/useLocalStorage';
 
 export type StoredAccount = StorageData["profile"]["accounts"][number];
+
+export const ALLOWED_SYNC_KEYS = [
+  "theme",
+  "showSidebar",
+  "timeTableViewMode",
+  "attendanceSortOption",
+  "sidebarTutorialDone",
+  "mobileNavigationLayout",
+  "startupPage",
+] as const;
+
+export type SyncedSettingsKey = typeof ALLOWED_SYNC_KEYS[number];
 
 type LocalStorageContextValue = {
   settings: StorageData['settings'];
@@ -11,6 +24,9 @@ type LocalStorageContextValue = {
   updateSettings: (patch: Partial<StorageData['settings']> | ((s: StorageData['settings']) => StorageData['settings'])) => void;
   removeSettings: (fields?: (keyof StorageData['settings'])[]) => void;
   resetSettings: () => void;
+  
+  notifications: any[];
+  fetchSyncData: () => Promise<void>;
 
   profile: StorageData['profile'];
   setProfile: (data: StorageData['profile']) => void;
@@ -33,31 +49,128 @@ const LocalStorageContext = createContext<LocalStorageContextValue | undefined>(
 export const LocalStorageProvider: React.FC<React.PropsWithChildren<unknown>> = ({ children }) => {
   const settingsStorage = useLocalStorage('settings');
   const profileStorage = useLocalStorage('profile');
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [ready, setReady] = useState(false);
+  const initialSyncDoneRef = useRef(false);
+  const prevActiveAccountIdRef = useRef<string | null>(null);
+
+  const profile = { ...DEFAULT_STORAGE.profile, ...profileStorage.data };
+  const normalizedAccounts = Array.isArray(profile.accounts) ? profile.accounts : [];
+  const activeAccount = normalizedAccounts.find((a) => a.id === profile.activeAccountId) || null;
+
+  const fetchSyncData = useCallback(async () => {
+    try {
+      const response = await API.get("/sync");
+      if (response.data?.success) {
+        if (Array.isArray(response.data.notifications)) {
+          setNotifications(response.data.notifications);
+        }
+        const dbSettings = response.data.settings;
+        if (dbSettings && typeof dbSettings === "object") {
+          const updatesNeeded: Partial<StorageData['settings']> = {};
+          let hasChanges = false;
+
+          ALLOWED_SYNC_KEYS.forEach((k) => {
+            if (k in dbSettings && dbSettings[k] !== undefined) {
+              updatesNeeded[k] = dbSettings[k];
+              hasChanges = true;
+            }
+          });
+
+          if (hasChanges) {
+            settingsStorage.update((prev) => {
+              const next = { ...prev, ...updatesNeeded };
+              try {
+                if (typeof window !== "undefined") {
+                  localStorage.setItem("settings", JSON.stringify(next));
+                }
+              } catch {}
+              return next;
+            });
+
+            if (dbSettings.theme) {
+              const classList = document.documentElement.classList;
+              classList.remove("light", "dark");
+              classList.add(dbSettings.theme);
+            }
+          }
+        }
+      }
+    } catch {
+    } finally {
+      setReady(true);
+    }
+  }, [settingsStorage]);
+
+  useEffect(() => {
+    if (!initialSyncDoneRef.current) {
+      initialSyncDoneRef.current = true;
+      fetchSyncData();
+    }
+  }, [fetchSyncData]);
+
+  useEffect(() => {
+    if (profile.activeAccountId) {
+      if (
+        prevActiveAccountIdRef.current !== null &&
+        prevActiveAccountIdRef.current !== profile.activeAccountId
+      ) {
+        fetchSyncData();
+      }
+      prevActiveAccountIdRef.current = profile.activeAccountId;
+    }
+  }, [profile.activeAccountId, fetchSyncData]);
+
+  const updateSettings = useCallback(
+    (patch: Partial<StorageData['settings']> | ((s: StorageData['settings']) => StorageData['settings'])) => {
+      settingsStorage.update((prev) => {
+        const next = typeof patch === "function" ? patch(prev) : { ...prev, ...patch };
+        const patchObj = typeof patch === "function" ? next : patch;
+
+        if (next.theme) {
+          const classList = document.documentElement.classList;
+          classList.remove("light", "dark");
+          classList.add(next.theme);
+        }
+
+        const syncPayload: Record<string, any> = {};
+        let hasSyncedKey = false;
+        ALLOWED_SYNC_KEYS.forEach((k) => {
+          if (k in patchObj && patchObj[k] !== undefined) {
+            syncPayload[k] = patchObj[k];
+            hasSyncedKey = true;
+          }
+        });
+
+        if (hasSyncedKey) {
+          API.post("/sync", { settings: syncPayload }).then((res) => {
+            if (res.data?.success && Array.isArray(res.data.notifications)) {
+              setNotifications(res.data.notifications);
+            }
+          }).catch(() => {});
+        }
+
+        return next;
+      });
+    },
+    [settingsStorage]
+  );
 
   const cycleTheme = () => {
     const themes = Themes;
     const current = settingsStorage.data.theme;
     const currentIndex = themes.indexOf(current as (typeof themes)[number]);
     const nextTheme = themes[(currentIndex + 1) % themes.length];
-    settingsStorage.update({ theme: nextTheme });
+    updateSettings({ theme: nextTheme });
   };
-
-  const profile = { ...DEFAULT_STORAGE.profile, ...profileStorage.data };
-  const normalizedAccounts = Array.isArray(profile.accounts) ? profile.accounts : [];
-  const activeAccount = normalizedAccounts.find((a) => a.id === profile.activeAccountId) || null;
-
-  useEffect(() => {
-    const timeout = setTimeout(() => setReady(true), 0);
-    return () => clearTimeout(timeout);
-  }, []);
 
   useEffect(() => {
     const { theme } = settingsStorage.data;
-    const classList = document.documentElement.classList;
-    const themeClasses = ["light", "dark"];
-    themeClasses.forEach((c) => classList.remove(c));
-    classList.add(theme);
+    if (theme) {
+      const classList = document.documentElement.classList;
+      classList.remove("light", "dark");
+      classList.add(theme);
+    }
   }, [settingsStorage.data.theme]);
 
   useEffect(() => {
@@ -151,6 +264,9 @@ export const LocalStorageProvider: React.FC<React.PropsWithChildren<unknown>> = 
         data: next.data,
       };
     });
+    setTimeout(() => {
+      fetchSyncData();
+    }, 50);
   };
 
   const upsertAccount: LocalStorageContextValue["upsertAccount"] = (account, activate = true) => {
@@ -186,6 +302,9 @@ export const LocalStorageProvider: React.FC<React.PropsWithChildren<unknown>> = 
         data: nextActive.data,
       };
     });
+    setTimeout(() => {
+      fetchSyncData();
+    }, 50);
     return result;
   };
 
@@ -209,14 +328,20 @@ export const LocalStorageProvider: React.FC<React.PropsWithChildren<unknown>> = 
         data: nextActive.data,
       };
     });
+    setTimeout(() => {
+      fetchSyncData();
+    }, 50);
   };
 
   const value: LocalStorageContextValue = {
     settings: { ...DEFAULT_STORAGE.settings, ...settingsStorage.data },
     setSettings: settingsStorage.set,
-    updateSettings: settingsStorage.update,
+    updateSettings,
     removeSettings: settingsStorage.remove,
     resetSettings: settingsStorage.reset,
+
+    notifications,
+    fetchSyncData,
 
     profile,
     setProfile: profileStorage.set,

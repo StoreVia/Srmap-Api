@@ -19,21 +19,14 @@ const Timetable = () => {
 
   const [countdown, setCountdown] = useState<number | null>(null);
   const [upcomingCountdown, setUpcomingCountdown] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<"old" | "new">();
+
+  const viewMode = (settings.timeTableViewMode as "old" | "new") || "old";
 
   const currentDay = ALL_DAYS[new Date().getDay()];
   const isWeekend = currentDay === "Saturday" || currentDay === "Sunday";
 
   const { ongoingClass, upcomingClass } = useCurrentClass(timetable, currentDay, subjectCodeToName, isWeekend);
   const { dialogOpen, setDialogOpen, selectedSubject, selectedSubjectAttendance, handleSubjectClick } = useSubjectDialog(subjectCodeToName, subjectCodeToAttendance);
-
-  useEffect(() => {
-    if (viewMode) updateSettings({ timeTableViewMode: viewMode });
-  }, [viewMode]);
-
-  useEffect(() => {
-    setViewMode(settings.timeTableViewMode);
-  }, [settings.timeTableViewMode]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -52,12 +45,12 @@ const Timetable = () => {
           {(["old", "new"] as const).map((mode) => (
             <button
               key={mode}
-              onClick={() => setViewMode(mode)}
+              onClick={() => updateSettings({ timeTableViewMode: mode })}
               className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
                 viewMode === mode ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground" : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
               }`}
             >
-              {mode === "old" ? "Old View" : "Minimal View"}
+              {mode === "old" ? "Detailed View" : "Minimal View"}
             </button>
           ))}
         </div>

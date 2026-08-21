@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { useStudentData } from "@/context/StudentContext";
+import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import FetchClient from "@/components/client/loading/FetchLoading";
 import SplashScreen from "@/components/client/loading/SplashScreen";
@@ -10,6 +11,7 @@ import SplashScreen from "@/components/client/loading/SplashScreen";
 export default function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const { initialized } = useStudentData();
+  const { ready } = useLocalStorageContext();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,7 +34,7 @@ export default function ProtectedDashboardLayout({ children }: { children: React
     }
   }, [isAuthenticated, initialized, isLoading, isPublicRoute]);
 
-  if (!checked || isLoading) return <SplashScreen />;
+  if (!checked || isLoading || !ready) return <SplashScreen />;
   if (isAuthenticated && !initialized) return <FetchClient />;
   if (isPublicRoute && !isAuthenticated) return <>{children}</>;
   

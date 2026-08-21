@@ -1,6 +1,6 @@
 {
   "name": "srmapi.next",
-  "version": "5.6",
+  "version": "5.7.0",
   "private": true,
   "scripts": {
     "dev": "next dev",

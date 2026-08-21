@@ -93,7 +93,7 @@ const AttendanceDetails = () => {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const pendingCalculateRef = useRef(false);
 
-  const currentSort = (settings.sort as SortOption) || "default";
+  const currentSort = (settings.attendanceSortOption as SortOption) || "default";
   const displayedSubjects = sortSubjects(rawSubjects, currentSort);
 
   const handleReset = () => {
@@ -191,7 +191,7 @@ const AttendanceDetails = () => {
     const sortOrder: SortOption[] = ["default", "ascending", "descending"];
     const currentIndex = sortOrder.indexOf(currentSort);
     const nextSort = sortOrder[(currentIndex + 1) % sortOrder.length];
-    updateSettings({ sort: nextSort });
+    updateSettings({ attendanceSortOption: nextSort });
   };
 
   useEffect(() => {
