@@ -457,7 +457,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const handleMenuClick = (item: MenuItem) => {
-    if (item.opensResourceChooser) {
+    if (item.opensResourceChooser && isMobile) {
       setResourceChooserOpen(true);
       return;
     }
@@ -548,6 +548,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       path: "/aboutus",
       icon: Users,
       opensResourceChooser: true,
+      subItems: [
+        { title: "About Us", path: "/aboutus" },
+        { title: "GitHub", path: "/github" },
+      ],
     });
     setMenuItems(menu);
   }, [isAdmin]);
