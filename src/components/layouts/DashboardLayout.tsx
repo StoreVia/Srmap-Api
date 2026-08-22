@@ -833,7 +833,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             </Button>
           </div>
         )}
-        <div className="sticky top-0 z-40 w-full bg-background relative border-b border-border shadow-sm">
+        <div className="sticky top-0 z-[100] isolate w-full bg-background relative border-b border-border shadow-sm">
           <motion.div
             animate={{ opacity: isMobile && activeMobileToast ? 0 : 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -1103,7 +1103,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           </AnimatePresence>
         </div>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
+        <main className="relative z-0 flex-1 flex flex-col overflow-hidden">
           <div className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6 ${isMobile && usesMobileSideNav ? "pl-14" : ""}`}>
             {children}
           </div>
