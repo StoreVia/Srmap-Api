@@ -29,6 +29,7 @@ interface MenuItem {
   group?: string;
   icon: React.ComponentType<{ className?: string }>;
   highlight?: boolean;
+  opensResourceChooser?: boolean;
   subItems?: Array<{
     title: string;
     path: string;
@@ -125,6 +126,43 @@ const MobileSubMenuDrawer: React.FC<MobileSubMenuDrawerProps> = ({ isOpen, onClo
   );
 };
 
+function ResourceChooserDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const router = useRouter();
+
+  const navigate = (path: string) => {
+    onClose();
+    router.push(path);
+  };
+
+  return (
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent className="max-h-[80vh]">
+        <DrawerHeader className="border-b">
+          <DrawerTitle>Explore Srmapi</DrawerTitle>
+        </DrawerHeader>
+        <div className="grid gap-3 p-4 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => navigate("/aboutus")}
+            className="flex items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-accent"
+          >
+            <Users className="h-5 w-5 text-primary" />
+            <span className="font-medium">About Us</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate("/github")}
+            className="flex items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-accent"
+          >
+            <GitHubMark className="h-5 w-5 text-primary" />
+            <span className="font-medium">GitHub</span>
+          </button>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  );
+}
+
 const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const routeRegex = /\/[a-zA-Z0-9\/-]+/g;
   const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
@@ -180,7 +218,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     isOpen: false,
     menuItem: null
   });
+  const [resourceChooserOpen, setResourceChooserOpen] = useState(false);
   const mobileNavScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const notificationPanelRef = React.useRef<HTMLDivElement | null>(null);
 
   const isActive = (path: string) => pathname === path;
   const isSubPathActive = (basePath: string) => {
@@ -296,6 +336,19 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    if (!isNotificationsOpen) return;
+
+    const closeNotificationsOnOutsidePress = (event: PointerEvent) => {
+      if (!notificationPanelRef.current?.contains(event.target as Node)) {
+        setIsNotificationsOpen(false);
+      }
+    };
+
+    document.addEventListener("pointerdown", closeNotificationsOnOutsidePress);
+    return () => document.removeEventListener("pointerdown", closeNotificationsOnOutsidePress);
+  }, [isNotificationsOpen]);
+
   const toggleSubMenu = (key: string) => {
     if (!isCollapsed) {
       setExpandedMenus((prev) => ({
@@ -404,6 +457,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const handleMenuClick = (item: MenuItem) => {
+    if (item.opensResourceChooser) {
+      setResourceChooserOpen(true);
+      return;
+    }
     if (item.subItems) {
       if (isCollapsed || isMobile) {
         openMobileSubMenu(item);
@@ -428,6 +485,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   const handleMobileNavClick = (item: MenuItem) => {
     setSelectedMobileNav(item.path);
+    if (item.opensResourceChooser) {
+      setResourceChooserOpen(true);
+      return;
+    }
     if (item.subItems) {
       openMobileSubMenu(item);
     } else {
@@ -468,8 +529,6 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       { title: "Feedback", shortTitle: "Feed", path: "/feedback", icon: Edit },
       // { title: "Apps", path: "/apps", icon: AppWindow },
       { title: "Settings", shortTitle: "Set", path: "/settings", icon: Settings },
-      { title: "GitHub", shortTitle: "Git", path: "/github", icon: GitHubMark },
-      { title: "About Us", shortTitle: "About", path: "/aboutus", icon: Users },
     ];
 
     let menu = [...baseMenu];
@@ -483,6 +542,13 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         }
       );
     }
+    menu.push({
+      title: "About & GitHub",
+      shortTitle: "More",
+      path: "/aboutus",
+      icon: Users,
+      opensResourceChooser: true,
+    });
     setMenuItems(menu);
   }, [isAdmin]);
 
@@ -763,7 +829,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             </Button>
           </div>
         )}
-        <div className="sticky top-0 z-30 w-full bg-background overflow-hidden relative border-b border-border shadow-sm">
+        <div className="sticky top-0 z-40 w-full bg-background relative border-b border-border shadow-sm">
           <motion.div
             animate={{ opacity: isMobile && activeMobileToast ? 0 : 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -940,16 +1006,40 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
               </div>
             </header>
 
-            <div
-              onClick={handleNotificationBarClick}
-              className={`notifications-bar cursor-pointer bg-slate-200 text-black py-2 pr-6 pl-6 flex items-center justify-between shadow-md ${isMobile && usesMobileSideNav ? "ml-9" : ""}`}
-            >
-              <span className="font-medium text-sm">
-                {notifications.notifications.length > 0 ? renderNotification(notifications.notifications[0].notification) : "No Notifications"}
-              </span>
-              <ChevronDown
-                className={`h-4 w-4 transition-transform duration-200 ${isNotificationsOpen ? "rotate-180" : ""}`}
-              />
+            <div ref={notificationPanelRef} className="relative">
+              <div
+                onClick={handleNotificationBarClick}
+                className={`notifications-bar cursor-pointer bg-slate-200 text-black py-2 pr-6 pl-6 flex items-center justify-between shadow-md ${isMobile && usesMobileSideNav ? "ml-12" : ""}`}
+              >
+                <span className="font-medium text-sm">
+                  {notifications.notifications.length > 0 ? renderNotification(notifications.notifications[0].notification) : "No Notifications"}
+                </span>
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform duration-200 ${isNotificationsOpen ? "rotate-180" : ""}`}
+                />
+              </div>
+
+              {isNotificationsOpen && (
+                <div
+                  className={`notifications-bar absolute right-0 top-full z-50 bg-popover border border-border shadow-lg ${isMobile && usesMobileSideNav ? "left-12" : "left-0"}`}
+                  onMouseEnter={handleMouseEnterNotifications}
+                  onMouseLeave={handleMouseLeaveNotifications}
+                >
+                  <div className="max-h-64 overflow-y-auto">
+                    {notifications.notifications.length === 0 ? (
+                      <p className="p-4 text-sm text-muted-foreground text-center">
+                        {notifications.isLoading ? "Loading..." : "No new notifications"}
+                      </p>
+                    ) : (
+                      notifications.notifications.slice(1).map((note, index) => (
+                        <div key={index} className="p-3 border-b bg-accent border-border text-sm hover:bg-accent/30 cursor-pointer">
+                          {renderNotification(note.notification)}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
 
@@ -1009,29 +1099,8 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           </AnimatePresence>
         </div>
 
-        {isNotificationsOpen && (
-          <div
-            className="notifications-bar bg-popover border border-border shadow-lg z-50"
-            onMouseEnter={handleMouseEnterNotifications}
-            onMouseLeave={handleMouseLeaveNotifications}
-          >
-            <div className="max-h-64 overflow-y-auto">
-              {notifications.notifications.length === 0 ? (
-                <p className="p-4 text-sm text-muted-foreground text-center">
-                  {notifications.isLoading ? "Loading..." : "No new notifications"}
-                </p>
-              ) : (
-                notifications.notifications.slice(1).map((note, index) => (
-                  <div key={index} className="p-3 border-b bg-accent border-border text-sm hover:bg-accent/30 cursor-pointer" >
-                    {renderNotification(note.notification)}
-                  </div>
-                )))}
-            </div>
-          </div>
-        )}
-
         <main className="flex-1 flex flex-col overflow-hidden">
-          <div className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6 ${isMobile && usesMobileSideNav ? "pl-12" : ""}`}>
+          <div className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6 ${isMobile && usesMobileSideNav ? "pl-14" : ""}`}>
             {children}
           </div>
           <footer className={`flex-shrink-0 p-6 pt-4 border-t border-border bg-background/80 backdrop-blur-sm ${isMobile && !usesMiniMobileNav && !usesMobileSideNav ? 'pb-28' : ''}`}>
@@ -1115,6 +1184,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             />
           </>
         )}
+        <ResourceChooserDrawer isOpen={resourceChooserOpen} onClose={() => setResourceChooserOpen(false)} />
       </div>
     </div>
   );
@@ -1171,8 +1241,8 @@ function MobileSidebarNav({
   onClick: (item: MenuItem) => void;
 }) {
   return (
-    <nav className="fixed bottom-0 left-0 top-16 z-30 w-9 overflow-y-auto border-r border-border bg-background/95 py-1 shadow-sm backdrop-blur-sm no-scrollbar" aria-label="Mobile sidebar navigation">
-      <div className="flex flex-col items-center gap-1">
+    <nav className="fixed bottom-0 left-0 top-16 z-50 w-12 overflow-y-auto border-r border-border bg-background/95 py-2 shadow-sm backdrop-blur-sm no-scrollbar" aria-label="Mobile sidebar navigation">
+      <div className="flex flex-col items-center gap-1.5">
         {items.map((item) => {
           const active = selectedPath === item.path || isSubPathActive(item.path);
           return (
@@ -1182,9 +1252,9 @@ function MobileSidebarNav({
               title={item.title}
               aria-label={item.title}
               onClick={() => onClick(item)}
-              className={`relative flex h-8 w-8 items-center justify-center rounded-md transition-colors ${active ? "bg-primary/15 text-primary" : "text-foreground/65 hover:bg-accent hover:text-foreground"}`}
+              className={`relative flex h-10 w-10 items-center justify-center rounded-md transition-colors ${active ? "bg-primary/15 text-primary" : "text-foreground/65 hover:bg-accent hover:text-foreground"}`}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-[18px] w-[18px]" />
               {item.highlight && <span className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-blue-600" />}
             </button>
           );
