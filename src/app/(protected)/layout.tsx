@@ -1,19 +1,20 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useStudentData } from "@/context/StudentContext";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
 import FetchClient from "@/components/client/loading/FetchLoading";
 import SplashScreen from "@/components/client/loading/SplashScreen";
 
-export default function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
+function ProtectedDashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
   const { initialized } = useStudentData();
   const { ready } = useLocalStorageContext();
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [checked, setChecked] = useState(false);
   const publicRoutes = ["/", "/privacy", "/privacy/mobile", "/terms", "/aboutus"];
@@ -28,15 +29,25 @@ export default function ProtectedDashboardLayout({ children }: { children: React
     }
 
     if (!isAuthenticated && !isPublicRoute) {
-      router.push("/login");
+      const search = searchParams?.toString();
+      const fullPath = search ? `${pathname}?${search}` : pathname;
+      router.push(`/login?redirect=${encodeURIComponent(fullPath)}`);
     } else if (isAuthenticated) {
       setChecked(true);
     }
-  }, [isAuthenticated, initialized, isLoading, isPublicRoute]);
+  }, [isAuthenticated, initialized, isLoading, isPublicRoute, pathname, searchParams, router]);
 
   if (!checked || isLoading || !ready) return <SplashScreen />;
   if (isAuthenticated && !initialized) return <FetchClient />;
   if (isPublicRoute && !isAuthenticated) return <>{children}</>;
   
   return <DashboardLayout>{children}</DashboardLayout>;
+}
+
+export default function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<SplashScreen />}>
+      <ProtectedDashboardLayoutContent>{children}</ProtectedDashboardLayoutContent>
+    </Suspense>
+  );
 }
