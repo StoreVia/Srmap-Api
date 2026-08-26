@@ -10,14 +10,5 @@ module.exports = {
         PORT: 3000,
       },
     },
-    {
-      name: "captcha",
-      cwd: `${__dirname}/python`,
-      script: "api.py",
-      interpreter: `${__dirname}/python/venv/bin/python3`,
-      env: {
-        PYTHONUNBUFFERED: "1",
-      },
-    },
   ],
 };
