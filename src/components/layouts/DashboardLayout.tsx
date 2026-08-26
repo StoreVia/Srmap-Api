@@ -563,10 +563,6 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   }, [pathname]);
 
   useEffect(() => {
-    document.title = `Srmapi - ${profile?.studentName}`;
-  }, [router, pathname, profile?.studentName]);
-
-  useEffect(() => {
     return () => {
       if (hoverTimeout) {
         clearTimeout(hoverTimeout);
@@ -809,10 +805,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         {lProfile?.hasCachedData && (
           <div className="w-full bg-red-500 text-white text-center text-xs sm:text-sm py-2 px-4 font-medium z-30 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
             <span>Showing cached data from {lProfile.sessionTime} since college portal is down. Click below button if portal was up again!</span>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-7 text-xs bg-transparent border-white text-white hover:bg-white hover:text-red-500" 
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs bg-transparent border-white text-white hover:bg-white hover:text-red-500"
               disabled={isFetchingNewData}
               onClick={async () => {
                 setIsFetchingNewData(true);
@@ -1055,15 +1051,14 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, ease: "easeInOut" }}
-                className={`absolute inset-0 z-40 p-3 px-4 flex items-center justify-between border-b shadow-md ${
-                  activeMobileToast.variant === "destructive"
+                className={`absolute inset-0 z-40 p-3 px-4 flex items-center justify-between border-b shadow-md ${activeMobileToast.variant === "destructive"
                     ? "bg-red-950 text-red-100 border-red-800"
                     : activeMobileToast.variant === "success"
-                    ? "bg-emerald-950 text-emerald-100 border-emerald-800"
-                    : activeMobileToast.variant === "info"
-                    ? "bg-blue-950 text-blue-100 border-blue-800"
-                    : "bg-slate-900 text-white border-slate-700"
-                }`}
+                      ? "bg-emerald-950 text-emerald-100 border-emerald-800"
+                      : activeMobileToast.variant === "info"
+                        ? "bg-blue-950 text-blue-100 border-blue-800"
+                        : "bg-slate-900 text-white border-slate-700"
+                  }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">
                   <div className="rounded-full p-1.5 bg-white/10 shrink-0">
@@ -1141,44 +1136,44 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             ) : usesSidebarMobileNav ? (
               <MobileSidebarNav items={menuItems} selectedPath={selectedMobileNav} isSubPathActive={isSubPathActive} onClick={handleMobileNavClick} />
             ) : (
-            <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border rounded-3xl bg-background/95 backdrop-blur-sm">
-              <div
-                ref={mobileNavScrollRef}
-                onScroll={handleMobileNavScroll}
-                className={usesDoubleRowMobileNav
-                  ? "grid h-20 grid-flow-col grid-rows-2 auto-cols-[68px] gap-px overflow-x-auto no-scrollbar p-1"
-                  : "flex h-20 overflow-x-auto no-scrollbar px-2"
-                }
-              >
-                {menuItems.map((item) => (
-                  <button
-                    key={item.path}
-                    onClick={() => handleMobileNavClick(item)}
-                    className={`relative flex items-center justify-center rounded-lg transition-all duration-200
+              <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border rounded-3xl bg-background/95 backdrop-blur-sm">
+                <div
+                  ref={mobileNavScrollRef}
+                  onScroll={handleMobileNavScroll}
+                  className={usesDoubleRowMobileNav
+                    ? "grid h-20 grid-flow-col grid-rows-2 auto-cols-[68px] gap-px overflow-x-auto no-scrollbar p-1"
+                    : "flex h-20 overflow-x-auto no-scrollbar px-2"
+                  }
+                >
+                  {menuItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleMobileNavClick(item)}
+                      className={`relative flex items-center justify-center rounded-lg transition-all duration-200
                           ${usesDoubleRowMobileNav ? "min-w-0 flex-col gap-0 px-0.5 py-0" : "mx-1 my-1 min-w-[70px] flex-col p-1"}
                           ${selectedMobileNav === item.path || isSubPathActive(item.path)
-                        ? "text-primary font-semibold bg-primary/15 border border-primary/30 shadow-md"
-                        : "text-foreground/70 hover:text-foreground hover:bg-accent/10 border border-transparent"
-                      }`}
-                  >
-                    {item.highlight ? (
-                      <span className="absolute top-0 right-0 flex items-center justify-center">
-                        <span className="absolute inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-blue-600 opacity-75"></span>
-                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-600"></span>
+                          ? "text-primary font-semibold bg-primary/15 border border-primary/30 shadow-md"
+                          : "text-foreground/70 hover:text-foreground hover:bg-accent/10 border border-transparent"
+                        }`}
+                    >
+                      {item.highlight ? (
+                        <span className="absolute top-0 right-0 flex items-center justify-center">
+                          <span className="absolute inline-flex h-1.5 w-1.5 animate-ping rounded-full bg-blue-600 opacity-75"></span>
+                          <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-blue-600"></span>
+                        </span>
+                      ) : item.subItems ? (
+                        <span className="absolute top-0 right-0 flex items-center justify-center">
+                          <ChevronUp className="h-2.5 w-2.5 text-foreground/60" />
+                        </span>
+                      ) : null}
+                      <item.icon className={`shrink-0 ${usesDoubleRowMobileNav ? "h-3.5 w-3.5" : "h-4 w-4 mb-0.5"}`} />
+                      <span className={`truncate text-center block ${usesDoubleRowMobileNav ? "max-w-[62px] text-[8px] leading-tight" : "max-w-[70px] text-[10px]"}`}>
+                        {usesDoubleRowMobileNav ? item.shortTitle ?? item.title : item.title}
                       </span>
-                    ) : item.subItems ? (
-                      <span className="absolute top-0 right-0 flex items-center justify-center">
-                        <ChevronUp className="h-2.5 w-2.5 text-foreground/60" />
-                      </span>
-                    ) : null}
-                    <item.icon className={`shrink-0 ${usesDoubleRowMobileNav ? "h-3.5 w-3.5" : "h-4 w-4 mb-0.5"}`} />
-                    <span className={`truncate text-center block ${usesDoubleRowMobileNav ? "max-w-[62px] text-[8px] leading-tight" : "max-w-[70px] text-[10px]"}`}>
-                      {usesDoubleRowMobileNav ? item.shortTitle ?? item.title : item.title}
-                    </span>
-                  </button>
-                ))}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
             )}
 
             <MobileSubMenuDrawer
