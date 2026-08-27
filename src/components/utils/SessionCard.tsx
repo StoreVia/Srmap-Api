@@ -18,11 +18,7 @@ const SessionCard = () => {
     setLoadingFetch(true);
     try {
       const res = await initiateSession();
-      if (res) {
-        toast({ title: "Success", description: `Session successfully initiated. New time: ${res.sessionTime}` });
-      } else {
-        toast({ variant: "destructive", title: "Error", description: "Failed to initiate session. SRM server might be unreachable." });
-      }
+      if(!res) toast({ variant: "destructive", title: "Error", description: "Failed to initiate session. SRM server might be unreachable." });
     } catch (err) {
       if (axios.isAxiosError(err)) {
         const message = err.response?.data?.message || "Error Fetching Data!";
