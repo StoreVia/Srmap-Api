@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
 import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, MessageSquare, Library, User, Edit, Settings, Users, Shield } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
+  const router = useRouter();
   const { isAdmin } = useAuth();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
@@ -58,6 +59,17 @@ export function useDashboardNavigation() {
     }
     setMenuItems(menu);
   }, [isAdmin]);
+
+  useEffect(() => {
+    if (menuItems.length > 0) {
+      menuItems.forEach((item) => {
+        router.prefetch(item.path);
+        if (item.subItems) {
+          item.subItems.forEach((sub) => router.prefetch(sub.path));
+        }
+      });
+    }
+  }, [menuItems, router]);
 
   const isActive = useCallback(
     (path: string) => pathname === path,

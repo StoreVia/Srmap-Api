@@ -24,7 +24,7 @@ interface DiscordEmbedMessage {
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const { title, reason: bug_description, time: timestamp } = body;
-  const validTitles = ["Bug", "Feature Request", "UI Issue", "Contact", "Error"];
+  const validTitles = ["Bug", "Feature Request", "UI Issue", "Contact", "Error", "Feedback", "feedback", "Suggestion", "suggestion"];
 
   const auth = await requireAuthResponse(req);
   if (auth instanceof NextResponse) return auth;
@@ -71,20 +71,29 @@ export async function POST(req: NextRequest) {
 
     if (response.status === 204) {
       let successMessage = "Issue Reported Successfully!";
-      switch (title) {
-        case "Bug":
+      const normalizedTitle = title.toLowerCase();
+      switch (normalizedTitle) {
+        case "bug":
           successMessage = "Bug Reported Successfully!";
           break;
-        case "Ui":
+        case "ui":
+        case "ui issue":
           successMessage = "UI Bug Reported Successfully!";
           break;
-        case "RequestFeature":
+        case "requestfeature":
+        case "feature request":
           successMessage = "Feature Requested Successfully!";
           break;
-        case "Contact":
+        case "feedback":
+          successMessage = "Feedback Submitted Successfully!";
+          break;
+        case "suggestion":
+          successMessage = "Suggestion Submitted Successfully!";
+          break;
+        case "contact":
           successMessage = "We Will Respond In 24 Hours To The Email Provided.";
           break;
-        case "Error":
+        case "error":
           successMessage = "Thank you for reporting this issue. Our team has been notified and will resolve it as soon as possible!";
           break;
       }

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/utils/useToast";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,12 +9,48 @@ import API from "@/lib/api/axiosClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
-const ReportIssue = ({ onClose, issueTypes }: { onClose: () => void; issueTypes: string[]; }) => {
-  const [issueType, setIssueType] = useState("Bug");
+const resolveType = (type?: string, availableTypes: string[] = []): string => {
+  if (!type) return availableTypes[0] || "Bug";
+  const exactMatch = availableTypes.find((t) => t === type);
+  if (exactMatch) return exactMatch;
+  const caseMatch = availableTypes.find(
+    (t) => t.toLowerCase() === type.toLowerCase()
+  );
+  if (caseMatch) return caseMatch;
+  return type.charAt(0).toUpperCase() + type.slice(1);
+};
+
+const ReportIssue = ({
+  onClose,
+  issueTypes: providedTypes,
+  initialType,
+}: {
+  onClose: () => void;
+  issueTypes: string[];
+  initialType?: string;
+}) => {
+  const initialResolved = useMemo(
+    () => resolveType(initialType, providedTypes),
+    [initialType, providedTypes]
+  );
+
+  const issueTypes = useMemo(() => {
+    const list = [...providedTypes];
+    if (initialResolved && !list.includes(initialResolved)) {
+      list.push(initialResolved);
+    }
+    return list;
+  }, [providedTypes, initialResolved]);
+
+  const [issueType, setIssueType] = useState(initialResolved);
   const [description, setDescription] = useState("");
   const [email, setEmail] = useState("");
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setIssueType(initialResolved);
+  }, [initialResolved]);
 
   const handleSubmit = async () => {
     if (!description.trim()) {
@@ -47,14 +83,12 @@ const ReportIssue = ({ onClose, issueTypes }: { onClose: () => void; issueTypes:
     setLoading(true);
     try {
       const now = new Date().toLocaleString();
-      const res = await API.post("/tools/report",
-        {
-          title: issueType,
-          reason: description,
-          time: now,
-          id: email,
-        },
-      );
+      const res = await API.post("/tools/report", {
+        title: issueType,
+        reason: description,
+        time: now,
+        id: email,
+      });
 
       if (res.data.success) {
         toast({
@@ -72,19 +106,13 @@ const ReportIssue = ({ onClose, issueTypes }: { onClose: () => void; issueTypes:
     } catch (err: any) {
       toast({
         title: "Error",
-        description: err.res.data.message || "Failed To Report Issue!",
+        description: err?.response?.data?.message || "Failed To Report Issue!",
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (issueTypes.length === 1) {
-      setIssueType(issueTypes[0]);
-    }
-  }, [issueTypes]);
 
   return (
     <Dialog open onOpenChange={onClose}>
@@ -110,7 +138,8 @@ const ReportIssue = ({ onClose, issueTypes }: { onClose: () => void; issueTypes:
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>          </div>
+            </Select>
+          </div>
 
           <div>
             <Label>Description</Label>

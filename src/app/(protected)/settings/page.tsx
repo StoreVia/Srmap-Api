@@ -1,8 +1,8 @@
 "use client";
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import API from "@/lib/api/axiosClient";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -245,15 +245,17 @@ function SettingsCard({ label, children }: { label: string; children: React.Reac
   );
 }
 
-const Settings = () => {
+const SettingsContent = () => {
   const isMobile = useIsMobile();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { logout, login, isLoginLoading, accounts, activeAccountId, switchAccount } = useAuth();
   const { initiateSession } = useStudentData();
   const { theme, setTheme } = useTheme();
   const { settings, updateSettings, removeAccount } = useLocalStorageContext();
 
   const [showReportModal, setShowReportModal] = useState(false);
+  const [initialReportType, setInitialReportType] = useState("Bug");
   const [loadingFetch, setLoadingFetch] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
   const [warningBox, setWarningBox] = useState<{
@@ -287,6 +289,17 @@ const Settings = () => {
       setLoadingDatabaseData(false);
     }
   };
+
+  useEffect(() => {
+    const reportParam = searchParams.get("report");
+    if (reportParam !== null) {
+      setInitialReportType(reportParam || "Feedback");
+      setShowReportModal(true);
+    }
+    if (searchParams.has("database") || searchParams.get("database") !== null) {
+      fetchDatabaseData();
+    }
+  }, [searchParams]);
 
   const handleFetchData = async () => {
     setLoadingFetch(true);
@@ -381,7 +394,11 @@ const Settings = () => {
       )}
 
       {showReportModal && (
-        <ReportIssue onClose={() => setShowReportModal(false)} issueTypes={["Bug", "UI Issue", "Feature Request", "Contact"]} />
+        <ReportIssue
+          onClose={() => setShowReportModal(false)}
+          issueTypes={["Bug", "UI Issue", "Feature Request", "Feedback", "Suggestion", "Contact"]}
+          initialType={initialReportType}
+        />
       )}
 
       <Dialog open={deleteReasonDialogOpen} onOpenChange={setDeleteReasonDialogOpen}>
@@ -686,4 +703,10 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default function Settings() {
+  return (
+    <Suspense fallback={<div className="p-4 text-sm text-muted-foreground">Loading settings...</div>}>
+      <SettingsContent />
+    </Suspense>
+  );
+}

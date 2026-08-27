@@ -31,7 +31,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
     useDashboardNavigation();
 
   const { toasts } = useToast();
-  const activeMobileToast = isMobile ? toasts.find((t) => (t as any).open !== false) : null;
+  const activeToast = toasts.find((t) => (t as any).open !== false);
 
   const [selectedMobileNav, setSelectedMobileNav] = useState<string | null>(null);
   const [mobileSubMenuDrawer, setMobileSubMenuDrawer] = useState<{
@@ -78,9 +78,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         <div className="relative top-0 z-40 w-full bg-background border-b border-border shadow-sm">
           <motion.div
-            animate={{ opacity: isMobile && activeMobileToast ? 0 : 1 }}
+            animate={{ opacity: activeToast ? 0 : 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
-            className={isMobile && activeMobileToast ? "pointer-events-none" : ""}
+            className={activeToast ? "pointer-events-none" : ""}
           >
             <DashboardHeader isMobile={isMobile} currentTitle={currentTitle} />
             <NotificationPanel
@@ -89,7 +89,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             />
           </motion.div>
 
-          <MobileToastBanner isMobile={isMobile} />
+          <MobileToastBanner />
         </div>
 
         <main className="flex-1 flex flex-col overflow-hidden">
