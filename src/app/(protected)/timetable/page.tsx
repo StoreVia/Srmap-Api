@@ -159,7 +159,7 @@ const Timetable = () => {
                 {WEEK_DAYS.map((day) => {
                   const dayData = timetable.find((t) => t.day === day);
                   return (
-                    <tr key={day} className="align-top transition-colors hover:bg-muted/30 dark:hover:bg-muted/10">
+                    <tr key={day} className="align-middle transition-colors hover:bg-muted/30 dark:hover:bg-muted/10">
                       <td className="sticky left-0 z-[1] rounded-md bg-slate-200 p-2 text-xs font-bold text-slate-800 dark:bg-muted dark:font-semibold dark:text-foreground">
                         {trimText(day, 3)}
                       </td>
@@ -167,10 +167,16 @@ const Timetable = () => {
                         const subjStr = dayData?.subjects[idx] || "";
                         const { code, venue } = parseSubject(subjStr);
                         return (
-                          <td key={`${day}-${idx}`} className="p-0">
+                          <td key={`${day}-${idx}`} className="p-0 h-px">
                             <div
-                              onClick={() => handleSubjectClick(code, venue, day, timeSlot)}
-                              className={`${viewMode === "new" ? "min-h-[100px] md:min-h-[70px] flex flex-col justify-center items-center" : ""} h-full rounded-md cursor-pointer transition-colors p-1 md:p-2 ${
+                              onClick={() => code && handleSubjectClick(code, venue, day, timeSlot)}
+                              className={`h-full rounded-md transition-colors p-1 md:p-2 ${code ? "cursor-pointer" : "cursor-default"} ${
+                                !code
+                                  ? "flex flex-col items-center justify-center"
+                                  : viewMode === "new"
+                                  ? "min-h-[100px] md:min-h-[70px] flex flex-col justify-center items-center"
+                                  : ""
+                              } ${
                                 code
                                   ? "border border-blue-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 dark:border-0 dark:bg-blue-900/30 dark:shadow-none dark:hover:bg-blue-800/40"
                                   : "border border-slate-200 bg-slate-50/80 dark:border-0 dark:bg-muted/10"

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/utils/useToast";
 import { Button } from "@/components/ui/button";
@@ -24,7 +25,7 @@ export const MobileToastBanner: React.FC<ToastBannerProps> = () => {
 
   if (!activeToast) return null;
 
-  return (
+  const banner = (
     <AnimatePresence>
       <motion.div
         key={`toast-banner-${activeToast.id}`}
@@ -32,7 +33,7 @@ export const MobileToastBanner: React.FC<ToastBannerProps> = () => {
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.35, ease: "easeInOut" }}
-        className={`absolute inset-0 z-40 p-3 px-4 sm:px-6 flex items-center justify-between border-b shadow-md ${
+        className={`fixed top-0 left-0 right-0 z-[9999] p-3 px-4 sm:px-6 flex items-center justify-between border-b shadow-md ${
           activeToast.variant === "destructive"
             ? "bg-red-950 text-red-100 border-red-800"
             : activeToast.variant === "success"
@@ -78,6 +79,9 @@ export const MobileToastBanner: React.FC<ToastBannerProps> = () => {
       </motion.div>
     </AnimatePresence>
   );
+
+  if (typeof document !== "undefined") return createPortal(banner, document.body);
+  return banner;
 };
 
 export const ToastBanner = MobileToastBanner;
