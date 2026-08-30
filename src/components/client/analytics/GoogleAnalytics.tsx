@@ -1,4 +1,3 @@
-import React from "react";
 import Script from "next/script";
 
 const GoogleAnalytics = () => {
@@ -6,14 +5,14 @@ const GoogleAnalytics = () => {
         <>
             <Script
                 strategy="lazyOnload"
-                src={`https://www.googletagmanager.com/gtag/js?id=G-F861JN7601`}
+                src={`https://www.googletagmanager.com/gtag/js?id=G-S21W7V6025`}
             />
             <Script id="" strategy="lazyOnload">
                 {`
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('js', new Date());
-                gtag('config', 'G-CRDSRT3JEQ');
+                gtag('config', 'G-S21W7V6025');
           `}
             </Script>
         </>
