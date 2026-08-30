@@ -140,7 +140,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
   };
 
   return (
-    <div ref={notificationPanelRef} className="relative">
+    <div ref={notificationPanelRef} className="relative z-10">
       <div
         onClick={handleNotificationBarClick}
         className={`notifications-bar cursor-pointer bg-slate-200 text-black py-2 pr-6 pl-6 flex items-center justify-between shadow-md ${

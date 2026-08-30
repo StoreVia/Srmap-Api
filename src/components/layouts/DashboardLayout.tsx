@@ -76,7 +76,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div className="flex-1 flex flex-col min-w-0">
         <CachedDataBanner />
 
-        <div className="sticky top-0 z-[60] w-full bg-background border-b border-border shadow-sm">
+        <div className="sticky top-0 z-30 w-full bg-background border-b border-border shadow-sm">
           <motion.div
             animate={{ opacity: activeToast ? 0 : 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}

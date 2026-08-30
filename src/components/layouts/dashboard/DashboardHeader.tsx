@@ -44,7 +44,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="h-16 border-b bg-background/80 backdrop-blur-sm">
+    <header className="relative z-20 h-16 border-b bg-background/80 backdrop-blur-sm">
       <div className="flex items-center px-6 h-full">
         {!isMobile && (
           <div className="relative">
