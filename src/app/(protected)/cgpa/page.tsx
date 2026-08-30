@@ -164,47 +164,50 @@ const CGPACalculator = () => {
     return (
         <div>
             <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <CardTitle className="text-xl">
-                                    {isManualMode ? "Manual Mode" : "Auto Subjects Fill Mode"}
-                                </CardTitle>
-                                <CardDescription>
-                                    {isManualMode
-                                        ? "Add Your Subjects And Grades"
-                                        : "All Subjects All Already Filled Just Mark Your Expected Grades"}
-                                </CardDescription>
+                <div className="grid gap-6 md:grid-cols-2 md:items-start">
+                    <Card className="h-full flex flex-col justify-between">
+                        <CardHeader>
+                            <div className="flex justify-between items-center gap-2">
+                                <div className="min-w-0 flex-1">
+                                    <CardTitle className="text-xl">
+                                        {isManualMode ? "Manual Mode" : "Auto Subjects Fill Mode"}
+                                    </CardTitle>
+                                    <CardDescription>
+                                        {isManualMode
+                                            ? "Add Your Subjects And Grades"
+                                            : "All Subjects All Already Filled Just Mark Your Expected Grades"}
+                                    </CardDescription>
+                                </div>
+                                <Button
+                                    variant={isManualMode ? "default" : "outline"}
+                                    onClick={() => setIsManualMode(!isManualMode)}
+                                    className="shrink-0"
+                                >
+                                    {isManualMode ? "Auto Mode" : "Manual Mode"}
+                                </Button>
                             </div>
-                            <Button
-                                variant={isManualMode ? "default" : "outline"}
-                                onClick={() => setIsManualMode(!isManualMode)}
-                            >
-                                {isManualMode ? "Auto Mode" : "Manual Mode"}
-                            </Button>
-                        </div>
-                    </CardHeader>
-                </Card>
+                        </CardHeader>
+                    </Card>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Current Academic Status</CardTitle>
-                        <CardDescription>Your Current Semester And CGPA</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h3 className="text-sm font-medium text-muted-foreground">Current Semester</h3>
-                                <p className="text-xl font-bold">{profile?.semester || "Not available"}</p>
+                    <Card className="h-full flex flex-col justify-between">
+                        <CardHeader>
+                            <CardTitle>Current Academic Status</CardTitle>
+                            <CardDescription>Your Current Semester And CGPA</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground">Current Semester</h3>
+                                    <p className="text-xl font-bold">{profile?.semester || "Not available"}</p>
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-medium text-muted-foreground">Current CGPA</h3>
+                                    <p className="text-xl font-bold">{Number(currentCGPA)}</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400">Current CGPA</h3>
-                                <p className="text-xl font-bold">{Number(currentCGPA)}</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 <Card>
                     <CardHeader>

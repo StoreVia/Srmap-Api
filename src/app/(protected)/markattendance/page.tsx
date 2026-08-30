@@ -78,7 +78,7 @@ const AttendanceCode = () => {
   };
 
   return (
-    <div className="grid min-w-0 gap-6">
+    <div className="grid min-w-0 gap-6 md:grid-cols-2 md:items-start">
       <Card className="min-w-0 max-w-full overflow-hidden">
         <CardHeader>
           <CardTitle>Attendance Code</CardTitle>

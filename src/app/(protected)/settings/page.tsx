@@ -380,7 +380,7 @@ const SettingsContent = () => {
   const activeAccount = accounts.find((a) => a.id === activeAccountId);
 
   return (
-    <div className="w-full space-y-5">
+    <div className="w-full">
       {warningBox.open && (
         <WarningPopup
           title={warningBox.title}
@@ -511,194 +511,231 @@ const SettingsContent = () => {
         </DialogContent>
       </Dialog>
 
-      <SettingsCard label="Appearance">
-        <AccordionRow
-          icon={<Sun className="h-4 w-4" />}
-          label="Theme"
-          sub={theme === "light" ? "Light" : "Dark"}
-        >
-          <div className="flex gap-2 pt-3">
-            {(["light", "dark"] as const).map(t => (
-              <button
-                key={t}
-                onClick={() => setTheme(t)}
-                className={`flex items-center gap-2 flex-1 justify-center px-3 py-2 rounded-lg border text-sm font-medium transition-all ${theme === t
-                    ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
-                    : "border-border text-muted-foreground hover:bg-muted"
-                  }`}
-              >
-                {t === "light" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
-                {t === "light" ? "Light" : "Dark"}
-                {theme === t && <Check className="h-3 w-3 ml-auto" />}
-              </button>
-            ))}
-          </div>
-        </AccordionRow>
-
-        <AccordionRow
-          icon={<Sunrise className="h-4 w-4" />}
-          label="Startup Page"
-          sub={activeStartupPage?.label ?? "Not set"}
-        >
-          <div className="flex flex-col gap-0.5 pt-2">
-            {STARTUP_PAGES.map(({ value, label, icon }) => {
-              const active = settings.startupPage === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => updateSettings({ startupPage: value })}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${active
-                      ? "bg-university-700/10 text-university-600 dark:bg-university-500/10 dark:text-university-400 font-medium"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                    }`}
-                >
-                  {icon}
-                  {label}
-                  {active && <Check className="h-3.5 w-3.5 ml-auto" />}
-                </button>
-              );
-            })}
-          </div>
-        </AccordionRow>
-
-        {isMobile && (
-          <AccordionRow
-            icon={<LayoutDashboard className="h-4 w-4" />}
-            label="Mobile Navigation"
-            sub={MOBILE_NAVIGATION_OPTIONS.find(({ value }) => value === settings.mobileNavigationLayout)?.label ?? "Single row"}
-          >
-            <p className="pt-3 text-xs text-muted-foreground">
-              {MOBILE_NAVIGATION_OPTIONS.find(({ value }) => value === settings.mobileNavigationLayout)?.description}
-            </p>
-            <div className="grid grid-cols-2 gap-2 pt-3">
-              {MOBILE_NAVIGATION_OPTIONS.map(({ value, label }) => {
-                const active = settings.mobileNavigationLayout === value;
-                return (
+      <div className="space-y-5">
+        <div className="grid gap-5 md:grid-cols-2 md:items-start">
+          <SettingsCard label="Appearance">
+            <AccordionRow
+              icon={<Sun className="h-4 w-4" />}
+              label="Theme"
+              sub={theme === "light" ? "Light" : "Dark"}
+            >
+              <div className="flex gap-2 pt-3">
+                {(["light", "dark"] as const).map((t) => (
                   <button
-                    key={value}
-                    onClick={() => updateSettings({ mobileNavigationLayout: value })}
-                    className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all ${active
+                    key={t}
+                    onClick={() => setTheme(t)}
+                    className={`flex items-center gap-2 flex-1 justify-center px-3 py-2 rounded-lg border text-sm font-medium transition-all ${theme === t
                         ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
                         : "border-border text-muted-foreground hover:bg-muted"
                       }`}
                   >
-                    {label}
-                    {active && <Check className="h-3 w-3" />}
-                  </button>
-                );
-              })}
-            </div>
-          </AccordionRow>
-        )}
-      </SettingsCard>
-
-      <SettingsCard label="Data Control">
-        <ActionRow
-          icon={<RefreshCw className={`h-4 w-4 ${loadingFetch ? "animate-spin" : ""}`} />}
-          label="Fetch New Data"
-          sub="Manually sync your latest attendance"
-          loading={loadingFetch}
-          loadingLabel="Fetching..."
-          disabled={loadingFetch}
-          onClick={() =>
-            setWarningBox({
-              open: true,
-              title: "Fetch New Data",
-              description: "Srmapi automatically fetches your data when you login after 1 AM.",
-              warning: "Do you want to still continue?",
-              onConfirm: handleFetchData,
-            })
-          }
-        />
-        <ActionRow
-          icon={<Database className="h-4 w-4" />}
-          label="View Database Record"
-          sub="See exactly how your data is stored"
-          loading={loadingDatabaseData}
-          loadingLabel="Loading..."
-          disabled={loadingDatabaseData}
-          onClick={fetchDatabaseData}
-        />
-      </SettingsCard>
-
-      <SettingsCard label="Accounts">
-        <AccordionRow
-          icon={<User className="h-4 w-4" />}
-          label="Switch Account"
-          sub={activeAccount ? `Active: ${activeAccount.username}` : "No active account"}
-        >
-          <div className="flex flex-col gap-2 pt-3">
-            {!hasAccounts && (
-              <p className="text-sm text-muted-foreground">No accounts found. Login to add an account.</p>
-            )}
-            {accounts.map((account) => {
-              const isActive = account.id === activeAccountId;
-              return (
-                <div
-                  key={account.id}
-                  className="flex flex-col gap-2 rounded-lg border px-3 py-2 sm:flex-row sm:items-center"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{account.username}</p>
-                    <p className="text-xs text-muted-foreground">{isActive ? "Currently active" : "Stored account"}</p>
-                  </div>
-                  <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
-                    {!isActive && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex-1 sm:flex-none"
-                        onClick={() => {
-                          switchAccount(account.id);
-                        }}
-                      >
-                        Switch
-                      </Button>
+                    {t === "light" ? (
+                      <Sun className="h-3.5 w-3.5" />
+                    ) : (
+                      <Moon className="h-3.5 w-3.5" />
                     )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="flex-1 sm:flex-none text-red-600 hover:text-destructive"
-                      onClick={() => removeAccount(account.id)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-            <Button
-              variant="outline"
-              className="mt-1"
-              onClick={() => setAddAccountDialogOpen(true)}
-              disabled={(accounts?.length || 0) >= 5}
+                    {t === "light" ? "Light" : "Dark"}
+                    {theme === t && <Check className="h-3 w-3 ml-auto" />}
+                  </button>
+                ))}
+              </div>
+            </AccordionRow>
+
+            <AccordionRow
+              icon={<Sunrise className="h-4 w-4" />}
+              label="Startup Page"
+              sub={activeStartupPage?.label ?? "Not set"}
             >
-              Add Another Account
-            </Button>
-            <p className="text-xs text-muted-foreground">You can store up to 5 accounts.</p>
-          </div>
-        </AccordionRow>
-      </SettingsCard>
+              <div className="flex flex-col gap-0.5 pt-2">
+                {STARTUP_PAGES.map(({ value, label, icon }) => {
+                  const active = settings.startupPage === value;
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => updateSettings({ startupPage: value })}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all ${active
+                          ? "bg-university-700/10 text-university-600 dark:bg-university-500/10 dark:text-university-400 font-medium"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                        }`}
+                    >
+                      {icon}
+                      {label}
+                      {active && <Check className="h-3.5 w-3.5 ml-auto" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </AccordionRow>
 
-      <SettingsCard label="Other">
-        <ActionRow
-          icon={<Flag className="h-4 w-4" />}
-          label="Report an Issue"
-          sub="Bugs, UI issues, or feature requests"
-          onClick={() => setShowReportModal(true)}
-        />
-        <ActionRow
-          icon={<Trash2 className="h-4 w-4" />}
-          label="Delete Account"
-          sub="Permanently remove your account and all data"
-          loading={loadingDelete}
-          loadingLabel="Deleting..."
-          disabled={loadingDelete}
-          destructive
-          onClick={() => setDeleteReasonDialogOpen(true)}
-        />
-      </SettingsCard>
+            {isMobile && (
+              <AccordionRow
+                icon={<LayoutDashboard className="h-4 w-4" />}
+                label="Mobile Navigation"
+                sub={
+                  MOBILE_NAVIGATION_OPTIONS.find(
+                    ({ value }) => value === settings.mobileNavigationLayout
+                  )?.label ?? "Single row"
+                }
+              >
+                <p className="pt-3 text-xs text-muted-foreground">
+                  {
+                    MOBILE_NAVIGATION_OPTIONS.find(
+                      ({ value }) => value === settings.mobileNavigationLayout
+                    )?.description
+                  }
+                </p>
+                <div className="grid grid-cols-2 gap-2 pt-3">
+                  {MOBILE_NAVIGATION_OPTIONS.map(({ value, label }) => {
+                    const active = settings.mobileNavigationLayout === value;
+                    return (
+                      <button
+                        key={value}
+                        onClick={() =>
+                          updateSettings({ mobileNavigationLayout: value })
+                        }
+                        className={`flex flex-1 items-center justify-center gap-2 rounded-lg border px-2 py-2 text-sm font-medium transition-all ${active
+                            ? "border-university-600 bg-university-700/10 text-university-600 dark:border-university-500 dark:text-university-400"
+                            : "border-border text-muted-foreground hover:bg-muted"
+                          }`}
+                      >
+                        {label}
+                        {active && <Check className="h-3 w-3" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </AccordionRow>
+            )}
+          </SettingsCard>
 
+          <SettingsCard label="Accounts">
+            <AccordionRow
+              icon={<User className="h-4 w-4" />}
+              label="Switch Account"
+              sub={
+                activeAccount
+                  ? `Active: ${activeAccount.username}`
+                  : "No active account"
+              }
+            >
+              <div className="flex flex-col gap-2 pt-3">
+                {!hasAccounts && (
+                  <p className="text-sm text-muted-foreground">
+                    No accounts found. Login to add an account.
+                  </p>
+                )}
+                {accounts.map((account) => {
+                  const isActive = account.id === activeAccountId;
+                  return (
+                    <div
+                      key={account.id}
+                      className="flex flex-col gap-2 rounded-lg border px-3 py-2 sm:flex-row sm:items-center"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {account.username}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {isActive ? "Currently active" : "Stored account"}
+                        </p>
+                      </div>
+                      <div className="flex w-full gap-2 sm:w-auto sm:shrink-0">
+                        {!isActive && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1 sm:flex-none"
+                            onClick={() => {
+                              switchAccount(account.id);
+                            }}
+                          >
+                            Switch
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="flex-1 sm:flex-none text-red-600 hover:text-destructive"
+                          onClick={() => removeAccount(account.id)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  className="mt-1"
+                  onClick={() => setAddAccountDialogOpen(true)}
+                  disabled={(accounts?.length || 0) >= 5}
+                >
+                  Add Another Account
+                </Button>
+                <p className="text-xs text-muted-foreground">
+                  You can store up to 5 accounts.
+                </p>
+              </div>
+            </AccordionRow>
+          </SettingsCard>
+        </div>
+
+        {/* Row 2: Data Control & Other */}
+        <div className="grid gap-5 md:grid-cols-2 md:items-start">
+          <SettingsCard label="Data Control">
+            <ActionRow
+              icon={
+                <RefreshCw
+                  className={`h-4 w-4 ${loadingFetch ? "animate-spin" : ""}`}
+                />
+              }
+              label="Fetch New Data"
+              sub="Manually sync your latest attendance"
+              loading={loadingFetch}
+              loadingLabel="Fetching..."
+              disabled={loadingFetch}
+              onClick={() =>
+                setWarningBox({
+                  open: true,
+                  title: "Fetch New Data",
+                  description:
+                    "Srmapi automatically fetches your data when you login after 1 AM.",
+                  warning: "Do you want to still continue?",
+                  onConfirm: handleFetchData,
+                })
+              }
+            />
+            <ActionRow
+              icon={<Database className="h-4 w-4" />}
+              label="View Database Record"
+              sub="See exactly how your data is stored"
+              loading={loadingDatabaseData}
+              loadingLabel="Loading..."
+              disabled={loadingDatabaseData}
+              onClick={fetchDatabaseData}
+            />
+          </SettingsCard>
+
+          <SettingsCard label="Other">
+            <ActionRow
+              icon={<Flag className="h-4 w-4" />}
+              label="Report an Issue"
+              sub="Bugs, UI issues, or feature requests"
+              onClick={() => setShowReportModal(true)}
+            />
+            <ActionRow
+              icon={<Trash2 className="h-4 w-4" />}
+              label="Delete Account"
+              sub="Permanently remove your account and all data"
+              loading={loadingDelete}
+              loadingLabel="Deleting..."
+              disabled={loadingDelete}
+              destructive
+              onClick={() => setDeleteReasonDialogOpen(true)}
+            />
+          </SettingsCard>
+        </div>
+      </div>
     </div>
   );
 };
