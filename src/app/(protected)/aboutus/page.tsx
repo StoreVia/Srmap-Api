@@ -32,7 +32,7 @@ const AboutUs = () => {
     },
     {
       id: 2,
-      name: "M. Azam Baig",
+      name: "Mohammad Azam",
       role: "Creator",
       bio: "Development.",
       avatarImage: AzamImg,
