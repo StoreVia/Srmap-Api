@@ -75,20 +75,37 @@ export function decodeCaptchaOutput(outputTensor: tf.Tensor): string {
     return predictedText.replace(/_/g, "");
 }
 
+let inferenceLock: Promise<void> = Promise.resolve();
+
 export async function solveCaptcha(imageBuffer: Buffer): Promise<string | null> {
+    const previousLock = inferenceLock;
+    let releaseLock!: () => void;
+    inferenceLock = new Promise<void>((resolve) => {
+        releaseLock = resolve;
+    });
+
+    await previousLock;
+
+    let inputTensor: tf.Tensor4D | null = null;
+    let outputTensor: tf.Tensor | null = null;
+
     try {
         const model = await getCaptchaModel();
-        const inputTensor = await preprocessCaptcha(imageBuffer);
-        const outputTensor = model.predict(inputTensor) as tf.Tensor;
+        inputTensor = await preprocessCaptcha(imageBuffer);
+        outputTensor = model.predict(inputTensor) as tf.Tensor;
 
         const captchaText = decodeCaptchaOutput(outputTensor);
-
-        inputTensor.dispose();
-        outputTensor.dispose();
-
         return captchaText || null;
     } catch (error: any) {
         console.error("[Captcha Solver] Error solving captcha:", error?.message || error);
         return null;
+    } finally {
+        if (inputTensor) {
+            try { inputTensor.dispose(); } catch (_) {}
+        }
+        if (outputTensor) {
+            try { outputTensor.dispose(); } catch (_) {}
+        }
+        releaseLock();
     }
 }

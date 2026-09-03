@@ -3,10 +3,15 @@ import { main, captcha, authenticate } from "@/server/utils/headers";
 import { LoginResponse } from "@/types/server/login";
 
 async function attemptLogin(username: string, password: string): Promise<LoginResponse> {
-  const mainRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginPage", {
-    method: "GET",
-    headers: main
-  });
+  let mainRes: Response;
+  try {
+    mainRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginPage", {
+      method: "GET",
+      headers: main
+    });
+  } catch (err) {
+    throw new Error("SRM server is unreachable. Please try again later.");
+  }
 
   if (!mainRes.ok) throw new Error("SRM server is unreachable. Please try again later.");
 
@@ -15,10 +20,15 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
   if (!jsessionIdMatch) throw new Error("Session ID not found");
   const jsessionId = jsessionIdMatch[1];
 
-  const captchaRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/captchas", {
-    method: "GET",
-    headers: captcha(jsessionId)
-  });
+  let captchaRes: Response;
+  try {
+    captchaRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/captchas", {
+      method: "GET",
+      headers: captcha(jsessionId)
+    });
+  } catch (err) {
+    throw new Error("SRM server is unreachable. Please try again later.");
+  }
 
   if (!captchaRes.ok) throw new Error("SRM server is unreachable. Please try again later.");
 
@@ -32,11 +42,16 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
     ccode: captchaTextRaw,
   });
 
-  const loginRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginToPortal", {
-    method: "POST",
-    headers: authenticate(jsessionId),
-    body: payload
-  });
+  let loginRes: Response;
+  try {
+    loginRes = await fetch("https://student.srmap.edu.in/srmapstudentcorner/StudentLoginToPortal", {
+      method: "POST",
+      headers: authenticate(jsessionId),
+      body: payload
+    });
+  } catch (err) {
+    throw new Error("SRM server is unreachable. Please try again later.");
+  }
 
   const html = await loginRes.text();
   const nameMatch = html.match(/<h2>(.*?)<\/h2>/);
@@ -52,20 +67,7 @@ async function login(username: string, password: string): Promise<LoginResponse>
     console.log("Error From /backendUtils/auth/login:- ", error);
     let message = "Login Failed, Please Check Your Credentials!";
     if (error instanceof Error) {
-      if (
-        error.message.includes("fetch failed") ||
-        error.message.includes("ECONNREFUSED") ||
-        error.message.includes("ENOTFOUND") ||
-        error.message.includes("network") ||
-        error.message.includes("timeout") ||
-        error.message.includes("ETIMEDOUT") ||
-        error.message.includes("socket") ||
-        error.message.includes("failed to fetch")
-      ) {
-        message = "SRM server is unreachable. Please try again later.";
-      } else {
-        message = error.message;
-      }
+      message = error.message;
     }
     return { success: false, message };
   }
