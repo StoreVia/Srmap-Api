@@ -31,7 +31,7 @@ export function useDashboardNavigation() {
       { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
-      { title: "Forums", shortTitle: "Forum", path: "/forums", icon: MessageSquare },
+      // { title: "Forums", shortTitle: "Forum", path: "/forums", icon: MessageSquare },
       { title: "Subjects", shortTitle: "Subs", path: "/subjects", icon: Library },
       { title: "Profile", shortTitle: "Me", path: "/profile", icon: User },
       { title: "Feedback", shortTitle: "Feed", path: "/feedback", icon: Edit },

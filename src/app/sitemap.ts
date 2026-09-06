@@ -23,7 +23,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "resources", priority: 0.85, changeFrequency: "weekly" as const },
     { path: "subjects", priority: 0.8, changeFrequency: "weekly" as const },
     { path: "calender", priority: 0.8, changeFrequency: "monthly" as const },
-    { path: "forums", priority: 0.8, changeFrequency: "daily" as const },
+    // { path: "forums", priority: 0.8, changeFrequency: "daily" as const },
     { path: "vacant", priority: 0.75, changeFrequency: "weekly" as const },
     { path: "apps", priority: 0.75, changeFrequency: "monthly" as const },
     { path: "markattendance", priority: 0.85, changeFrequency: "weekly" as const },
