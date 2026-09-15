@@ -34,7 +34,7 @@ export const DashboardFooter: React.FC<DashboardFooterProps> = ({ isMobile }) =>
         )}
 
         <p className="text-xs text-muted-foreground">
-          Version 5.7.3 • Last updated: 30-Aug-2026
+          Version 5.8.0 • Last updated: 08-Sep-2026
         </p>
       </div>
     </footer>

@@ -89,6 +89,7 @@ const AttendanceDetails = () => {
   const [isCalculating, setIsCalculating] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isPredicted, setIsPredicted] = useState(false);
+  const [changedSubjectCodes, setChangedSubjectCodes] = useState<Set<string>>(new Set());
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const pendingCalculateRef = useRef(false);
@@ -100,15 +101,16 @@ const AttendanceDetails = () => {
     setIsResetting(true);
     setRawSubjects(mapManyToAttendanceShape(attendance));
     setIsPredicted(false);
+    setChangedSubjectCodes(new Set());
     setTimeout(() => {
       setIsResetting(false);
     }, 500);
   };
 
-  useEffect(() => { 
+  useEffect(() => {
+    if (isPredicted) return;
     setRawSubjects(mapManyToAttendanceShape(attendance));
-    setIsPredicted(false);
-  }, [attendance]);
+  }, [attendance, isPredicted]);
 
   const handleCalculateToday = async () => {
     if (!sessionValid || !sessionId) {
@@ -144,10 +146,12 @@ const AttendanceDetails = () => {
         }
       });
 
+      const changed = new Set<string>();
       const updatedSubjects = baseSubjects.map((sub) => {
         const c = counts.get(sub.subject_code);
         if (!c || (c.p === 0 && c.a === 0)) return sub;
 
+        changed.add(sub.subject_code);
         const newAttended = sub.attended + c.p;
         const newAbsent = sub.absent + c.a;
         const newConducted = sub.conducted + c.p + c.a;
@@ -169,6 +173,7 @@ const AttendanceDetails = () => {
       });
 
       setRawSubjects(updatedSubjects);
+      setChangedSubjectCodes(changed);
       setIsPredicted(true);
       toast({
         title: "Prediction Applied",
@@ -275,7 +280,11 @@ const AttendanceDetails = () => {
       {displayedSubjects.length > 0 ? (
         <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {displayedSubjects.map((subject) => (
-            <AttendanceCard key={subject.subject_code} subject={subject} />
+            <AttendanceCard
+              key={subject.subject_code}
+              subject={subject}
+              isPredictedChanged={changedSubjectCodes.has(subject.subject_code)}
+            />
           ))}
         </div>
       ) : (

@@ -3,7 +3,7 @@ import "@/css/pages/feedback/RadioButton.css";
 
 import { Suspense } from "react";
 import ErrorFallBack from "./error";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -13,6 +13,12 @@ import ProgressBar from "@/components/client/utils/PageProgress";
 import SplashScreen from "@/components/client/loading/SplashScreen";
 import { LocalStorageProvider } from "@/context/LocalStorageContext";
 import GoogleAnalytics from "@/components/client/analytics/GoogleAnalytics";
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",

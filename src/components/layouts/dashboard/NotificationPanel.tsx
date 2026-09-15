@@ -143,17 +143,15 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
     <div ref={notificationPanelRef} className="relative z-10">
       <div
         onClick={handleNotificationBarClick}
-        className={`notifications-bar cursor-pointer bg-slate-200 text-black py-2 pr-6 pl-6 flex items-center justify-between shadow-md ${
-          isMobile && usesMobileSideNav ? "ml-12" : ""
-        }`}
+        className="notifications-bar cursor-pointer bg-muted/80 text-foreground py-1.5 px-3 sm:px-6 flex items-center justify-between border-b border-border/40 transition-colors hover:bg-muted"
       >
-        <span className="font-medium text-sm">
+        <span className="font-medium text-xs sm:text-sm truncate min-w-0 pr-2">
           {notifications.notifications.length > 0
             ? renderNotification(notifications.notifications[0].notification)
             : "No Notifications"}
         </span>
         <ChevronDown
-          className={`h-4 w-4 transition-transform duration-200 ${
+          className={`h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-transform duration-200 ${
             isNotificationsOpen ? "rotate-180" : ""
           }`}
         />
@@ -161,22 +159,20 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
 
       {isNotificationsOpen && (
         <div
-          className={`notifications-bar absolute right-0 top-full z-50 bg-popover border border-border shadow-lg ${
-            isMobile && usesMobileSideNav ? "left-12" : "left-0"
-          }`}
+          className="notifications-bar absolute left-0 right-0 top-full z-50 bg-popover border border-border shadow-lg"
           onMouseEnter={handleMouseEnterNotifications}
           onMouseLeave={handleMouseLeaveNotifications}
         >
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-60 sm:max-h-64 overflow-y-auto">
             {notifications.notifications.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground text-center">
+              <p className="p-3 sm:p-4 text-xs sm:text-sm text-muted-foreground text-center">
                 {notifications.isLoading ? "Loading..." : "No new notifications"}
               </p>
             ) : (
               notifications.notifications.slice(1).map((note, index) => (
                 <div
                   key={index}
-                  className="p-3 border-b bg-accent border-border text-sm hover:bg-accent/30 cursor-pointer"
+                  className="p-2.5 sm:p-3 border-b bg-accent border-border text-xs sm:text-sm hover:bg-accent/30 cursor-pointer"
                 >
                   {renderNotification(note.notification)}
                 </div>

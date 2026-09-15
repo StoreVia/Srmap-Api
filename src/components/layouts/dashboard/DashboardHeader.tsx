@@ -44,8 +44,8 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
   };
 
   return (
-    <header className="relative z-20 h-16 border-b bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center px-6 h-full">
+    <header className="relative z-20 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm">
+      <div className="flex items-center px-3 sm:px-6 h-full">
         {!isMobile && (
           <div className="relative">
             <SidebarTrigger

@@ -13,7 +13,7 @@ import { DashboardHeader } from "./dashboard/DashboardHeader";
 import { NotificationPanel } from "./dashboard/NotificationPanel";
 import { MobileToastBanner } from "./dashboard/MobileToastBanner";
 import { DesktopSidebar } from "./dashboard/DesktopSidebar";
-import { MobileNavigation } from "./dashboard/MobileNavigation";
+import { MobileNavigation, MobileSidebarNav } from "./dashboard/MobileNavigation";
 import { MobileSubMenuDrawer } from "./dashboard/MobileSubMenuDrawer";
 import { DashboardFooter } from "./dashboard/DashboardFooter";
 
@@ -64,7 +64,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="h-dvh flex w-full bg-background overflow-hidden">
       <DesktopSidebar
         menuItems={menuItems}
         isMobile={isMobile}
@@ -73,10 +73,10 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         onOpenMobileSubMenu={openMobileSubMenu}
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <CachedDataBanner />
 
-        <div className="sticky top-0 z-30 w-full bg-background border-b border-border shadow-sm">
+        <div className="relative shrink-0 z-30 w-full bg-background border-b border-border shadow-sm">
           <motion.div
             animate={{ opacity: activeToast ? 0 : 1 }}
             transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -92,31 +92,47 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           <MobileToastBanner />
         </div>
 
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <div
-            className={`flex-1 min-w-0 overflow-x-hidden overflow-y-auto p-4 sm:p-6 ${
-              isMobile && usesMobileSideNav ? "pl-14" : ""
-            }`}
-          >
-            {children}
-          </div>
-          <DashboardFooter isMobile={isMobile} />
-        </main>
+        <div className="flex-1 flex min-w-0 overflow-hidden">
+          {isMobile && usesMobileSideNav && (
+            <aside className="w-11 sm:w-12 shrink-0 border-r border-border bg-background/95 h-full z-20 overflow-y-auto no-scrollbar">
+              <MobileSidebarNav
+                items={menuItems}
+                selectedPath={selectedMobileNav}
+                isSubPathActive={isSubPathActive}
+                onClick={handleMobileNavClick}
+              />
+            </aside>
+          )}
+
+          <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden overflow-y-auto">
+            <div
+              className={`flex-1 min-w-0 p-3 sm:p-6 ${
+                isMobile && !usesMobileSideNav
+                  ? "pb-[calc(5rem+max(1.25rem,env(safe-area-inset-bottom,16px)))]"
+                  : ""
+              }`}
+            >
+              {children}
+            </div>
+            <DashboardFooter isMobile={isMobile} />
+          </main>
+        </div>
+
+        {isMobile && !usesMobileSideNav && (
+          <MobileNavigation
+            items={menuItems}
+            selectedPath={selectedMobileNav}
+            isSubPathActive={isSubPathActive}
+            onNavClick={handleMobileNavClick}
+          />
+        )}
 
         {isMobile && (
-          <>
-            <MobileNavigation
-              items={menuItems}
-              selectedPath={selectedMobileNav}
-              isSubPathActive={isSubPathActive}
-              onNavClick={handleMobileNavClick}
-            />
-            <MobileSubMenuDrawer
-              isOpen={mobileSubMenuDrawer.isOpen}
-              onClose={closeMobileSubMenu}
-              menuItem={mobileSubMenuDrawer.menuItem}
-            />
-          </>
+          <MobileSubMenuDrawer
+            isOpen={mobileSubMenuDrawer.isOpen}
+            onClose={closeMobileSubMenu}
+            menuItem={mobileSubMenuDrawer.menuItem}
+          />
         )}
       </div>
     </div>

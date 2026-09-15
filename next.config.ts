@@ -5,6 +5,7 @@ const isDev = process.env.NODE_ENV === "development";
 const config = {
   reactStrictMode: !isDev,
   trailingSlash: false,
+  allowedDevOrigins: ['192.168.0.189'],
   devIndicators: false,
   images: {
     unoptimized: isDev,

@@ -48,12 +48,12 @@ export function Toaster() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.35, ease: "easeInOut" }}
           className={`fixed top-0 left-0 right-0 z-[9999] p-3 px-4 flex items-center justify-between border-b shadow-lg ${activeMobileToast.variant === "destructive"
-              ? "bg-red-950 text-red-100 border-red-800"
-              : activeMobileToast.variant === "success"
-                ? "bg-emerald-950 text-emerald-100 border-emerald-800"
-                : activeMobileToast.variant === "info"
-                  ? "bg-blue-950 text-blue-100 border-blue-800"
-                  : "bg-slate-900 text-white border-slate-700"
+            ? "bg-red-950 text-red-100 border-red-800"
+            : activeMobileToast.variant === "success"
+              ? "bg-emerald-950 text-emerald-100 border-emerald-800"
+              : activeMobileToast.variant === "info"
+                ? "bg-blue-950 text-blue-100 border-blue-800"
+                : "bg-slate-900 text-white border-slate-700"
             }`}
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1 pr-2">

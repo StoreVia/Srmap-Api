@@ -60,7 +60,7 @@ const toastIconMap = {
 const Toast = React.forwardRef<
   React.ComponentRef<typeof ToastPrimitives.Root>,
   React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> &
-    VariantProps<typeof toastVariants>
+  VariantProps<typeof toastVariants>
 >(({ className, variant = "default", children, ...props }, ref) => {
   return (
     <ToastPrimitives.Root

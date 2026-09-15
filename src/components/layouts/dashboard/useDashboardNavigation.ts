@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, MessageSquare, Library, User, Edit, Settings, Users, Shield } from "lucide-react";
+import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, MessageSquare, Library, User, Edit, Settings, Users, Shield, Gamepad2 } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -13,6 +13,7 @@ export function useDashboardNavigation() {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
+      { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark", path: "/markattendance", icon: ListChecks },

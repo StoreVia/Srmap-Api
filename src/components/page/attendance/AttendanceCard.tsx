@@ -18,7 +18,7 @@ export interface Subject {
   absent: number;
 }
 
-const AttendanceCard = ({ subject }: { subject: Subject }) => {
+const AttendanceCard = ({ subject, isPredictedChanged = false }: { subject: Subject; isPredictedChanged?: boolean }) => {
   const [simulatedBunks, setSimulatedBunks] = useState(0);
   const [futureAttendedClasses, setFutureAttendedClasses] = useState(0);
   const [simulatedPercentage, setSimulatedPercentage] = useState(0);
@@ -85,12 +85,22 @@ const AttendanceCard = ({ subject }: { subject: Subject }) => {
 
   return (
     <>
-      <Card className="mb-4">
+      <Card className={`mb-4 overflow-hidden transition-all duration-300 ${isPredictedChanged ? 'border-blue-500 dark:border-blue-400' : ''}`}>
+        {isPredictedChanged && (
+          <div className="h-1 w-full bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500" />
+        )}
         <CardHeader className="pb-2">
           <div className="flex justify-between items-start gap-2">
             <div className="min-w-0 flex-1">
               <CardTitle className="text-lg">{subject.subject_name}</CardTitle>
-              <p className="text-muted-foreground text-xs">{subject.subject_code}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-muted-foreground text-xs">{subject.subject_code}</p>
+                {isPredictedChanged && (
+                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                    Predicted
+                  </span>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <div className="bg-muted px-2 py-1.5 rounded-lg">
