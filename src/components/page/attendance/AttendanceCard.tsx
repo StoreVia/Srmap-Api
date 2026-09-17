@@ -1,10 +1,10 @@
 "use client";
+import { useState, useEffect } from "react";
 import { RotateCcw } from "lucide-react";
 import AttendanceDialog from "./OdMlDialog";
-import { Button } from "@/components/ui/button";
 import SimulationDialog from "./SimulationDialog";
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 export interface Subject {
   subject_code: string;
@@ -18,7 +18,13 @@ export interface Subject {
   absent: number;
 }
 
-const AttendanceCard = ({ subject, isPredictedChanged = false }: { subject: Subject; isPredictedChanged?: boolean }) => {
+const AttendanceCard = ({
+  subject,
+  isPredictedChanged = false,
+}: {
+  subject: Subject;
+  isPredictedChanged?: boolean;
+}) => {
   const [simulatedBunks, setSimulatedBunks] = useState(0);
   const [futureAttendedClasses, setFutureAttendedClasses] = useState(0);
   const [simulatedPercentage, setSimulatedPercentage] = useState(0);
@@ -83,50 +89,60 @@ const AttendanceCard = ({ subject, isPredictedChanged = false }: { subject: Subj
   const displayedAttended = subject.attended + futureAttendedClasses;
   const hasSimulations = simulatedBunks > 0 || futureAttendedClasses > 0;
 
+  const percentageColor =
+    simulatedPercentage < 75
+      ? "text-red-500"
+      : simulatedPercentage <= 80
+      ? "text-orange-500"
+      : "text-blue-500";
+
   return (
     <>
-      <Card className={`mb-4 overflow-hidden transition-all duration-300 ${isPredictedChanged ? 'border-blue-500 dark:border-blue-400' : ''}`}>
+      <Card
+        className={`overflow-hidden transition-all duration-200 border-border/80 ${
+          isPredictedChanged ? "border-blue-500 ring-1 ring-blue-500/20" : ""
+        }`}
+      >
         {isPredictedChanged && (
           <div className="h-1 w-full bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500" />
         )}
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start gap-2">
+
+        <CardContent className="p-3 sm:p-3.5 space-y-2.5">
+          {/* Top Header: Title, Code & Percentage */}
+          <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
-              <CardTitle className="text-lg">{subject.subject_name}</CardTitle>
-              <div className="flex items-center gap-2">
-                <p className="text-muted-foreground text-xs">{subject.subject_code}</p>
+              <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground truncate leading-snug">
+                {subject.subject_name}
+              </h3>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-[11px] text-muted-foreground font-mono font-medium">
+                  {subject.subject_code}
+                </span>
                 {isPredictedChanged && (
-                  <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-700">
+                  <span className="text-[9px] font-semibold px-1 py-0.2 rounded bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                     Predicted
                   </span>
                 )}
               </div>
             </div>
+
             <div className="flex items-center gap-1 shrink-0">
-              <div className="bg-muted px-2 py-1.5 rounded-lg">
-                <span
-                  className={`text-base font-bold ${
-                    simulatedPercentage < 75
-                      ? "text-red-600"
-                      : simulatedPercentage <= 80
-                      ? "text-orange-500"
-                      : "text-blue-600"
-                  }`}
-                >
+              <div className="bg-muted px-2 py-1 rounded-md">
+                <span className={`text-sm font-bold tabular-nums ${percentageColor}`}>
                   {simulatedPercentage.toFixed(2)}%
                 </span>
               </div>
               <AttendanceDialog subject={subject} />
             </div>
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
+
+          {/* Compact Progress Bar */}
           <div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
               <div
-                className={`h-2 rounded-full transition-all duration-300 ${
+                className={`h-full rounded-full transition-all duration-300 ${
                   simulatedPercentage < 75
-                    ? "bg-red-600"
+                    ? "bg-red-500"
                     : simulatedPercentage <= 80
                     ? "bg-orange-500"
                     : "bg-blue-600"
@@ -134,63 +150,80 @@ const AttendanceCard = ({ subject, isPredictedChanged = false }: { subject: Subj
                 style={{ width: `${Math.min(simulatedPercentage, 100)}%` }}
               />
             </div>
-            <div className="flex justify-between mt-1 text-xs">
+            <div className="flex justify-between mt-1 text-[10px] text-muted-foreground font-medium">
               <span>Min: 75%</span>
-              <span>Current: {simulatedPercentage.toFixed(2)}%</span>
+              <span className="tabular-nums">Current: {simulatedPercentage.toFixed(2)}%</span>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <div className="bg-muted p-2 rounded">
-              <p className="text-xs">Present</p>
-              <p className="text-lg font-bold text-green-600">{displayedAttended}</p>
+
+          {/* Compact 2x2 Stats Grid */}
+          <div className="grid grid-cols-2 gap-1.5">
+            <div className="bg-muted/70 px-2 py-1.5 rounded-md">
+              <p className="text-[10px] text-muted-foreground font-medium leading-none">Present</p>
+              <p className="text-base font-bold text-green-600 dark:text-green-500 mt-1 tabular-nums leading-none">
+                {displayedAttended}
+              </p>
             </div>
-            <div className="bg-muted p-2 rounded">
-              <p className="text-xs">Absent</p>
-              <p className="text-lg font-bold text-red-600">{absentClasses}</p>
+            <div className="bg-muted/70 px-2 py-1.5 rounded-md">
+              <p className="text-[10px] text-muted-foreground font-medium leading-none">Absent</p>
+              <p className="text-base font-bold text-red-600 dark:text-red-500 mt-1 tabular-nums leading-none">
+                {absentClasses}
+              </p>
             </div>
-            <div className="bg-muted p-2 rounded">
-              <p className="text-xs">Total</p>
-              <p className="text-lg font-bold">{displayedTotal}</p>
+            <div className="bg-muted/70 px-2 py-1.5 rounded-md">
+              <p className="text-[10px] text-muted-foreground font-medium leading-none">Total</p>
+              <p className="text-base font-bold text-foreground mt-1 tabular-nums leading-none">
+                {displayedTotal}
+              </p>
             </div>
-            <div className="bg-muted p-2 rounded">
-              <p className="text-xs">Can Skip</p>
-              <p className="text-lg font-bold">{remainingBunks}</p>
+            <div className="bg-muted/70 px-2 py-1.5 rounded-md">
+              <p className="text-[10px] text-muted-foreground font-medium leading-none">Can Skip</p>
+              <p className="text-base font-bold text-foreground mt-1 tabular-nums leading-none">
+                {remainingBunks}
+              </p>
             </div>
+
+            {/* Need to Attend / Status Row */}
             {simulatedPercentage < 75 && (
-              <div className="bg-muted p-2 rounded col-span-2">
-                <p className="text-xs">Need to Attend</p>
-                <p className="text-lg font-bold">{classesNeeded}</p>
+              <div className="bg-red-500/10 border border-red-500/20 px-2.5 py-1.5 rounded-md col-span-2 flex items-center justify-between">
+                <span className="text-xs font-semibold text-red-600 dark:text-red-400">Need to Attend</span>
+                <span className="text-sm font-bold text-red-600 dark:text-red-400 tabular-nums">
+                  {classesNeeded} {classesNeeded === 1 ? "class" : "classes"}
+                </span>
               </div>
             )}
           </div>
-          <div className="bg-muted p-3 rounded">
-            <div className="flex justify-between items-center mb-1">
-              <p className="text-sm font-medium">Calculators</p>
-              {hasSimulations && (
-                <Button
-                  onClick={handleRevertChanges}
-                  variant="ghost"
-                  size="sm"
-                  className={`p-1 h-7 w-7 ${isRotating ? "animate-spin" : ""}`}
-                >
-                  <RotateCcw className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-            <div className="flex gap-2 flex-wrap">
+
+          {/* Compact Action Buttons */}
+          <div className="flex items-center gap-1.5 pt-0.5">
+            <Button
+              type="button"
+              onClick={() => setBunksDialogOpen(true)}
+              className="flex-1 text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-xs"
+            >
+              Plan Bunks
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setFutureDialogOpen(true)}
+              className="flex-1 text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md shadow-xs"
+            >
+              Future
+            </Button>
+            {hasSimulations && (
               <Button
-                onClick={() => setBunksDialogOpen(true)}
-                className="flex-1 text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
+                type="button"
+                onClick={handleRevertChanges}
+                variant="ghost"
+                size="icon"
+                title="Reset simulation"
+                className={`h-8 w-8 shrink-0 rounded-md text-muted-foreground hover:text-foreground ${
+                  isRotating ? "animate-spin" : ""
+                }`}
               >
-                Plan Bunks
+                <RotateCcw className="h-3.5 w-3.5" />
               </Button>
-              <Button
-                onClick={() => setFutureDialogOpen(true)}
-                className="flex-1 text-xs h-8 bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Future
-              </Button>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>

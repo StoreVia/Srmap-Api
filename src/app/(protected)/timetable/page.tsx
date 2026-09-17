@@ -46,9 +46,8 @@ const Timetable = () => {
             <button
               key={mode}
               onClick={() => updateSettings({ timeTableViewMode: mode })}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                viewMode === mode ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground" : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
-              }`}
+              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${viewMode === mode ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground" : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
+                }`}
             >
               {mode === "old" ? "Detailed View" : "Minimal View"}
             </button>
@@ -170,17 +169,15 @@ const Timetable = () => {
                           <td key={`${day}-${idx}`} className="p-0 h-px">
                             <div
                               onClick={() => code && handleSubjectClick(code, venue, day, timeSlot)}
-                              className={`h-full rounded-md transition-colors p-1 md:p-2 ${code ? "cursor-pointer" : "cursor-default"} ${
-                                !code
-                                  ? "flex flex-col items-center justify-center"
-                                  : viewMode === "new"
+                              className={`h-full rounded-md transition-colors p-1 md:p-2 ${code ? "cursor-pointer" : "cursor-default"} ${!code
+                                ? "flex flex-col items-center justify-center"
+                                : viewMode === "new"
                                   ? "min-h-[100px] md:min-h-[70px] flex flex-col justify-center items-center"
                                   : ""
-                              } ${
-                                code
+                                } ${code
                                   ? "border border-blue-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 dark:border-0 dark:bg-blue-900/30 dark:shadow-none dark:hover:bg-blue-800/40"
                                   : "border border-slate-200 bg-slate-50/80 dark:border-0 dark:bg-muted/10"
-                              }`}
+                                }`}
                             >
                               {code ? (
                                 viewMode === "new" ? (
