@@ -6,11 +6,27 @@ import { useAuth } from "@/context/AuthContext";
 import { useStudentData } from "@/context/StudentContext";
 import { useTheme } from "@/context/ThemeContext";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
-import { whatsapp } from "@/shared/utils/functions";
+import { whatsapp, toTitleCase } from "@/shared/utils/functions";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { User, Check, MoreVertical, Home, RotateCcw, Sun, Moon, LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  User,
+  Check,
+  MoreVertical,
+  Home,
+  RotateCcw,
+  Sun,
+  Moon,
+  LogOut,
+} from "lucide-react";
 
 interface DashboardHeaderProps {
   isMobile: boolean;
@@ -43,47 +59,55 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     switchAccount(accountId);
   };
 
+  const studentDisplayName = profile?.studentName
+    ? toTitleCase(profile.studentName)
+    : "";
+  const registerNo = profile?.registerNo || "";
+
   return (
-    <header className="relative z-20 h-14 sm:h-16 border-b bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center px-3 sm:px-6 h-full">
-        {!isMobile && (
-          <div className="relative">
-            <SidebarTrigger
-              className="mr-4 hover:bg-accent hover:text-accent-foreground"
-              onClick={handleSidebarClick}
-            />
-            {showTutorial && (
-              <div className="absolute left-full -ml-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-lg shadow-lg whitespace-nowrap flex items-center z-50">
-                👈 Click here to open the menu
-                <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rotate-45"></div>
-              </div>
+    <header className="relative z-20 h-14 sm:h-16 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
+      <div className="flex items-center justify-between px-3 sm:px-6 h-full gap-2 sm:gap-4">
+        <div className="flex items-center min-w-0 gap-2 sm:gap-3 flex-1">
+          {!isMobile && (
+            <div className="relative shrink-0">
+              <SidebarTrigger
+                className="hover:bg-accent hover:text-accent-foreground"
+                onClick={handleSidebarClick}
+              />
+              {showTutorial && (
+                <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-primary text-primary-foreground text-xs px-3 py-1 rounded-lg shadow-lg whitespace-nowrap flex items-center z-50 animate-pulse">
+                  👈 Click here to open the menu
+                  <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rotate-45" />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate leading-tight">
+              {currentTitle}
+            </h1>
+            {(studentDisplayName || registerNo) && (
+              <p className="text-[11px] sm:text-xs text-muted-foreground truncate leading-tight mt-0.5">
+                {studentDisplayName}
+                {studentDisplayName && registerNo ? " • " : ""}
+                {registerNo && (
+                  <span className="font-mono font-medium">{registerNo}</span>
+                )}
+              </p>
             )}
           </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <h1 className={`${isMobile ? "text-lg" : "text-xl"} font-semibold truncate`}>
-            {currentTitle}
-          </h1>
-          {!isMobile ? (
-            <p className="text-sm text-muted-foreground truncate">
-              {profile?.studentName}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground truncate">
-              {profile?.registerNo}
-            </p>
-          )}
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
           <Button
             type="button"
             onClick={whatsapp}
-            className="h-9 shrink-0 gap-1.5 bg-green-600 px-2.5 text-xs text-white hover:bg-green-700 sm:px-3"
+            className="h-8 sm:h-9 shrink-0 gap-1.5 bg-green-600 px-2 sm:px-3 text-xs text-white hover:bg-green-700 rounded-md font-medium shadow-xs"
             aria-label="Join the Srmapi WhatsApp channel"
           >
             <svg
-              className="h-4 w-4"
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4"
               viewBox="0 0 24 24"
               fill="currentColor"
               aria-hidden="true"
@@ -98,17 +122,17 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-full overflow-hidden hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                className="h-8 w-8 sm:h-9 sm:w-9 rounded-full overflow-hidden p-0 border border-border/40 hover:border-primary/50 transition-colors"
                 aria-label="Switch account"
               >
                 {profile?.picture ? (
                   <Image
                     src={profile.picture}
                     alt="Profile"
-                    width={32}
-                    height={32}
+                    width={36}
+                    height={36}
                     unoptimized
-                    className="h-8 w-8 rounded-full object-cover"
+                    className="h-full w-full rounded-full object-cover"
                   />
                 ) : (
                   <User className="h-4 w-4" />
@@ -116,7 +140,9 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-              <DropdownMenuLabel>Switch Account</DropdownMenuLabel>
+              <DropdownMenuLabel className="font-semibold text-xs text-muted-foreground uppercase tracking-wider">
+                Switch Account
+              </DropdownMenuLabel>
               <DropdownMenuSeparator />
               {(accounts?.length || 0) > 0 ? (
                 accounts.map((account) => {
@@ -129,10 +155,10 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
                           handleAccountSwitch(account.id);
                         }
                       }}
-                      className="cursor-pointer flex items-center justify-between"
+                      className="cursor-pointer flex items-center justify-between py-2"
                     >
-                      <span>{account.username}</span>
-                      {isActiveAccount && <Check className="h-4 w-4" />}
+                      <span className="font-mono text-sm">{account.username}</span>
+                      {isActiveAccount && <Check className="h-4 w-4 text-primary" />}
                     </DropdownMenuItem>
                   );
                 })
@@ -159,7 +185,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-accent hover:text-accent-foreground transition-colors duration-200"
+                className="h-8 w-8 sm:h-9 sm:w-9 hover:bg-accent hover:text-accent-foreground rounded-lg transition-colors"
                 aria-label="Open actions menu"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -194,7 +220,7 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => logout()}
-                className="cursor-pointer text-red-600 focus:text-destructive"
+                className="cursor-pointer text-destructive focus:text-destructive"
               >
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout

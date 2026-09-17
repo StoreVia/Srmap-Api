@@ -4,19 +4,11 @@ import { useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/utils/useNotification";
 import { ChevronDown } from "lucide-react";
 
-interface NotificationPanelProps {
-  isMobile: boolean;
-  usesMobileSideNav: boolean;
-}
-
 const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
 const routeRegex = /\/[a-zA-Z0-9\/-]+/g;
 const REFRESH_INTERVAL = 30 * 1000;
 
-export const NotificationPanel: React.FC<NotificationPanelProps> = ({
-  isMobile,
-  usesMobileSideNav,
-}) => {
+export const NotificationPanel: React.FC = () => {
   const router = useRouter();
   const notifications = useNotifications();
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -128,17 +120,6 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
       document.removeEventListener("pointerdown", closeNotificationsOnOutsidePress);
   }, [isNotificationsOpen]);
 
-  const handleMouseEnterNotifications = () => {
-    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-    document.body.style.overflow = "hidden";
-    document.body.style.paddingRight = `${scrollBarWidth}px`;
-  };
-
-  const handleMouseLeaveNotifications = () => {
-    document.body.style.overflow = "auto";
-    document.body.style.paddingRight = "0";
-  };
-
   return (
     <div ref={notificationPanelRef} className="relative z-10">
       <div
@@ -160,8 +141,6 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({
       {isNotificationsOpen && (
         <div
           className="notifications-bar absolute left-0 right-0 top-full z-50 bg-popover border border-border shadow-lg"
-          onMouseEnter={handleMouseEnterNotifications}
-          onMouseLeave={handleMouseLeaveNotifications}
         >
           <div className="max-h-60 sm:max-h-64 overflow-y-auto">
             {notifications.notifications.length === 0 ? (

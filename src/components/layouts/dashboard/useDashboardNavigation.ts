@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, MessageSquare, Library, User, Edit, Settings, Users, Shield, Gamepad2 } from "lucide-react";
+import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2 } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ export function useDashboardNavigation() {
       { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
-      { title: "Mark Attendance", shortTitle: "Mark", path: "/markattendance", icon: ListChecks },
+      { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
       { title: "Vacant", shortTitle: "Empty", path: "/vacant", icon: Building },
       {
         title: "Exams",
@@ -33,13 +33,13 @@ export function useDashboardNavigation() {
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
       // { title: "Forums", shortTitle: "Forum", path: "/forums", icon: MessageSquare },
-      { title: "Subjects", shortTitle: "Subs", path: "/subjects", icon: Library },
-      { title: "Profile", shortTitle: "Me", path: "/profile", icon: User },
-      { title: "Feedback", shortTitle: "Feed", path: "/feedback", icon: Edit },
-      { title: "Settings", shortTitle: "Set", path: "/settings", icon: Settings },
+      { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
+      { title: "Profile", shortTitle: "Profile", path: "/profile", icon: User },
+      { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit },
+      { title: "Settings", shortTitle: "Settings", path: "/settings", icon: Settings },
       {
         title: "About & GitHub",
-        shortTitle: "More",
+        shortTitle: "AboutUs",
         path: "/aboutus",
         icon: Users,
         subItems: [

@@ -25,7 +25,9 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   const router = useRouter();
   const isMobile = useIsMobile();
   const { settings } = useLocalStorageContext();
-  const usesMobileSideNav = settings.mobileNavigationLayout === "sidebar";
+  const navLayout = settings.mobileNavigationLayout || "single";
+  const usesMobileSideNav = navLayout === "sidebar";
+  const usesMiniMobileNav = navLayout === "mini";
 
   const { menuItems, pathname, isActive, isSubPathActive, currentTitle } =
     useDashboardNavigation();
@@ -64,7 +66,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="h-dvh flex w-full bg-background overflow-hidden">
+    <div className="fixed inset-0 h-[100dvh] w-full flex bg-background overflow-hidden select-none sm:select-text">
       <DesktopSidebar
         menuItems={menuItems}
         isMobile={isMobile}
@@ -73,28 +75,27 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
         onOpenMobileSubMenu={openMobileSubMenu}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <CachedDataBanner />
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden relative">
+        {/* Pinned Sticky Top Header Stack - NEVER scrolls off-screen */}
+        <div className="sticky top-0 z-30 w-full shrink-0 bg-background/95 backdrop-blur-md border-b border-border/60 shadow-xs">
+          <CachedDataBanner />
 
-        <div className="relative shrink-0 z-30 w-full bg-background border-b border-border shadow-sm">
           <motion.div
             animate={{ opacity: activeToast ? 0 : 1 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
             className={activeToast ? "pointer-events-none" : ""}
           >
             <DashboardHeader isMobile={isMobile} currentTitle={currentTitle} />
-            <NotificationPanel
-              isMobile={isMobile}
-              usesMobileSideNav={usesMobileSideNav}
-            />
+            <NotificationPanel />
           </motion.div>
 
           <MobileToastBanner />
         </div>
 
-        <div className="flex-1 flex min-w-0 overflow-hidden">
+        {/* Scrollable Content Area */}
+        <div className="flex-1 flex min-w-0 h-full overflow-hidden relative">
           {isMobile && usesMobileSideNav && (
-            <aside className="w-11 sm:w-12 shrink-0 border-r border-border bg-background/95 h-full z-20 overflow-y-auto no-scrollbar">
+            <aside className="w-12 shrink-0 border-r border-border/60 bg-background/95 h-full z-20 overflow-y-auto no-scrollbar">
               <MobileSidebarNav
                 items={menuItems}
                 selectedPath={selectedMobileNav}
@@ -104,20 +105,30 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
             </aside>
           )}
 
-          <main className="flex-1 flex flex-col min-w-0 overflow-x-hidden overflow-y-auto">
-            <div
-              className={`flex-1 min-w-0 p-3 sm:p-6 ${
-                isMobile && !usesMobileSideNav
-                  ? "pb-[calc(5rem+max(1.25rem,env(safe-area-inset-bottom,16px)))]"
-                  : ""
-              }`}
-            >
+          <main
+            id="main-scroll-container"
+            className="flex-1 flex flex-col min-w-0 overflow-x-hidden overflow-y-auto overscroll-y-contain"
+          >
+            <div className="flex-1 min-w-0 p-3 sm:p-6">
               {children}
             </div>
             <DashboardFooter isMobile={isMobile} />
+
+            {/* Spacer strictly below footer when mobile bottom bar is active */}
+            {isMobile && !usesMobileSideNav && !usesMiniMobileNav && (
+              <div
+                className={`shrink-0 w-full ${
+                  navLayout === "double"
+                    ? "h-[calc(5rem+max(0.5rem,env(safe-area-inset-bottom,8px)))]"
+                    : "h-[calc(3.75rem+max(0.5rem,env(safe-area-inset-bottom,8px)))]"
+                }`}
+                aria-hidden="true"
+              />
+            )}
           </main>
         </div>
 
+        {/* Mobile Navigation (Bottom Nav or Mini Side Nav) */}
         {isMobile && !usesMobileSideNav && (
           <MobileNavigation
             items={menuItems}
@@ -127,6 +138,7 @@ const DashboardContent: React.FC<DashboardLayoutProps> = ({ children }) => {
           />
         )}
 
+        {/* Submenu Drawer for items with nested pages */}
         {isMobile && (
           <MobileSubMenuDrawer
             isOpen={mobileSubMenuDrawer.isOpen}

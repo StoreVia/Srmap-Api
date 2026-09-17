@@ -1,40 +1,39 @@
 "use client";
 import React from "react";
-import { useLocalStorageContext } from "@/context/LocalStorageContext";
+import Link from "next/link";
 
 interface DashboardFooterProps {
-  isMobile: boolean;
+  isMobile?: boolean;
 }
 
 export const DashboardFooter: React.FC<DashboardFooterProps> = ({ isMobile }) => {
-  const { settings } = useLocalStorageContext();
-  const usesMiniMobileNav = settings.mobileNavigationLayout === "mini";
-  const usesSidebarMobileNav = settings.mobileNavigationLayout === "sidebar";
+  const currentYear = new Date().getFullYear();
 
   return (
-    <footer
-      className={`flex-shrink-0 p-6 pt-4 border-t border-border bg-background/80 backdrop-blur-sm ${
-        isMobile && !usesMiniMobileNav && !usesSidebarMobileNav ? "pb-28" : ""
-      }`}
-    >
-      <div className={`pt-4 ${isMobile ? "text-center -mt-4" : "flex items-center justify-between"}`}>
-        <p className={`text-sm text-muted-foreground ${isMobile ? "mb-2" : ""}`}>
-          {new Date().getFullYear()} Srmapi Portal.
-        </p>
-
-        {isMobile && (
-          <div className="flex space-x-1 justify-center text-xs text-muted-foreground">
-            <a href="/privacy" className="hover:underline">
-              Privacy Policy,
-            </a>
-            <a href="/terms" className="hover:underline">
-              Terms and conditions
-            </a>
+    <footer className="shrink-0 w-full border-t border-border/40 bg-background/60 backdrop-blur-xs py-3 px-3 sm:px-6 mt-auto select-none">
+      <div className={`w-full flex ${isMobile ? "flex-col items-center text-center gap-1.5" : "flex-row items-center justify-between"} text-xs text-muted-foreground`}>
+        <div className={`flex items-center gap-2 ${isMobile ? "flex-wrap justify-center" : ""}`}>
+          <span className="font-medium">© {currentYear} Srmapi Portal</span>
+          <span className="text-border">•</span>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/privacy"
+              className="hover:text-foreground hover:underline transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <span className="text-border">•</span>
+            <Link
+              href="/terms"
+              className="hover:text-foreground hover:underline transition-colors"
+            >
+              Terms & Conditions
+            </Link>
           </div>
-        )}
+        </div>
 
-        <p className="text-xs text-muted-foreground">
-          Version 5.8.0 • Last updated: 08-Sep-2026
+        <p className="text-[11px] sm:text-xs text-muted-foreground/80">
+          Version 5.8.1 • Last updated: 17-Sep-2026
         </p>
       </div>
     </footer>
