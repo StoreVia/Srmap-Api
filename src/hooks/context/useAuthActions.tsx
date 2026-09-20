@@ -14,7 +14,7 @@ export const useAuthActions = () => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-    const login = useCallback(async (username: string, password: string, wantCachedData?: boolean) => {
+    const login = useCallback(async (username: string, password: string, wantCachedData?: boolean, turnstileToken?: string) => {
         const normalizedUsername = username.toUpperCase();
         const exists = profile.accounts?.some((a: any) => a.id === normalizedUsername);
         if (!exists && (profile.accounts?.length || 0) >= 5) {
@@ -28,7 +28,7 @@ export const useAuthActions = () => {
         }
         try {
             setIsLoginLoading(true);
-            const res = await API.post("/auth/login", { username: normalizedUsername, password, wantCachedData });
+            const res = await API.post("/auth/login", { username: normalizedUsername, password, wantCachedData, turnstileToken });
             const { accessToken, sessionId, sessionTime, hasCachedData } = res.data;
             const save = upsertAccount({
                 id: normalizedUsername,

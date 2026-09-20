@@ -12,6 +12,7 @@ import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import usePasswordToggle from "@/hooks/utils/usePasswordToggle";
 import { toast } from "@/hooks/utils/useToast";
 import { CachedDataPrompt } from "@/components/utils/CachedDataPrompt";
+import { Turnstile } from "@/components/utils/Turnstile";
 import Logo from "../../../../public/icons/round_corner_logo.png";
 import Logo_White from "../../../../public/icons/round_corner_logo.png";
 import { handleRegNumberChange } from "@/shared/utils/functions";
@@ -20,6 +21,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const passwordToggle = usePasswordToggle();
   const { login, isLoginLoading } = useAuth();
   const { theme, toggleTheme } = useTheme();
@@ -31,7 +33,11 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result: any = await login(username, password);
+    if (!turnstileToken) {
+      toast.error("Please complete the verification.");
+      return;
+    }
+    const result: any = await login(username, password, false, turnstileToken);
     if (result && !result.success && result.error?.includes("SRM server is unreachable")) {
       if (result.hasCachedData) {
         const normalizedUsername = username.toUpperCase();
@@ -45,7 +51,7 @@ const Login = () => {
 
   const handleUseCachedData = async () => {
     setShowCachedPrompt(false);
-    await login(username, password, true);
+    await login(username, password, true, turnstileToken || undefined);
   };
 
   return (
@@ -155,10 +161,18 @@ const Login = () => {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-3 px-6 pb-6">
+              <div className="flex justify-center w-full">
+                <Turnstile
+                  onVerify={(token) => setTurnstileToken(token)}
+                  onExpire={() => setTurnstileToken(null)}
+                  onError={() => setTurnstileToken(null)}
+                  theme={theme === "dark" ? "dark" : "light"}
+                />
+              </div>
               <Button
                 type="submit"
                 className="w-full h-11 font-medium bg-black text-white hover:bg-gray-900 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200"
-                disabled={isLoginLoading}
+                disabled={isLoginLoading || !turnstileToken}
               >
                 {isLoginLoading ? (
                   <span className="flex items-center gap-2">

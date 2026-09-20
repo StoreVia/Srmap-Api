@@ -10,7 +10,7 @@ interface AuthContextType {
   isLoginLoading: boolean;
   accounts: Array<{ id: string; username: string }>;
   activeAccountId: string;
-  login: (username: string, password: string, wantCachedData?: boolean) => Promise<{ success: boolean; error?: string | null; hasCachedData?: boolean; accessToken?: string; sessionId?: string; sessionTime?: string; } | void>;
+  login: (username: string, password: string, wantCachedData?: boolean, turnstileToken?: string) => Promise<{ success: boolean; error?: string | null; hasCachedData?: boolean; accessToken?: string; sessionId?: string; sessionTime?: string; } | void>;
   switchAccount: (accountId: string) => void;
   logout: () => void;
 }

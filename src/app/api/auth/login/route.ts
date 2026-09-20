@@ -3,10 +3,11 @@ import { isValidRegNumber } from "@/validators/auth/login";
 import { handleUserSession } from "@/server/auth/handleUserSession";
 import { userBlockedResponse, paramatersNotMatched } from "@/server/utils/responses";
 import { createToken, errorResponse, isAdmin, isBlocked } from "@/server/utils/functions";
+import { verifyTurnstileToken } from "@/lib/turnstile";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    let { username, password, wantCachedData } = body;
+    let { username, password, wantCachedData, turnstileToken } = body;
 
     username = username?.toUpperCase() || "";
 
@@ -14,7 +15,14 @@ export async function POST(req: NextRequest) {
         return paramatersNotMatched();
     }
 
+    const ip = req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || undefined;
+    const turnstileResult = await verifyTurnstileToken(turnstileToken || "", ip);
+    if (!turnstileResult.success) {
+        return errorResponse(turnstileResult.error || "Verification failed", {}, 403);
+    }
+
     const [isValid, errorMessage] = isValidRegNumber(username);
+
     if (!isValid) {
         return errorResponse(errorMessage || "Invalid Username!");
     }

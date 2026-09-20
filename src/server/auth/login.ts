@@ -1,6 +1,7 @@
 import { solveCaptcha } from "@/lib/captcha";
 import { main, captcha, authenticate } from "@/server/utils/headers";
 import { LoginResponse } from "@/types/server/login";
+import { callApiWithRetry } from "@/shared/api/retryApi";
 
 async function attemptLogin(username: string, password: string): Promise<LoginResponse> {
   let mainRes: Response;
@@ -62,13 +63,10 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
 
 async function login(username: string, password: string): Promise<LoginResponse> {
   try {
-    return await attemptLogin(username, password);
+    return await callApiWithRetry(() => attemptLogin(username, password), 2);
   } catch (error: unknown) {
-    console.log("Error From /backendUtils/auth/login:- ", error);
-    let message = "Login Failed, Please Check Your Credentials!";
-    if (error instanceof Error) {
-      message = error.message;
-    }
+    const message = error instanceof Error ? error.message : "Login Failed, Please Check Your Credentials!";
+    console.log("[Login] All attempts failed:", message);
     return { success: false, message };
   }
 }
