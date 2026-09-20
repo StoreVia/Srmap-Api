@@ -18,6 +18,7 @@ import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import { useIsMobile } from "@/hooks/utils/useMobile";
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Turnstile } from "@/components/utils/Turnstile";
 import { Sun, Moon, Database, Lock, User, Calendar, Clock, Hash, Expand, Shrink, ChevronDown, ChevronUp, RefreshCw, Trash2, Flag, LayoutDashboard, Fingerprint, CalendarDays, CheckSquare, Sunrise, Check } from "lucide-react";
 
 const FIELD_META: Record<string, { label: string; icon: React.ReactNode; sensitive?: boolean }> = {
@@ -272,6 +273,7 @@ const SettingsContent = () => {
   const [addAccountDialogOpen, setAddAccountDialogOpen] = useState(false);
   const [newAccountUsername, setNewAccountUsername] = useState("");
   const [newAccountPassword, setNewAccountPassword] = useState("");
+  const [addAccountTurnstileToken, setAddAccountTurnstileToken] = useState<string | null>(null);
 
   const fetchDatabaseData = async () => {
     setLoadingDatabaseData(true);
@@ -344,12 +346,17 @@ const SettingsContent = () => {
       toast({ title: "Missing fields", description: "Please enter registration number and password.", variant: "destructive" });
       return;
     }
-    const result = await login(newAccountUsername, newAccountPassword);
+    if (!addAccountTurnstileToken) {
+      toast({ title: "Verification required", description: "Please complete the verification.", variant: "destructive" });
+      return;
+    }
+    const result = await login(newAccountUsername, newAccountPassword, false, addAccountTurnstileToken);
     if (result && result.success) {
       toast({ title: "Account added", description: "Account saved and switched successfully." });
       setAddAccountDialogOpen(false);
       setNewAccountUsername("");
       setNewAccountPassword("");
+      setAddAccountTurnstileToken(null);
       setTimeout(() => router.push("/dashboard"), 200);
     } else if (result?.hasCachedData) {
       setAddAccountDialogOpen(false);
@@ -359,11 +366,12 @@ const SettingsContent = () => {
         description: "The college portal is currently down, but we found cached data for this account in our database.",
         warning: "Would you like to add this account using the cached data?",
         onConfirm: async () => {
-          const cachedResult = await login(newAccountUsername, newAccountPassword, true);
+          const cachedResult = await login(newAccountUsername, newAccountPassword, true, addAccountTurnstileToken || undefined);
           if (cachedResult?.success) {
             toast({ title: "Account added", description: "Account saved and switched successfully using cached data." });
             setNewAccountUsername("");
             setNewAccountPassword("");
+            setAddAccountTurnstileToken(null);
             setTimeout(() => router.push("/dashboard"), 200);
           } else {
             toast({ title: "Failed to add account", description: cachedResult?.error || "Unknown error occurred.", variant: "destructive" });
@@ -495,6 +503,13 @@ const SettingsContent = () => {
                 disabled={isLoginLoading}
               />
             </div>
+            <div className="flex justify-center">
+              <Turnstile
+                onVerify={(token) => setAddAccountTurnstileToken(token)}
+                onExpire={() => setAddAccountTurnstileToken(null)}
+                onError={() => setAddAccountTurnstileToken(null)}
+              />
+            </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button
                 variant="outline"
@@ -503,7 +518,7 @@ const SettingsContent = () => {
               >
                 Cancel
               </Button>
-              <Button onClick={handleAddAccount} disabled={isLoginLoading}>
+              <Button onClick={handleAddAccount} disabled={isLoginLoading || !addAccountTurnstileToken}>
                 {isLoginLoading ? "Adding..." : "Add Account"}
               </Button>
             </div>
