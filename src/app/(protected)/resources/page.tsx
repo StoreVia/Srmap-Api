@@ -1,13 +1,15 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/utils/useMobile";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import API from "@/lib/api/axiosClient";
-import { Download, FileText, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, FileText, ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle, DialogWindowClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
+import Link from "next/link";
 
 type Course = {
     name: string;
@@ -15,13 +17,13 @@ type Course = {
 };
 
 type Subject = {
-    id: number;
+    id: string | number;
     code: string;
     name: string;
 };
 
 type Resource = {
-    id: number;
+    id: string | number;
     title: string;
     size: string;
     type: string;
@@ -37,9 +39,10 @@ type SubjectResources = {
 };
 
 const Resources = () => {
+    const { isAdmin } = useAuth();
     const [selectedCourse, setSelectedCourse] = useState<string>("CSE");
     const [selectedYear, setSelectedYear] = useState<string>("1");
-    const [selectedSubject, setSelectedSubject] = useState<number | null>(null);
+    const [selectedSubject, setSelectedSubject] = useState<string | number | null>(null);
     const [activeResourceType, setActiveResourceType] = useState<"previousYearPapers" | "slidesAndNotes">("previousYearPapers");
     const [previewResource, setPreviewResource] = useState<Resource | null>(null);
     const [showSubjects, setShowSubjects] = useState<boolean>(true);
@@ -91,7 +94,7 @@ const Resources = () => {
         }
     };
 
-    const fetchResources = async (course: string, year: string, subjectId: number) => {
+    const fetchResources = async (course: string, year: string, subjectId: string | number) => {
         setLoading(prev => ({ ...prev, resources: true }));
         try {
             const response = await API.get(`/resources/resource?course=${course}&year=${year}&subjectId=${subjectId}`);
@@ -157,6 +160,20 @@ const Resources = () => {
 
     return (
         <div>
+            {isAdmin && (
+                <div className="mb-4 flex items-center justify-between p-3 rounded-lg border bg-muted/40">
+                    <div className="text-xs text-muted-foreground">
+                        Admin mode: You can manage and publish resources in the admin panel.
+                    </div>
+                    <Button asChild size="sm" variant="default" className="h-8 text-xs">
+                        <Link href="/admin">
+                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                            Edit Resources
+                        </Link>
+                    </Button>
+                </div>
+            )}
+
             <div className="mb-4 flex flex-col md:flex-row md:gap-4">
                 <div className="flex-1 min-w-0">
                     <label htmlFor="yearSelect" className="block text-sm font-medium mb-1">
@@ -170,8 +187,8 @@ const Resources = () => {
                             <SelectGroup>
                                 <SelectItem value="1">Year 1</SelectItem>
                                 <SelectItem value="2">Year 2</SelectItem>
-                                {/* <SelectItem value="3">Year 3</SelectItem>
-                                <SelectItem value="4">Year 4</SelectItem> */}
+                                <SelectItem value="3">Year 3</SelectItem>
+                                <SelectItem value="4">Year 4</SelectItem>
                             </SelectGroup>
                         </SelectContent>
                     </Select>

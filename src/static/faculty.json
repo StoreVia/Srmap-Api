@@ -1,5 +1,9 @@
 [
   {
+    "faculty": "Dr Iswar Mahato",
+    "location": "CV RAMAN BLOCK,LEVEL 6,CABIN NO:-4"
+  },
+  {
     "faculty": "Dr. Abhaya Kumar Pradhan",
     "location": "S15, 7th Floor, S Radhakrishnan Block"
   },
@@ -148,6 +152,10 @@
     "location": "Cubicle No. 13, Level 3, Homi Bhabha Block"
   },
   {
+    "faculty": "Dr Parvez Ahmad",
+    "location": "Homi J Bhabha Block, Level 4"
+  },
+  {
     "faculty": "Dr Keerthi Reddy N",
     "location": "Level-3,cubicle-26,Homi J baba"
   },
@@ -161,7 +169,7 @@
   },
   {
     "faculty": "Dr Sahadeb Shit",
-    "location": "Homi J. Bhabha Block, Level 6, Cubicle No: 23."
+    "location": "CV RAMAN BLOCK, LEVEL 11, CUBICLE NO:-53"
   },
   {
     "faculty": "Mr Junaid Alam",
@@ -169,15 +177,19 @@
   },
   {
     "faculty": "Dr MD NASIR",
-    "location": "Homi j Bhabha Block, Level 4,Cubicle No-30"
+    "location": "CV RAMAN BLOCK, LEVEL 11, CUBICLE NO:-18"
   },
   {
     "faculty": "Mr Vamshi Vijay Krishna Jeripotul",
-    "location": "Homi J Bhabha Block, Level 2, Cubical No:"
+    "location": "Homi J Bhabha Block, Level 2, Cabin No:-18"
   },
   {
     "faculty": "Prof. Dr. Rama Rao T",
     "location": "Sarvepalli Radhakrishnan Block, 7 F, SC-01"
+  },
+  {
+    "faculty": "Dr Chintalapudi V N U Bharathi Murthy",
+    "location": "CV RAMAN BLOCK, LEVEL 11"
   },
   {
     "faculty": "Mr Yara Srinivas",
@@ -242,6 +254,10 @@
   {
     "faculty": "Dr Yasir Afaq",
     "location": "Homi J Bhaba Level 3, Cubicle Number 63."
+  },
+  {
+    "faculty": "Dr Pintu Bhunia",
+    "location": "Homi J Bhaba Level 6, Cabin No 2"
   },
   {
     "faculty": "Dr Surochita Pal",
@@ -533,7 +549,7 @@
   },
   {
     "faculty": "Dr Manikandan V M",
-    "location": "SR Block, Level 3, Cabin No: 12"
+    "location": "SR Block, Level 7, Next to Dean of SEAS cabin"
   },
   {
     "faculty": "Dr Kshira Sagar Sahoo",
@@ -680,6 +696,14 @@
     "location": "CV Block, 8th Floor, Room No. 15"
   },
   {
+    "faculty": "Dr Debabrata Pramanik",
+    "location": "Jc bose Physics theory lab 302"
+  },
+  {
+    "faculty": "Dr Supravat Dey",
+    "location": "SR Block, 5th floor, Office number 17"
+  },
+  {
     "faculty": "Dr Jatis Kumar Dash",
     "location": "X-lab,level 4,Thermo dynamics lab"
   },
@@ -689,7 +713,7 @@
   },
   {
     "faculty": "Dr Sourav Sen",
-    "location": "Homi J Bhabha Block Level-4"
+    "location": "CV-BLOCK-10TH FLOOOR"
   },
   {
     "faculty": "Dr Suraj Singh Khurana",
@@ -810,6 +834,10 @@
   {
     "faculty": "Dr Pranav R T Peddinti",
     "location": "JC Bose block,level 4,Center for Drone Technology"
+  },
+  {
+    "faculty": "Dr Harish Puppala",
+    "location": "JC BOSE BLOCK, LEVEL 3, CENTRE FOR GEOSPATIAL TECHNOLOGY"
   },
   {
     "faculty": "Dr. Siddhant Dash",
@@ -1054,5 +1082,13 @@
   {
     "faculty": "Mr. Kounteya Sarkar",
     "location": "Cubicle 7, Room CV 310 (CV Block)"
+  },
+  {
+    "faculty": "Dr Neelakantam Gone",
+    "location": "CV Raman Block, Level 11, Cubical No:130"
+  },
+  {
+    "faculty": "Dr. KV Phani Kumar",
+    "location": "SR BLOCK , CABIN 22, LEVEL 7"
   }
 ]

@@ -10,7 +10,7 @@
     <a href="https://srmapi.in"><strong>Explore the Web App »</strong></a>
     <br />
     <br />
-    <a href="#-key-features">Key Features</a> •
+    <a href="#-features">Key Features</a> •
     <a href="#-tech-stack">Tech Stack</a> •
     <a href="#-getting-started">Getting Started</a> •
     <a href="#-available-commands">Commands</a> •
@@ -34,14 +34,16 @@
 
 | Feature | Description |
 | :--- | :--- |
-| **Attendance** | Accurate attendance calculation, detailed logs, bunks and future attendance calculations, and OD/ML adjustment support. |
-| **Detailed Timetable** | Interactive weekly schedule with real-time "current class" tracker and classroom navigation. |
+| **Attendance** | Accurate attendance calculation, detailed logs, bunks and future attendance simulations, and OD/ML adjustments. |
+| **Detailed Timetable** | Interactive weekly schedule with real-time "current class" tracker, room numbers, and subject details. |
 | **Examinations & Results** | Instant internal assessment marks, historical semester records, and exam ledger CGPA lookup. |
 | **Vacant Classrooms** | Automated empty room finder filtering by block, day of the week, and active time slot. |
-| **Built-in CAPTCHA Solver** | In-house Node.js TFLite neural solver solving portal CAPTCHA. |
-| **Multi-Account Storage** | Upto 5 switchable student accounts. |
-| **Academic Resources** | Static syllabus, course resources, and downloadable subject reference materials. |
-| **Offline & Cached Mode** | Student portal offline fallback allowing students to access attendance & schedules even when SRM servers are down. |
+| **Built-in CAPTCHA Solver** | In-house Node.js TFLite neural solver solving portal CAPTCHA in ~2ms without external services. |
+| **Arcade Suite** | Built-in gaming center with interactive multiplayer/singleplayer Chess and speed Typing Test. |
+| **Dynamic Resources Hub** | Centralized study hub for past mid-term/end-sem question papers, lecture slides, and notes with in-app preview. |
+| **Admin Resource Editor** | Full CRUD administrative control panel to manage years, courses, subjects, and study materials on the fly. |
+| **Multi-Account Storage** | Up to 5 switchable student accounts with local encrypted credential preservation. |
+| **Offline & Cached Mode** | Offline fallback allowing students to access attendance & schedules even when SRM servers are down. |
 
 ---
 
@@ -56,7 +58,7 @@
 - **Frontend & App Framework:** [Next.js 16 (App Router)](https://nextjs.org/) + [React 19](https://react.dev/)
 - **Styling & UI Components:** [Tailwind CSS](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/) + [Lucide Icons](https://lucide.dev/)
 - **Machine Learning / AI:** [TensorFlow.js (TFLite Runtime)](https://www.tensorflow.org/js) + [Sharp](https://sharp.pixelplumbing.com/)
-- **Database & Cache:** [MongoDB](https://www.mongodb.com/) with native driver connection pooling
+- **Database & Cache:** [MongoDB](https://www.mongodb.com/) (`college_db` for users/settings and `resources` for study hub)
 - **PWA & Service Worker:** [Serwist (@serwist/next)](https://serwist.pages.dev/)
 - **HTTP Client & Parsing:** [Axios](https://axios-http.com/) + [Cheerio](https://cheerio.js.org/) + [Tough-Cookie](https://github.com/salesforce/tough-cookie)
 
@@ -88,8 +90,9 @@ Ensure you have the following installed on your machine:
    Create a `.env` file in the root directory:
    ```env
    NODE_ENV=development
-   MONGO_URI="mongodb://127.0.0.1:27017"
+   MONGO_URI="mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority"
    ACCESS_SECRET="your-ultra-secure-random-jwt-signing-secret"
+   ENCRYPT_SECRET="your-encryption-secret-key"
    ACCESS_EXPIRE=365
    D_REPORT="https://discord.com/api/webhooks/your-webhook-url"
    ```
@@ -125,13 +128,15 @@ For comprehensive technical architecture, data scraping workflows, cryptographic
 ```
 srmapi.next/
 ├── src/
-│   ├── app/           # Next.js App Router (Public, Protected, API Routes)
-│   ├── components/    # Reusable UI Primitives & Feature-specific Dialogs
-│   ├── context/       # Auth, Student Data, and Account Contexts
-│   ├── hooks/         # Custom React hooks (Timetable, Toast, Navigation)
+│   ├── app/           # Next.js App Router (Public, Protected, Arcade, Admin, API Routes)
+│   ├── components/    # Reusable UI Primitives, Page Dialogs & Admin Resource Editor
+│   ├── context/       # Auth, Admin, Student Data, and Account Contexts
+│   ├── hooks/         # Custom React hooks (Timetable, Toast, Navigation, Mobile)
 │   ├── lib/           # MongoDB singleton, Axios client, CAPTCHA solver
 │   ├── server/        # SRM scrapers, HTML parsers, auth & session logic
 │   ├── static/        # TFLite model, academic calendar, faculty records
+│   ├── types/         # Server & client type definitions
+│   ├── validators/    # Input and payload validators
 │   └── shared/        # Universal utilities & retry helpers
 ├── public/            # PWA manifests, icons, static assets
 └── workflow.md        # Detailed system workflow & API reference

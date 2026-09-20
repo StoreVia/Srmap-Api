@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import resourcesData from "@/static/resources/resource.json";
+import { useMongo } from "@/lib/database/useMongo";
 import { PARAMETERS } from "@/shared/utils/messages";
 import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 
@@ -9,30 +9,64 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const course = searchParams.get('course');
-    const year = searchParams.get('year');
-    const subjectId = searchParams.get('subjectId');
+    const course = searchParams.get("course");
+    const year = searchParams.get("year");
+    const subjectId = searchParams.get("subjectId");
 
     if (!course || !year || !subjectId) {
       return errorResponse(PARAMETERS);
     }
 
-    const courseData = resourcesData[course as keyof typeof resourcesData];
-    if (!courseData) {
-      return NextResponse.json({ success: false, error: "Course Not Found!" }, { status: 404 });
-    }
+    const initDb = await useMongo();
+    const db = initDb.db("resources");
+    const resourcesCollection = db.collection("resources");
 
-    const yearData = courseData[year as keyof typeof courseData];
-    if (!yearData) {
-      return NextResponse.json({ success: false, error: "Year Not Found For This Course!" }, { status: 404 });
-    }
+    const resources = await resourcesCollection
+      .find({
+        subjectId: String(subjectId),
+      })
+      .toArray();
 
-    const subjectData = yearData[subjectId as keyof typeof yearData];
-    if (!subjectData) {
-      return NextResponse.json({ success: false, error: "Subject Not Found!" }, { status: 404 });
-    }
+    const midPapers = resources
+      .filter((r) => r.category === "previousYearPapers" && r.examType === "mid")
+      .map((r) => ({
+        id: r._id.toString(),
+        title: r.title,
+        size: r.size,
+        type: r.fileType,
+        downloadUrl: r.downloadUrl,
+      }));
 
-    return NextResponse.json({ success: true, data: subjectData });
+    const semPapers = resources
+      .filter((r) => r.category === "previousYearPapers" && r.examType === "sem")
+      .map((r) => ({
+        id: r._id.toString(),
+        title: r.title,
+        size: r.size,
+        type: r.fileType,
+        downloadUrl: r.downloadUrl,
+      }));
+
+    const slides = resources
+      .filter((r) => r.category === "slidesAndNotes")
+      .map((r) => ({
+        id: r._id.toString(),
+        title: r.title,
+        size: r.size,
+        type: r.fileType,
+        downloadUrl: r.downloadUrl,
+      }));
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        previousYearPapers: {
+          mid: midPapers,
+          sem: semPapers,
+        },
+        slidesAndNotes: slides,
+      },
+    });
   } catch (err) {
     console.log("Error From /api/resources/resource:- ", err);
     return errorResponse(undefined, {}, 500);

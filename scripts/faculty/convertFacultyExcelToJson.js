@@ -20,14 +20,15 @@ const sheet = workbook.Sheets[workbook.SheetNames[0]];
 const rows = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
 const output = rows
-  .filter(row => {
-    const name = String(row.Name || "").trim();
-    const location = String(row["Office Location"] || "").trim();
-    return name && location && location !== "-";
+  .map(row => {
+    const name = String(row.Name || row.__EMPTY || row.Faculty || row["Faculty Name"] || "").trim();
+    const location = String(row["Office Location"] || row.Location || row.location || row.__EMPTY_1 || "").trim();
+    return { name, location };
   })
-  .map(row => ({
-    faculty: String(row.Name).trim(),
-    location: String(row["Office Location"]).trim()
+  .filter(item => item.name && item.location && item.location !== "-" && item.name.toLowerCase() !== "name")
+  .map(item => ({
+    faculty: item.name,
+    location: item.location
   }));
 
 fs.writeFileSync(jsonPath, JSON.stringify(output, null, 2), "utf8");

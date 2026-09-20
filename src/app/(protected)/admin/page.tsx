@@ -11,6 +11,7 @@ import { Users, Calendar, SquarePen, Unlock, Plus, Database, CheckCircle2, Power
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ResourceEditor } from "@/components/page/admin/ResourceEditor";
 
 interface AdminStats {
   success: boolean;
@@ -411,6 +412,8 @@ export default function AdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ResourceEditor />
 
       <Card className="overflow-hidden flex flex-col">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2">
