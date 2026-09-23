@@ -1,15 +1,16 @@
 "use client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/utils/useMobile";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import API from "@/lib/api/axiosClient";
-import { Download, FileText, ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { Download, FileText, ChevronDown, ChevronUp, Search, X, Loader2, ArrowRight } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogTitle, DialogWindowClose } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAuth } from "@/context/AuthContext";
-import Link from "next/link";
+import { useStudentData } from "@/context/StudentContext";
 
 type Course = {
     name: string;
@@ -20,6 +21,16 @@ type Subject = {
     id: string | number;
     code: string;
     name: string;
+    courseCode?: string;
+    year?: string;
+};
+
+type SearchSubjectResult = {
+    id: string;
+    code: string;
+    name: string;
+    courseCode: string;
+    year: string;
 };
 
 type Resource = {
@@ -38,15 +49,38 @@ type SubjectResources = {
     slidesAndNotes?: Resource[];
 };
 
+function parseSemesterNumber(semStr?: string): number | null {
+    if (!semStr) return null;
+    const clean = String(semStr).trim().toUpperCase();
+
+    const digitMatch = clean.match(/\d+/);
+    if (digitMatch) {
+        const num = parseInt(digitMatch[0], 10);
+        if (num >= 1 && num <= 8) return num;
+    }
+
+    if (/\bVIII\b/i.test(clean) || clean === "VIII") return 8;
+    if (/\bVII\b/i.test(clean) || clean === "VII") return 7;
+    if (/\bVI\b/i.test(clean) || clean === "VI") return 6;
+    if (/\bV\b/i.test(clean) || clean === "V") return 5;
+    if (/\bIV\b/i.test(clean) || clean === "IV") return 4;
+    if (/\bIII\b/i.test(clean) || clean === "III") return 3;
+    if (/\bII\b/i.test(clean) || clean === "II") return 2;
+    if (/\bI\b/i.test(clean) || clean === "I") return 1;
+
+    return null;
+}
+
 const Resources = () => {
-    const { isAdmin } = useAuth();
-    const [selectedCourse, setSelectedCourse] = useState<string>("CSE");
-    const [selectedYear, setSelectedYear] = useState<string>("1");
+    const { profile, subjects: studentSubjects } = useStudentData();
+    const isMobile = useIsMobile();
+
+    const [selectedYear, setSelectedYear] = useState<string>("");
+    const [selectedCourse, setSelectedCourse] = useState<string>("");
     const [selectedSubject, setSelectedSubject] = useState<string | number | null>(null);
     const [activeResourceType, setActiveResourceType] = useState<"previousYearPapers" | "slidesAndNotes">("previousYearPapers");
     const [previewResource, setPreviewResource] = useState<Resource | null>(null);
     const [showSubjects, setShowSubjects] = useState<boolean>(true);
-    const isMobile = useIsMobile();
     const [selectedExamType, setSelectedExamType] = useState<"mid" | "sem">("mid");
 
     const [courses, setCourses] = useState<Record<string, Course>>({});
@@ -58,7 +92,32 @@ const Resources = () => {
         resources: false
     });
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchedTerm, setSearchedTerm] = useState("");
+    const [searchResults, setSearchResults] = useState<SearchSubjectResult[]>([]);
+    const [searchLoading, setSearchLoading] = useState(false);
+    const [isSearchActive, setIsSearchActive] = useState(false);
+
+    const yearInitializedRef = useRef(false);
+
+    useEffect(() => {
+        if (yearInitializedRef.current || selectedYear) return;
+
+        const rawSem = profile?.semester || studentSubjects?.find((s) => s.semester)?.semester;
+        const semNum = parseSemesterNumber(rawSem);
+        if (semNum !== null && semNum >= 1 && semNum <= 8) {
+            const detectedYear = String(Math.ceil(semNum / 2));
+            setSelectedYear(detectedYear);
+            fetchCourses(detectedYear);
+            yearInitializedRef.current = true;
+        }
+    }, [profile?.semester, studentSubjects, selectedYear]);
+
     const fetchCourses = async (year: string) => {
+        if (!year) {
+            setCourses({});
+            return;
+        }
         setLoading(prev => ({ ...prev, courses: true }));
         try {
             const response = await API.get(`/resources/courses?year=${year}`);
@@ -77,6 +136,10 @@ const Resources = () => {
     };
 
     const fetchSubjects = async (course: string, year: string) => {
+        if (!course || !year) {
+            setSubjects([]);
+            return;
+        }
         setLoading(prev => ({ ...prev, subjects: true }));
         try {
             const response = await API.get(`/resources/subjects?course=${course}&year=${year}`);
@@ -95,6 +158,10 @@ const Resources = () => {
     };
 
     const fetchResources = async (course: string, year: string, subjectId: string | number) => {
+        if (!course || !year || !subjectId) {
+            setResources(null);
+            return;
+        }
         setLoading(prev => ({ ...prev, resources: true }));
         try {
             const response = await API.get(`/resources/resource?course=${course}&year=${year}&subjectId=${subjectId}`);
@@ -112,29 +179,86 @@ const Resources = () => {
         }
     };
 
-    useEffect(() => {
+    const handleYearChange = (year: string) => {
+        setSelectedYear(year);
+        setSelectedCourse("");
+        setSelectedSubject(null);
+        setSubjects([]);
+        setResources(null);
+        fetchCourses(year);
+    };
+
+    const handleCourseChange = (course: string) => {
+        setSelectedCourse(course);
+        setSelectedSubject(null);
+        setResources(null);
         if (selectedYear) {
-            fetchCourses(selectedYear);
-            setSelectedCourse("");
-            setSelectedSubject(null);
-            setSubjects([]);
-            setResources(null);
+            fetchSubjects(course, selectedYear);
         }
-    }, [selectedYear]);
+    };
 
     useEffect(() => {
+        const courseKeys = Object.keys(courses);
+        if (courseKeys.length > 0 && !selectedCourse && selectedYear) {
+            const defaultCourse = courseKeys.includes("CSE") ? "CSE" : courseKeys[0];
+            setSelectedCourse(defaultCourse);
+            fetchSubjects(defaultCourse, selectedYear);
+        }
+    }, [courses, selectedCourse, selectedYear]);
+
+    const handleSubjectClick = (subjectId: string | number) => {
+        setSelectedSubject(subjectId);
         if (selectedCourse && selectedYear) {
-            fetchSubjects(selectedCourse, selectedYear);
-            setSelectedSubject(null);
-            setResources(null);
+            fetchResources(selectedCourse, selectedYear, subjectId);
         }
-    }, [selectedCourse, selectedYear]);
+        if (isMobile) setShowSubjects(false);
+    };
 
-    useEffect(() => {
-        if (selectedCourse && selectedYear && selectedSubject) {
-            fetchResources(selectedCourse, selectedYear, selectedSubject);
+    const handleSearchSubmit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        const trimmed = searchQuery.trim();
+        if (!trimmed) {
+            setSearchResults([]);
+            setIsSearchActive(false);
+            return;
         }
-    }, [selectedCourse, selectedYear, selectedSubject]);
+
+        setSearchLoading(true);
+        setIsSearchActive(true);
+        setSearchedTerm(trimmed);
+
+        try {
+            const res = await API.get(`/resources/search?q=${encodeURIComponent(trimmed)}`);
+            if (res.data?.success) {
+                setSearchResults(res.data.data || []);
+            } else {
+                setSearchResults([]);
+            }
+        } catch (err) {
+            console.error("Search failed:", err);
+            setSearchResults([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    const handleClearSearch = () => {
+        setSearchQuery("");
+        setSearchedTerm("");
+        setSearchResults([]);
+        setIsSearchActive(false);
+    };
+
+    const handleSelectSearchResult = async (result: SearchSubjectResult) => {
+        setSelectedYear(result.year);
+        setSelectedCourse(result.courseCode);
+        setSelectedSubject(result.id);
+        setIsSearchActive(false);
+        fetchCourses(result.year);
+        fetchSubjects(result.courseCode, result.year);
+        fetchResources(result.courseCode, result.year, result.id);
+        if (isMobile) setShowSubjects(false);
+    };
 
     const getPreviewUrl = (url: string) => {
         const match = url.match(/\/d\/(.*)\/view/);
@@ -157,29 +281,142 @@ const Resources = () => {
         link.click();
         document.body.removeChild(link);
     };
+    
+    const currentSubject = subjects.find((s) => String(s.id) === String(selectedSubject));
 
     return (
-        <div>
-            {isAdmin && (
-                <div className="mb-4 flex items-center justify-between p-3 rounded-lg border bg-muted/40">
-                    <div className="text-xs text-muted-foreground">
-                        Admin mode: You can manage and publish resources in the admin panel.
+        <div className="space-y-4">
+            {/* Top Big Long Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="w-full">
+                <div className="relative flex items-center w-full">
+                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground pointer-events-none" />
+                    <Input
+                        type="text"
+                        inputMode="search"
+                        enterKeyHint="search"
+                        placeholder="Search subjects by code or name across all years (e.g. CSE 102, Physics, Economics)..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-11 pr-24 h-12 w-full text-sm rounded-xl border-primary/25 focus-visible:ring-primary shadow-sm [&::-webkit-search-cancel-button]:hidden [&::-webkit-search-decoration]:hidden"
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                        {searchQuery && (
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="sm"
+                                onClick={handleClearSearch}
+                                className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                                title="Clear search"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        )}
+                        <Button
+                            type="submit"
+                            size="sm"
+                            disabled={searchLoading || !searchQuery.trim()}
+                            className="h-8 px-3 text-xs flex items-center gap-1.5"
+                        >
+                            {searchLoading ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                            ) : (
+                                <Search className="h-3.5 w-3.5" />
+                            )}
+                            <span>Search</span>
+                        </Button>
                     </div>
-                    <Button asChild size="sm" variant="default" className="h-8 text-xs">
-                        <Link href="/admin">
-                            <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                            Edit Resources
-                        </Link>
-                    </Button>
                 </div>
+            </form>
+
+            {/* Search Results Overlay / Section */}
+            {isSearchActive && (
+                <Card className="border-primary/30 shadow-md">
+                    <CardHeader className="pb-3 pt-3 px-3 sm:px-4 flex flex-row items-center justify-between gap-2 border-b">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                            <Search className="h-4 w-4 text-primary shrink-0" />
+                            <CardTitle className="text-xs sm:text-sm font-semibold truncate">
+                                Results for &ldquo;{searchedTerm}&rdquo;
+                            </CardTitle>
+                            {!searchLoading && (
+                                <Badge variant="secondary" className="text-[10px] sm:text-xs shrink-0 px-1.5 py-0 h-5">
+                                    {searchResults.length}
+                                </Badge>
+                            )}
+                        </div>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearSearch}
+                            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground shrink-0"
+                        >
+                            <X className="h-3.5 w-3.5 mr-1" /> Close
+                        </Button>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                        {searchLoading ? (
+                            <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+                                <Loader2 className="h-6 w-6 animate-spin mb-2 text-university-700" />
+                                <p className="text-xs">Searching database across all years...</p>
+                            </div>
+                        ) : searchResults.length > 0 ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                                {searchResults.map((result) => {
+                                    const isSelected = String(selectedSubject) === String(result.id);
+                                    return (
+                                        <div
+                                            key={result.id}
+                                            className={`p-3 rounded-lg border transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                                                isSelected
+                                                    ? "border-primary bg-primary/10 shadow-sm"
+                                                    : "hover:border-primary/50 hover:bg-muted/40"
+                                            }`}
+                                            onClick={() => handleSelectSearchResult(result)}
+                                        >
+                                            <div>
+                                                <div className="flex items-center justify-between gap-1 mb-1">
+                                                    <span className="font-semibold text-sm text-foreground">
+                                                        {result.code}
+                                                    </span>
+                                                    <div className="flex items-center gap-1">
+                                                        <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-normal">
+                                                            Year {result.year}
+                                                        </Badge>
+                                                        <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 font-medium">
+                                                            {result.courseCode}
+                                                        </Badge>
+                                                    </div>
+                                                </div>
+                                                <p className="text-xs text-muted-foreground line-clamp-2">
+                                                    {result.name}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center justify-end text-xs font-medium text-primary pt-1 border-t border-muted/40">
+                                                <span>View Resources</span>
+                                                <ArrowRight className="h-3 w-3 ml-1" />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="text-center py-8 text-muted-foreground text-xs">
+                                <FileText className="h-8 w-8 mx-auto mb-2 opacity-40" />
+                                <p>No subjects found matching &ldquo;{searchedTerm}&rdquo; across any year.</p>
+                                <p className="mt-1 text-[11px] opacity-75">Try searching with a subject code like &ldquo;CSE 102&rdquo; or keyword like &ldquo;Physics&rdquo;.</p>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             )}
 
-            <div className="mb-4 flex flex-col md:flex-row md:gap-4">
+            {/* Year & Course Selectors */}
+            <div className="flex flex-col md:flex-row md:gap-4">
                 <div className="flex-1 min-w-0">
                     <label htmlFor="yearSelect" className="block text-sm font-medium mb-1">
                         Select Year
                     </label>
-                    <Select value={selectedYear} onValueChange={setSelectedYear}>
+                    <Select value={selectedYear} onValueChange={handleYearChange}>
                         <SelectTrigger id="yearSelect" className="w-full">
                             <SelectValue placeholder="Select Year" />
                         </SelectTrigger>
@@ -200,7 +437,7 @@ const Resources = () => {
                     </label>
                     <Select
                         value={selectedCourse}
-                        onValueChange={setSelectedCourse}
+                        onValueChange={handleCourseChange}
                         disabled={loading.courses || Object.keys(courses).length === 0}
                     >
                         <SelectTrigger id="courseSelect" className="w-full">
@@ -227,61 +464,86 @@ const Resources = () => {
                 </div>
             </div>
 
-            <div className="md:hidden mb-4">
+            {/* Mobile Subject Toggle */}
+            <div className="md:hidden">
                 <Button
                     variant="outline"
                     className="w-full flex justify-between items-center"
                     onClick={() => setShowSubjects(!showSubjects)}
-                    disabled={!selectedCourse}
+                    disabled={!selectedCourse && !selectedSubject}
                 >
                     <span>
-                        {selectedSubject
-                            ? `${subjects.find((s) => s.id === selectedSubject)?.code || "Select Subject"}`
+                        {currentSubject
+                            ? `${currentSubject.code} - ${currentSubject.name}`
                             : "Select Subject"}
                     </span>
                     {showSubjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </Button>
             </div>
 
+            {/* Main Content Layout */}
             <div className="flex flex-col md:flex-row gap-4 md:gap-6">
-                <div className={`w-full md:w-1/3 lg:w-1/4 border border-primary/20 rounded-lg ${showSubjects ? "block" : "hidden md:block"}`}>
-                    <div className="space-y-2 mt-4 max-h-[50vh] md:max-h-[70vh] overflow-y-auto pr-4 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent hover:scrollbar-thumb-gray-400 dark:hover:scrollbar-thumb-gray-500">
-                        <h3 className="font-medium ml-6 text-lg">Subjects</h3>
-                        {!selectedCourse ? (
-                            <div className="text-center py-4 text-gray-500">
-                                Select a course to view subjects
-                            </div>
-                        ) : loading.subjects ? (
-                            <div className="flex justify-center py-4">
-                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-university-700"></div>
-                            </div>
-                        ) : subjects.length > 0 ? (
-                            subjects.map((subject) => (
-                                <div
-                                    key={subject.id}
-                                    className={`p-3 border ml-4 rounded-md cursor-pointer transition-colors ${selectedSubject === subject.id
-                                        ? "bg-university-700 text-white"
-                                        : "hover:bg-gray-100 hover:dark:bg-gray-800"
-                                        }`}
-                                    onClick={() => {
-                                        setSelectedSubject(subject.id);
-                                        if (isMobile) setShowSubjects(false);
-                                    }}
-                                >
-                                    <p className="font-medium">{subject.code}</p>
-                                    <p className="text-sm">{subject.name}</p>
+                {/* Subjects Column */}
+                <div className={`w-full md:w-1/3 lg:w-1/4 border border-primary/20 rounded-lg p-3 ${showSubjects ? "block" : "hidden md:block"}`}>
+                    <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-base">Subjects</h3>
+                            {selectedCourse && (
+                                <Badge variant="outline" className="text-xs">
+                                    {subjects.length} subjects
+                                </Badge>
+                            )}
+                        </div>
+
+                        {/* Subject List */}
+                        <div className="space-y-2 max-h-[50vh] md:max-h-[65vh] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                            {!selectedYear ? (
+                                <div className="text-center py-6 text-xs text-muted-foreground">
+                                    Please select an academic year above
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-4 text-gray-500">
-                                No subjects found for this course
-                            </div>
-                        )}
+                            ) : !selectedCourse ? (
+                                <div className="text-center py-6 text-xs text-muted-foreground">
+                                    Please select a course to view subjects
+                                </div>
+                            ) : loading.subjects ? (
+                                <div className="flex justify-center py-6">
+                                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-university-700"></div>
+                                </div>
+                            ) : subjects.length > 0 ? (
+                                subjects.map((subject) => {
+                                    const isSelected = String(selectedSubject) === String(subject.id);
+                                    return (
+                                        <div
+                                            key={subject.id}
+                                            className={`p-2.5 border rounded-md cursor-pointer transition-colors ${
+                                                isSelected
+                                                    ? "bg-university-700 text-white border-university-700"
+                                                    : "hover:bg-muted/60"
+                                            }`}
+                                            onClick={() => handleSubjectClick(subject.id)}
+                                        >
+                                            <p className="font-semibold text-xs">{subject.code}</p>
+                                            <p className="text-xs line-clamp-2 opacity-90 mt-0.5">{subject.name}</p>
+                                        </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-center py-6 text-xs text-muted-foreground">
+                                    No subjects found for {selectedCourse} (Year {selectedYear})
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 
+                {/* Resources Content Column */}
                 <div className={`w-full md:w-2/3 lg:w-3/4 ${!showSubjects || isMobile ? "block" : "hidden md:block"}`}>
-                    {!selectedCourse ? (
+                    {!selectedYear ? (
+                        <div className="flex flex-col items-center justify-center h-64 border border-primary/20 rounded-lg text-gray-500">
+                            <FileText className="h-12 w-12 mb-2 opacity-50" />
+                            <p>Select an academic year or search for a subject</p>
+                        </div>
+                    ) : !selectedCourse ? (
                         <div className="flex flex-col items-center justify-center h-64 border border-primary/20 rounded-lg text-gray-500">
                             <FileText className="h-12 w-12 mb-2 opacity-50" />
                             <p>Select a course to view resources</p>
@@ -289,14 +551,18 @@ const Resources = () => {
                     ) : !selectedSubject ? (
                         <div className="flex flex-col items-center justify-center h-64 border border-primary/20 rounded-lg text-gray-500 px-4 text-center">
                             <FileText className="h-12 w-12 mb-2 opacity-50" />
-                            <p className="mt-2">Select a subject to view available resources</p>
+                            <p className="mt-2">Select a subject from the left panel to view available resources</p>
                         </div>
                     ) : (
                         <div>
-                            <h3 className="text-lg sm:text-xl font-semibold mb-4 break-words">
-                                {subjects.find((s) => s.id === selectedSubject)?.code} - {" "}
-                                {subjects.find((s) => s.id === selectedSubject)?.name}
-                            </h3>
+                            <div className="mb-4">
+                                <h3 className="text-lg sm:text-xl font-semibold break-words">
+                                    {currentSubject ? `${currentSubject.code} - ${currentSubject.name}` : "Subject Resources"}
+                                </h3>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                    Year {selectedYear} • {selectedCourse}
+                                </p>
+                            </div>
 
                             {loading.resources ? (
                                 <div className="flex justify-center py-8">
@@ -344,32 +610,32 @@ const Resources = () => {
                                                         resources.previousYearPapers[selectedExamType]!.map((resource) => (
                                                             <Card
                                                                 key={resource.id}
-                                                                className="transition-all duration-200 hover:shadow-lg"
+                                                                className="transition-all duration-200 hover:shadow-lg flex flex-col justify-between"
                                                             >
                                                                 <CardHeader className="pb-2">
-                                                                    <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                                                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0" />
-                                                                        <span className="line-clamp-1">{resource.title}</span>
+                                                                    <CardTitle className="flex items-start gap-2 text-base sm:text-lg">
+                                                                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0 mt-1" />
+                                                                        <span className="line-clamp-2 leading-snug">{resource.title}</span>
                                                                     </CardTitle>
                                                                     <CardDescription className="text-xs sm:text-sm">
                                                                         {resource.type.toUpperCase()} - {resource.size}
                                                                     </CardDescription>
                                                                 </CardHeader>
-                                                                <CardFooter className="flex flex-col sm:flex-row justify-between pt-2 gap-2">
+                                                                <CardFooter className="flex items-center gap-2 pt-2 border-t mt-auto">
                                                                     <Button
                                                                         variant="outline"
                                                                         size="sm"
                                                                         onClick={() => handlePreview(resource)}
-                                                                        className="w-full"
+                                                                        className="flex-1 text-xs"
                                                                     >
-                                                                        <FileText className="h-4 w-4 mr-2" /> Preview
+                                                                        <FileText className="h-3.5 w-3.5 mr-1.5" /> Preview
                                                                     </Button>
                                                                     <Button
                                                                         size="sm"
                                                                         onClick={() => handleDownload(resource)}
-                                                                        className="w-full"
+                                                                        className="flex-1 text-xs"
                                                                     >
-                                                                        <Download className="h-4 w-4 mr-2" /> Download
+                                                                        <Download className="h-3.5 w-3.5 mr-1.5" /> Download
                                                                     </Button>
                                                                 </CardFooter>
                                                             </Card>
@@ -396,32 +662,32 @@ const Resources = () => {
                                                 resources.slidesAndNotes.map((resource) => (
                                                     <Card
                                                         key={resource.id}
-                                                        className="transition-all duration-200 hover:shadow-lg"
+                                                        className="transition-all duration-200 hover:shadow-lg flex flex-col justify-between"
                                                     >
                                                         <CardHeader className="pb-2">
-                                                            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                                                                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0" />
-                                                                <span className="line-clamp-1">{resource.title}</span>
+                                                            <CardTitle className="flex items-start gap-2 text-base sm:text-lg">
+                                                                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0 mt-1" />
+                                                                <span className="line-clamp-2 leading-snug">{resource.title}</span>
                                                             </CardTitle>
                                                             <CardDescription className="text-xs sm:text-sm">
                                                                 {resource.type.toUpperCase()} - {resource.size}
                                                             </CardDescription>
                                                         </CardHeader>
-                                                        <CardFooter className="flex flex-col sm:flex-row justify-between pt-2 gap-2">
+                                                        <CardFooter className="flex items-center gap-2 pt-2 border-t mt-auto">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() => handlePreview(resource)}
-                                                                className="w-full"
+                                                                className="flex-1 text-xs"
                                                             >
-                                                                <FileText className="h-4 w-4 mr-2" /> Preview
+                                                                <FileText className="h-3.5 w-3.5 mr-1.5" /> Preview
                                                             </Button>
                                                             <Button
                                                                 size="sm"
                                                                 onClick={() => handleDownload(resource)}
-                                                                className="w-full"
+                                                                className="flex-1 text-xs"
                                                             >
-                                                                <Download className="h-4 w-4 mr-2" /> Download
+                                                                <Download className="h-3.5 w-3.5 mr-1.5" /> Download
                                                             </Button>
                                                         </CardFooter>
                                                     </Card>

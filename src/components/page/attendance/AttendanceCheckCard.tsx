@@ -81,7 +81,6 @@ export default function AttendanceCheckCard({ sessionValid, sessionId, refreshKe
         <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div className="min-w-0">
             <CardTitle className="break-words">Check Attendance</CardTitle>
-            <CardDescription className="break-words">Today&apos;s attendance from the active SRM session.</CardDescription>
           </div>
           {sessionValid && (
             <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3 xl:flex-nowrap">

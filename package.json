@@ -1,6 +1,6 @@
 {
   "name": "srmapi.next",
-  "version": "5.8.2",
+  "version": "5.8.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -10,6 +10,8 @@
     "faculty": "cd scripts/faculty && node convertFacultyExcelToJson.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1137.0",
+    "@aws-sdk/s3-request-presigner": "^3.1137.0",
     "@iconify/react": "^6.0.2",
     "@radix-ui/react-avatar": "^1.1.0",
     "@radix-ui/react-checkbox": "^1.1.1",

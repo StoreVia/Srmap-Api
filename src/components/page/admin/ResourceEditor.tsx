@@ -372,9 +372,6 @@ export function ResourceEditor() {
               <FolderOpen className="h-5 w-5 text-primary" />
               Resources Hub Management
             </CardTitle>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Directly edit and publish courses, subjects, and study materials without editing static code.
-            </p>
           </div>
 
           <div className="flex items-center gap-2">
@@ -388,30 +385,6 @@ export function ResourceEditor() {
               <RefreshCw className={`h-3.5 w-3.5 mr-1.5 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
-            <Button size="sm" onClick={openAddCourse} className="h-8 text-xs whitespace-nowrap">
-              <Plus className="h-3.5 w-3.5 mr-1" /> Add Course
-            </Button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 pt-3">
-          <div className="rounded-md border bg-background/50 p-2 text-center">
-            <div className="text-lg font-bold">
-              {loading ? <Skeleton className="h-6 w-8 mx-auto" /> : stats.totalCourses}
-            </div>
-            <p className="text-[11px] text-muted-foreground">Total Courses</p>
-          </div>
-          <div className="rounded-md border bg-background/50 p-2 text-center">
-            <div className="text-lg font-bold">
-              {loading ? <Skeleton className="h-6 w-8 mx-auto" /> : stats.totalSubjects}
-            </div>
-            <p className="text-[11px] text-muted-foreground">Total Subjects</p>
-          </div>
-          <div className="rounded-md border bg-background/50 p-2 text-center">
-            <div className="text-lg font-bold">
-              {loading ? <Skeleton className="h-6 w-8 mx-auto" /> : stats.totalResources}
-            </div>
-            <p className="text-[11px] text-muted-foreground">Resource Files</p>
           </div>
         </div>
       </CardHeader>
