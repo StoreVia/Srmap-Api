@@ -1,6 +1,6 @@
 # Srmapi Next
 
-Srmapi Next is a full-stack alternative portal for SRM AP students. It is a Next.js 16 application with a React client, Next.js Route Handlers as its backend, MongoDB for application data, and an in-house Node.js TFLite CAPTCHA solver. The backend signs in to `student.srmap.edu.in` on a student's behalf, keeps the SRM `JSESSIONID` in the browser for the current session, scrapes portal pages, normalizes the results, and caches selected data in MongoDB.
+Srmapi Next is a full-stack alternative portal for SRM AP students. It is a Next.js 16 application with a React client, Next.js Route Handlers as its backend, MongoDB for application data and dynamic learning resources, an in-house Node.js TFLite CAPTCHA solver, and a student Arcade suite. The backend signs in to `student.srmap.edu.in` on a student's behalf, keeps the SRM `JSESSIONID` in the browser for the current session, scrapes portal pages, normalizes the results, and caches selected data in MongoDB.
 
 It is a third-party integration, not an official SRM service. SRM may change its HTML, session behavior, CAPTCHA format, or policies at any time; every scraper depends on the current portal markup.
 
@@ -22,7 +22,8 @@ It is a third-party integration, not an official SRM service. SRM may change its
 ```mermaid
 flowchart LR
   Browser["Browser / React client"] -->|"Bearer JWT + JSON"| Next["Next.js app and Route Handlers"]
-  Next -->|"MongoDB driver"| Mongo["MongoDB: college_db"]
+  Next -->|"MongoDB: college_db"| MongoCore["Users, Settings, Blocks, Timetables"]
+  Next -->|"MongoDB: resources"| MongoRes["Years, Courses, Subjects, Resources"]
   Next -->|"HTTP + JSESSIONID"| SRM["student.srmap.edu.in"]
   Next -->|"In-Memory TFLite"| Captcha["Node.js CAPTCHA solver (src/lib/captcha)"]
   Captcha -->|"TFLite Runtime"| Model["captcha_float32.tflite"]
@@ -45,6 +46,7 @@ Create a `.env` file in the repository root.
 NODE_ENV=development
 MONGO_URI="mongodb://127.0.0.1:27017"
 ACCESS_SECRET="replace-with-a-long-random-signing-secret"
+ENCRYPT_SECRET="replace-with-an-encryption-secret"
 ACCESS_EXPIRE=365
 D_REPORT="https://example.invalid/webhook"
 ```
@@ -109,9 +111,11 @@ The app uses the Next.js App Router under `src/app`. Routes split into:
 | `/login` | `(public)/login/page.tsx` | Login, validation, cached-data prompt, and session creation. |
 | `/forgot` | `(public)/forgot/page.tsx` | SRM password reset via CAPTCHA solve and OTP workflow. |
 | `/dashboard` | `(protected)/dashboard/page.tsx` | High-level summary of attendance, timetable, and internals. |
+| `/arcade` | `(protected)/arcade/page.tsx` | Arcade game center hub with Chess and Typing Test. |
+| `/arcade/chess` / `/chess` | `(protected)/arcade/chess/page.tsx` | Interactive real-time & single-player Chess game. |
+| `/arcade/typingtest` | `(protected)/arcade/typingtest/page.tsx` | Interactive typing speed and accuracy test. |
 | `/attendance` | `(protected)/attendance/page.tsx` | Subject attendance, sorting/filtering, simulation, OD/ML adjustment, history, and detailed current attendance. |
 | `/markattendance` | `(protected)/markattendance/page.tsx` | Sends an attendance code to SRM. |
-| `/checkattendance` | `(protected)/checkattendance/page.tsx` | Displays SRM's current-day attendance records. |
 | `/timetable` | `(protected)/timetable/page.tsx` | Weekly timetable, subject lookup, current-class logic, and subject dialog. |
 | `/subjects` | `(protected)/subjects/page.tsx` | Displays scraped enrolled subjects and links to the published subject sheet. |
 | `/cgpa` | `(protected)/cgpa/page.tsx` | Client-side CGPA calculator. |
@@ -120,19 +124,19 @@ The app uses the Next.js App Router under `src/app`. Routes split into:
 | `/exams/semester-results` | `(protected)/exams/semester-results/page.tsx` | Displays parsed exam ledger rows and CGPA. |
 | `/feedback` | `(protected)/feedback/page.tsx` | Retrieves SRM feedback subjects, proposes a random comment, and submits ratings/comments. |
 | `/vacant` | `(protected)/vacant/page.tsx` | Queries available rooms by block, day, and time slot. |
-| `/resources` | `(protected)/resources/page.tsx` | Walks static course/year/subject resource data through protected APIs. |
+| `/resources` | `(protected)/resources/page.tsx` | Dynamic study resource center with year/course/subject selector, file preview, and admin editor launch button. |
 | `/calender` | `(protected)/calender/page.tsx` | Renders the static academic calendar (the route spelling is `calender`). |
 | `/profile` | `(protected)/profile/page.tsx` | Displays scraped student profile data. |
 | `/settings` | `(protected)/settings/page.tsx` | Theme/startup settings, local accounts, refresh, issue report, database-document viewer, and data deletion. |
-| `/admin` | `(protected)/admin/page.tsx` | Admin metrics, blocked-user list, notifications, and feedback controls. |
+| `/admin` | `(protected)/admin/page.tsx` | Admin dashboard with live stats, application controls, notifications, blocked users, and the full Resource Hub Management suite. |
 | `/apps` | `(protected)/apps/page.tsx` | App/download presentation. |
 | `/aboutus`, `/privacy`, `/terms` | protected route group | Public informational/legal pages. |
 
-`DashboardLayout.tsx` is the shared navigation shell: desktop/mobile sidebars, top controls, account switching, theme controls, and navigation items. `components/page/*` contains the feature-specific dialogs/cards; `components/ui/*` is the reusable Radix/Tailwind component layer; `hooks/*` contains UI state helpers (toasts, mobile detection, password visibility, session validation, current class, timetable subject maps/dialogs, and scroll indicator).
+`DashboardLayout.tsx` is the shared navigation shell: desktop/mobile sidebars, top controls, account switching, theme controls, and navigation items. `components/page/*` contains feature-specific dialogs and views (attendance, feedback, settings, timetable, and admin resource editor); `components/ui/*` is the reusable Radix/Tailwind component layer; `hooks/*` contains UI state helpers.
 
 ## Backend API
 
-All API responses are JSON. With the exception of `POST /api/auth/login` and `POST /api/auth/forgot`, every endpoint below requires `Authorization: Bearer <accessToken>`. `requireAuthResponse` verifies the token and then checks the MongoDB blocked-user collection. Most error helpers return `{ success: false, message, ...extra }`; authentication/session failures often include `action: "logout"`, which the Axios interceptor uses to remove the active local account.
+All API responses are JSON. With the exception of `POST /api/auth/login` and `POST /api/auth/forgot`, every endpoint below requires `Authorization: Bearer <accessToken>`. `requireAuthResponse` verifies the token and checks the MongoDB blocked-user collection.
 
 ### Authentication and account data
 
@@ -160,21 +164,26 @@ All API responses are JSON. With the exception of `POST /api/auth/login` and `PO
 | `POST /api/srmapi/feedback/subjects` | `sessionId` | Scrapes feedback subjects/faculty metadata. |
 | `POST /api/srmapi/feedback/submit` | `sessionId`, `comment`, `optionNo`, optional `selectedSubjectIds` | Checks feature toggle, submits ratings/comments for selected SRM subjects. |
 
-### Static data, rooms, notifications, and reporting
+### Dynamic Resources Hub (Database: `resources`)
 
 | Method and route | Input | Behavior |
 | --- | --- | --- |
-| `GET /api/resources/courses` | `?year=` | Returns course data for a static year key. |
-| `GET /api/resources/subjects` | `?course=&year=` | Returns static subject data for a course/year. |
-| `GET /api/resources/resource` | `?course=&year=&subjectId=` | Returns static resource payload for one subject. |
+| `GET /api/resources/courses` | `?year=` | Queries `resources.courses` for active courses in a year. |
+| `GET /api/resources/subjects` | `?course=&year=` | Queries `resources.subjects` for subjects matching course code and year. |
+| `GET /api/resources/resource` | `?course=&year=&subjectId=` | Queries `resources.resources` for question papers and notes attached to `subjectId`. |
+
+### Rooms, notifications, settings, and reporting
+
+| Method and route | Input | Behavior |
+| --- | --- | --- |
 | `GET /api/vacant` | `?block=&day=&slot=` | Ensures empty-room JSON is current, reads a requested slot, and enriches each room with a type from `ROOM_TYPES`. |
 | `GET /api/sync` | none | Returns notifications and synced user settings from database. |
 | `POST /api/sync` | `settings` | Updates synced user settings in database and returns updated settings and notifications. |
 | `POST /api/tools/report` | `title`, `reason`, optional `time`, optional `id` | Checks title and user existence, then posts an embed to `D_REPORT`. |
 
-### Administration
+### Administration (Database: `college_db` & `resources`)
 
-The admin allowlist is hard-coded in `isAdmin` in `src/server/utils/functions.ts`; being an admin is also embedded as `admin: true` in the issued JWT. Admin routes additionally validate the token and call the hard-coded allowlist.
+The admin allowlist is hard-coded in `isAdmin` in `src/server/utils/functions.ts`; being an admin is also embedded as `admin: true` in the issued JWT.
 
 | Method and route | Body | Behavior |
 | --- | --- | --- |
@@ -184,8 +193,18 @@ The admin allowlist is hard-coded in `isAdmin` in `src/server/utils/functions.ts
 | `POST /api/admin/block/remove` | `username` | Removes a blocked-user entry. |
 | `POST /api/admin/notification/add` | `notification` | Creates an admin notification. |
 | `POST /api/admin/notification/remove` | `notificationId` | Removes one notification by ObjectId. |
-| `POST /api/admin/settings/feedback/toggle` | none | Toggles `settings/{id: "app-settings"}.feedback`. |
-| `POST /api/admin/settings/feedback/reset` | none | Sets `settings/{id: "feedback"}.count` to zero. |
+| `POST /api/admin/settings/toggle/:type` | `:type` (`feedback` \| `timetable`) | Toggles setting boolean (`feedback` or `timetableCollection`) in `settings/{id: "app-settings"}` using upsert. |
+| `POST /api/admin/settings/reset/:type` | `:type` (`feedback` \| `timetable`) | Resets feedback count to zero in `settings/{id: "feedback"}` or clears cached timetable collection in `empty_classes`. |
+| `GET /api/admin/resources/list` | optional `?year=&courseCode=&subjectId=` | Returns full hierarchy across `years`, `courses`, `subjects`, and `resources` with live counts. |
+| `POST /api/admin/resources/courses` | `year`, `code`, `name` | Adds a new course branch. |
+| `PUT /api/admin/resources/courses` | `id`, `year`, `code`, `name` | Updates a course and cascades code/year updates to subjects and resources. |
+| `DELETE /api/admin/resources/courses` | `id` | Deletes a course and cascades deletions to subjects and resources. |
+| `POST /api/admin/resources/subjects` | `courseCode`, `year`, `code`, `name` | Adds a new subject under a course and year. |
+| `PUT /api/admin/resources/subjects` | `id`, `courseCode`, `year`, `code`, `name` | Updates subject code and name. |
+| `DELETE /api/admin/resources/subjects` | `id` | Deletes a subject and cascades deletion to linked resource files. |
+| `POST /api/admin/resources/resources` | `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl` | Adds a new question paper or lecture slide. |
+| `PUT /api/admin/resources/resources` | `id`, `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl` | Updates resource file details. |
+| `DELETE /api/admin/resources/resources` | `id` | Deletes a specific resource item. |
 
 ## SRM scraper and CAPTCHA service
 
@@ -201,17 +220,26 @@ Because the model is cached in memory, each CAPTCHA solve takes ~2ms within Node
 
 ## Database and cache model
 
-MongoDB stores core application state in `college_db`.
+MongoDB stores core application state across two distinct databases:
 
-| Database / collection | Written/read by | Stored fields and purpose |
+### 1. `college_db` (Core Student & App State)
+
+| Collection | Written/read by | Stored fields and purpose |
 | --- | --- | --- |
 | `college_db.users` | login, fetch, attendance history, tools document, deletion | `username`, `name`, `createdAt`, `session_id` (encrypted SRM ID), `session_time`, `data` (encrypted normalized portal payload), and up to 10 `{ date, data }` encrypted attendance snapshots. |
 | `college_db.blocked` | auth guards/admin | `username`, `blockedAt`, `blockedBy`; used on login and every protected API call. |
 | `college_db.notifications` | admin/tools | notification text, creation time, author; public notification response hides ID/author. |
-| `college_db.settings` | feedback/admin | `{ id: "app-settings", feedback }` and `{ id: "feedback", count }`. |
+| `college_db.settings` | feedback/timetable/admin | App settings toggles and reset counters. |
 | `college_db.empty_classes` | fresh data fetch/vacancy generator | SHA-256-deduplicated timetable/profile data used to calculate occupied rooms. |
 
-Vacancy generation supports the hard-coded C-block rooms and eight daily slots from 09:00 through 16:50, Monday to Friday. It scans each stored timetable for venue text matching `(BlockRoom)`, marks those rooms occupied, and writes `src/static/empty_classrooms.json`. `ensureVacantFresh` generates the file when missing and refreshes it once per India-time day after 01:00.
+### 2. `resources` (Dynamic Study Materials Hub)
+
+| Collection | Written/read by | Stored fields and purpose |
+| --- | --- | --- |
+| `resources.years` | admin resources / seed | `year`, `name`, `createdAt`, `updatedAt`. |
+| `resources.courses` | admin resources, student resources reader | `year`, `code`, `name`, `createdAt`, `updatedAt`. |
+| `resources.subjects` | admin resources, student resources reader | `courseCode`, `year`, `code`, `name`, `createdAt`, `updatedAt`. |
+| `resources.resources` | admin resources, student resources reader | `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl`, `createdAt`, `updatedAt`. |
 
 ## Authentication, credentials, and security
 
@@ -227,21 +255,13 @@ createToken({ username, password, admin: isAdmin(username) })
 
 - Bearer-token signature/expiry validation on protected API routes.
 - User blocklist checked on login and protected requests.
-- Hard-coded server-side admin allowlist, with additional main-admin checks on the feedback controls.
-- Login registration-number validation, password-reset password validation, and length/object-ID checks on admin inputs.
+- Hard-coded server-side admin allowlist, with additional main-admin checks on settings and resource management.
 - Request timeouts for portal Axios clients and CAPTCHA inference.
 - Error responses can signal the client to remove its active local account.
 
-### Known limitations
-
-- Do not log request bodies, JWTs, passwords, session IDs, or decrypted cache data.
-- There is no server-side token revocation, CSRF strategy, rate limiter, account lockout, or database schema/index setup in the current source. JWT expiry is the normal token-lifetime boundary; blocking is the available server-side access denial.
-- `POST /api/tools/report` permits `body.id` to replace the ID displayed in the report embed.
-- Scraper, feedback, and attendance submission endpoints act with a user's SRM session. Obtain consent and ensure this use complies with SRM's rules.
-
 ## Configuration, deployment, and operations
 
-`next.config.ts` enables React strict mode outside development, disables dev indicators, skips TypeScript build errors only in development, and configures Serwist only in production. 
+`next.config.ts` enables React strict mode outside development, disables dev indicators, and configures Serwist only in production.
 
 ## Complete source map
 
@@ -249,11 +269,12 @@ createToken({ username, password, admin: isAdmin(username) })
 | --- | --- |
 | `src/app/layout.tsx`, `globals.css`, `error.tsx`, `not-found.tsx`, `loading` files, `sitemap.ts`, `sw.ts` | Root document/providers/styles, global error/not-found/loading UX, sitemap, and service-worker source. |
 | `src/app/(public)/*` | Landing, login, forgot-password pages and authenticated-user redirect layout. |
-| `src/app/(protected)/*` | All authenticated app pages listed in the frontend table, their loading layout, and admin sub-layout. |
+| `src/app/(protected)/*` | All authenticated app pages (dashboard, attendance, timetable, arcade, exams, feedback, vacant, resources, admin), loading layouts, and admin sub-layout. |
 | `src/app/api/auth/*` | Login, SRM password reset, and user-document deletion. |
 | `src/app/api/srmapi/*` | Session initiation, aggregate portal fetch, attendance, examinations, and feedback endpoints. |
-| `src/app/api/admin/*` | Admin verification, metrics, blocks, notifications, and feedback settings. |
-| `src/app/api/resources/*`, `api/vacant`, `api/tools/*` | Static learning resources, room availability, user document, notifications, and issue reporting. |
+| `src/app/api/admin/*` | Admin verification, metrics, blocks, notifications, application controls, and resource CRUD routes. |
+| `src/app/api/resources/*` | Dynamic learning resources reader endpoints (`courses`, `subjects`, `resource`). |
+| `src/app/api/vacant`, `api/tools/*`, `api/sync` | Room availability, user document viewer, issue reporting, and client settings synchronization. |
 | `src/static/captcha/*` | Captcha TFLite model (`src/static/captcha/model/captcha_float32.tflite`) and path definition. |
 | `src/lib/captcha/*` | In-house Node.js TFLite captcha solver module with in-memory caching and sharp preprocessing. |
 | `src/server/auth/*` | SRM login exchange, encrypted session persistence/cached-login fallback, and bearer-token extraction. |
@@ -265,20 +286,14 @@ createToken({ username, password, admin: isAdmin(username) })
 | `src/server/faculty/faculty.ts` | Normalizes faculty names and looks up cabin locations in static faculty data. |
 | `src/server/vacant/*` | Builds and freshness-controls the empty-classroom matrix. |
 | `src/context/*` | React contexts for auth, browser storage/accounts, student data, theme, and admin state. |
-| `src/hooks/auth`, `hooks/context`, `hooks/timetable`, `hooks/utils` | Session/auth/storage helpers, timetable mapping/current-class/dialog state, toasts, notifications, mobile/scroll/password UI hooks. |
+| `src/hooks/*` | Custom hooks for navigation, mobile detection, timetable dialogs/maps, toasts, and session validity. |
 | `src/lib/api/axiosClient.ts` | Browser API client, JWT injection, and forced-logout/blocked-response handling. |
 | `src/lib/database/*` | Singleton MongoDB connector and its alias. |
-| `src/components/layouts/*` | Dashboard navigation shell (`DashboardLayout.tsx`) and modular layout sub-components (`src/components/layouts/dashboard/`). |
-| `src/components/client/*` | Analytics, route progress, and loading UI. |
+| `src/components/layouts/*` | Dashboard navigation shell (`DashboardLayout.tsx`) and modular layout sub-components. |
+| `src/components/page/admin/*` | Admin Resource Hub components (`ResourceEditor`, `ResourceCard`, `ResourceFormDialog`, `ResourceDeleteConfirm`). |
 | `src/components/page/*` | Attendance dialogs/card, feedback info dialog, landing/download components, settings report form, and timetable subject dialog. |
-| `src/components/utils/*` | React error boundary, cache prompt, and session card. |
-| `src/components/ui/*` | Reusable Tailwind/Radix primitives. |
-| `src/shared/*` | Client-safe API retry helper; attendance, time/session, password, timetable, message, and class-name utilities. |
-| `src/validators/*` | Registration-number, reset-password, and feedback-comment validation. |
-| `src/types/*` | Type definitions for student context, login, feedback, and room type metadata. |
-| `src/static/*` | Academic calendar, feedback phrases, faculty cabins, resources, and generated vacancy JSON. |
-| `public/*` | PWA icons/manifest, robots instructions, screenshots, developer images, and gender avatar fallbacks. |
-| `scripts/faculty/*` | Faculty spreadsheet input and Node converter that regenerates faculty JSON. |
-| `deprecated/*` | Deprecated/archived routes and standalone prototypes. |
-| `package.json`, `next.config.ts`, `tsconfig.json`, `tailwind.config.ts`, `postcss.config.js`, `eslint.config.ts` | Build scripts/dependencies and Next/TypeScript/Tailwind/PostCSS/ESLint configuration. |
-| `.gitignore`, `next-env.d.ts`, `temp.txt` | Ignore rules, Next TypeScript declaration, and an unreferenced temporary text file. |
+| `src/components/ui/*` | Reusable Tailwind/Radix primitives (Dialog, Button, Card, Tabs, Select, Badge, Input, WarningPopup). |
+| `src/types/server/resource.ts` | Database models & client interface definitions for courses, subjects, and study materials. |
+| `src/validators/srmapi/resource.ts` | Course, subject, and resource input validation functions. |
+| `src/static/*` | Academic calendar, feedback phrases, faculty cabins, and generated vacancy JSON. |
+| `public/*` | PWA icons/manifest, robots instructions, screenshots, and developer images. |

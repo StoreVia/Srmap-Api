@@ -214,7 +214,7 @@ export default function TypingTestPage() {
   const nextLineText = promptLines[currentLineIndex + 1] || '';
 
   return (
-    <div className="w-full space-y-6 max-w-4xl mx-auto animate-in fade-in">
+    <div className="w-full space-y-6 animate-in fade-in">
       <div className="flex items-center justify-between gap-2 pb-3 border-b w-full">
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
           <Link href="/arcade">

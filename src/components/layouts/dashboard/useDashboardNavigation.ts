@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2 } from "lucide-react";
+import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, Database } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -32,7 +32,6 @@ export function useDashboardNavigation() {
       { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
-      // { title: "Forums", shortTitle: "Forum", path: "/forums", icon: MessageSquare },
       { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
       { title: "Profile", shortTitle: "Profile", path: "/profile", icon: User },
       { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit },
@@ -56,6 +55,10 @@ export function useDashboardNavigation() {
         shortTitle: "Admin",
         path: "/admin",
         icon: Shield,
+        subItems: [
+          { title: "Admin", path: "/admin" },
+          { title: "Resource Admin", path: "/admin/resources" },
+        ],
       });
     }
     setMenuItems(menu);

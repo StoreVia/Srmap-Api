@@ -7,11 +7,11 @@ import { useAdmin } from "@/context/AdminContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import API from "@/lib/api/axiosClient";
 import { useEffect, useState, useCallback } from "react";
-import { Users, Calendar, SquarePen, Unlock, Plus, Database, CheckCircle2, Power, Clapperboard } from "lucide-react";
+import { Users, Calendar, SquarePen, Unlock, Plus, Power } from "lucide-react";
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { ResourceEditor } from "@/components/page/admin/ResourceEditor";
+import { Switch } from "@/components/ui/switch";
 
 interface AdminStats {
   success: boolean;
@@ -220,7 +220,7 @@ export default function AdminPage() {
   const handleToggleFeedback = async () => {
     try {
       setSettingsAction("feedback-toggle");
-      const res = await API.post("/admin/settings/feedback/toggle");
+      const res = await API.post("/admin/settings/toggle/feedback");
       if (res.data.success) setFeedbackEnabled(res.data.feedback);
     } catch {
       toast({ title: "Error", description: "Failed to update feedback setting", variant: "destructive" });
@@ -232,7 +232,7 @@ export default function AdminPage() {
   const handleResetFeedback = async () => {
     try {
       setSettingsAction("feedback-reset");
-      const res = await API.post("/admin/settings/feedback/reset");
+      const res = await API.post("/admin/settings/reset/feedback");
       if (res.data.success) fetchAdminStats();
     } catch {
       toast({ title: "Error", description: "Failed to reset feedback count", variant: "destructive" });
@@ -244,7 +244,7 @@ export default function AdminPage() {
   const handleToggleTimetableCollection = async () => {
     try {
       setSettingsAction("timetable-toggle");
-      const res = await API.post("/admin/settings/timetable/toggle");
+      const res = await API.post("/admin/settings/toggle/timetable");
       if (res.data.success) setTimetableCollectionEnabled(res.data.timetableCollection);
     } catch (error: any) {
       toast({ title: "Error", description: error.response?.data?.message || "Failed to update timetable collection", variant: "destructive" });
@@ -256,7 +256,7 @@ export default function AdminPage() {
   const handleResetTimetables = async () => {
     try {
       setSettingsAction("timetable-reset");
-      const res = await API.post("/admin/settings/timetable/reset");
+      const res = await API.post("/admin/settings/reset/timetable");
       if (res.data.success) {
         toast({ title: "Timetables reset", description: `${res.data.deletedCount} collected timetable records removed.` });
         fetchAdminStats();
@@ -389,31 +389,76 @@ export default function AdminPage() {
       </div>
 
       <Card className="overflow-hidden">
-        <CardHeader className="border-b bg-muted/20">
-          <CardTitle className="flex items-center gap-2 text-base"><Power className="h-4 w-4" />Application controls</CardTitle>
-          <p className="text-sm text-muted-foreground">Manage feedback and the timetable data used by the vacant-room feature.</p>
+        <CardHeader className="border-b bg-muted/20 py-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Power className="h-4 w-4" />
+            Application controls
+          </CardTitle>
         </CardHeader>
-        <CardContent className="grid grid-cols-2 gap-3 p-3 sm:p-4">
-          <div className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-start justify-between gap-3"><div><p className="font-medium">Enable Feedback</p><p className="text-xs text-muted-foreground">Allow students to submit SRM feedback.</p></div><CheckCircle2 className={`h-5 w-5 ${feedbackEnabled ? "text-green-600" : "text-muted-foreground"}`} /></div>
-            <Button className="h-auto min-h-10 w-full whitespace-normal break-words px-2 text-xs leading-tight" variant={feedbackEnabled ? "outline" : "default"} onClick={handleToggleFeedback} disabled={settingsAction !== null}>{settingsAction === "feedback-toggle" ? "Updating..." : feedbackEnabled ? "Disable Feedback" : "Enable Feedback"}</Button>
+        <CardContent className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-3 sm:p-4">
+          <div className="rounded-lg border p-3 sm:p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">Feedback</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">{feedbackEnabled ? "Enabled" : "Disabled"}</span>
+              <Switch
+                checked={feedbackEnabled}
+                onCheckedChange={handleToggleFeedback}
+                disabled={settingsAction !== null}
+              />
+            </div>
           </div>
-          <div className="rounded-lg border p-4 space-y-3">
-            <div className="flex items-start justify-between gap-3"><div><p className="font-medium">Enable Timetable Collection</p><p className="text-xs text-muted-foreground">Collect anonymous timetable data for vacant rooms.</p></div><Database className={`h-5 w-5 ${timetableCollectionEnabled ? "text-green-600" : "text-muted-foreground"}`} /></div>
-            <Button className="h-auto min-h-10 w-full whitespace-normal break-words px-2 text-xs leading-tight" variant={timetableCollectionEnabled ? "outline" : "default"} onClick={handleToggleTimetableCollection} disabled={settingsAction !== null}>{settingsAction === "timetable-toggle" ? "Updating..." : timetableCollectionEnabled ? "Disable Collection" : "Enable Collection"}</Button>
+
+          <div className="rounded-lg border p-3 sm:p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">Timetable Collection</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-muted-foreground">{timetableCollectionEnabled ? "Enabled" : "Disabled"}</span>
+              <Switch
+                checked={timetableCollectionEnabled}
+                onCheckedChange={handleToggleTimetableCollection}
+                disabled={settingsAction !== null}
+              />
+            </div>
           </div>
-          <div className="rounded-lg border p-4 space-y-3">
-            <div><p className="font-medium">Reset Collected Timetables</p><p className="text-xs text-muted-foreground">Delete {stats?.counts.timetables ?? 0} cached timetable records.</p></div>
-            <Button className="h-auto min-h-10 w-full whitespace-normal break-words px-2 text-xs leading-tight" variant="destructive" onClick={confirmResetTimetables} disabled={settingsAction !== null}>{settingsAction === "timetable-reset" ? "Resetting..." : "Reset"}</Button>
+
+          <div className="rounded-lg border p-3 sm:p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">Reset Timetables</span>
+              <span className="text-xs font-mono font-semibold text-primary">
+                {statsLoading ? <Skeleton className="h-4 w-8 inline-block" /> : `${stats?.counts.timetables ?? 0} records`}
+              </span>
+            </div>
+            <Button
+              className="h-8 w-full text-xs"
+              variant="destructive"
+              onClick={confirmResetTimetables}
+              disabled={settingsAction !== null}
+            >
+              {settingsAction === "timetable-reset" ? "Resetting..." : "Reset"}
+            </Button>
           </div>
-          <div className="rounded-lg border p-4 space-y-3">
-            <div><p className="font-medium">Reset Feedback Count</p><p className="text-xs text-muted-foreground">Set the total submitted-feedback count to zero.</p></div>
-            <Button className="h-auto min-h-10 w-full whitespace-normal break-words px-2 text-xs leading-tight" variant="destructive" onClick={confirmResetFeedback} disabled={settingsAction !== null}>{settingsAction === "feedback-reset" ? "Resetting..." : "Reset"}</Button>
+
+          <div className="rounded-lg border p-3 sm:p-4 flex flex-col justify-between gap-3">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-sm">Reset Feedback Count</span>
+              <span className="text-xs font-mono font-semibold text-primary">
+                {statsLoading ? <Skeleton className="h-4 w-8 inline-block" /> : `${stats?.counts.feedback ?? 0} submitted`}
+              </span>
+            </div>
+            <Button
+              className="h-8 w-full text-xs"
+              variant="destructive"
+              onClick={confirmResetFeedback}
+              disabled={settingsAction !== null}
+            >
+              {settingsAction === "feedback-reset" ? "Resetting..." : "Reset"}
+            </Button>
           </div>
         </CardContent>
       </Card>
-
-      <ResourceEditor />
 
       <Card className="overflow-hidden flex flex-col">
         <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2">
