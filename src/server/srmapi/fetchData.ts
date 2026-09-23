@@ -2,13 +2,6 @@ import * as cheerio from "cheerio";
 import { createClient } from "@/server/utils/functions";
 import { getFacultyCabin } from "@/server/faculty/faculty";
 
-interface SubjectMap {
-  [key: string]: {
-    semester: string;
-    credit: string;
-  };
-}
-
 interface AttendanceRecord {
   subject_code: string;
   subject_name: string;
@@ -29,11 +22,11 @@ export interface TimetableDay {
 interface SubjectDetail {
   code: string;
   name: string;
-  ltp: string;
-  credit: string;
-  semester: string;
-  faculty: string;
-  classrooms: string;
+  ltp?: string;
+  credit?: string;
+  semester?: string;
+  faculty?: string;
+  classrooms?: string;
   facultyCabins?: {
     name: string;
     location: string;
@@ -105,17 +98,6 @@ async function fetchFromWebsite(sessionId: string): Promise<WebsiteData | null> 
       cgpa: cgpaDiv.length ? cgpaDiv.text().split(":")[1]?.trim() || "0" : "0"
     };
 
-    const subjectMap: SubjectMap = {};
-    $subjects("table.table-striped tr").each((_, row) => {
-      const td = $subjects(row).find("td");
-      if (td.length === 5) {
-        subjectMap[td.eq(1).text().trim()] = {
-          semester: td.eq(0).text().trim(),
-          credit: td.eq(3).text().trim()
-        };
-      }
-    });
-
     $attendance("table#tblSubjectWiseAttendance tr").each((_, row) => {
       const td = $attendance(row).find("td");
       if (td.length === 9) {
@@ -149,9 +131,17 @@ async function fetchFromWebsite(sessionId: string): Promise<WebsiteData | null> 
 
     timetable.push(...rawTimetable.slice(0, 5));
 
+    const timetableSubjectMap = new Map<string, {
+      name: string;
+      ltp: string;
+      faculty: string;
+      classrooms: string;
+      facultyCabins?: { name: string; location: string }[];
+    }>();
+
     rawTimetable.slice(7).forEach(item => {
       if (item.subjects.length >= 4) {
-        const code = item.day;
+        const code = item.day.trim();
         const faculty = item.subjects[2].trim();
 
         const cabins = faculty
@@ -163,16 +153,44 @@ async function fetchFromWebsite(sessionId: string): Promise<WebsiteData | null> 
           })
           .filter(Boolean) as SubjectDetail["facultyCabins"];
 
-        subjectDetails.push({
-          code,
-          name: item.subjects[0],
-          ltp: item.subjects[1],
-          credit: subjectMap[code]?.credit || "",
-          semester: subjectMap[code]?.semester || "",
+        const info = {
+          name: item.subjects[0].trim(),
+          ltp: item.subjects[1].trim(),
           faculty,
-          classrooms: item.subjects[3],
+          classrooms: item.subjects[3].trim(),
           facultyCabins: cabins?.length ? cabins : undefined
-        });
+        };
+
+        timetableSubjectMap.set(code, info);
+        timetableSubjectMap.set(code.replace(/\s+/g, "").toUpperCase(), info);
+      }
+    });
+
+    $subjects("table.table-striped tr").each((_, row) => {
+      const td = $subjects(row).find("td");
+      if (td.length >= 4) {
+        const semester = td.eq(0).text().trim();
+        const code = td.eq(1).text().trim();
+        const name = td.eq(2).text().trim();
+        const credit = td.eq(3).text().trim();
+        const category = td.length >= 5 ? td.eq(4).text().trim() : "";
+
+        if (code && name && !/course code|sub code|^code$/i.test(code)) {
+          const ttInfo =
+            timetableSubjectMap.get(code) ||
+            timetableSubjectMap.get(code.replace(/\s+/g, "").toUpperCase());
+
+          subjectDetails.push({
+            code,
+            name: ttInfo?.name || name,
+            ltp: ttInfo?.ltp || category || undefined,
+            credit,
+            semester,
+            faculty: ttInfo?.faculty || undefined,
+            classrooms: ttInfo?.classrooms || undefined,
+            facultyCabins: ttInfo?.facultyCabins
+          });
+        }
       }
     });
 

@@ -60,23 +60,31 @@ const Subjects = () => {
 
                 <div className="flex items-center gap-2">
                   <Layers className="w-4 h-4 text-green-500" />
-                  <span>LTP: {subj.ltp} | Credit: {subj.credit}</span>
+                  <span>
+                    {subj.ltp ? `LTP: ${subj.ltp} | ` : ""}Credit: {subj.credit}
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="w-4 h-4 text-purple-500" />
-                  <span>Semester: {subj.semester}</span>
-                </div>
+                {subj.semester && (
+                  <div className="flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4 text-purple-500" />
+                    <span>Semester: {subj.semester}</span>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-orange-500" />
-                  <span>{subj.faculty}</span>
-                </div>
+                {subj.faculty && (
+                  <div className="flex items-center gap-2">
+                    <User className="w-4 h-4 text-orange-500" />
+                    <span>{subj.faculty}</span>
+                  </div>
+                )}
 
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-red-500" />
-                  <span>{subj.classrooms}</span>
-                </div>
+                {subj.classrooms && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-red-500" />
+                    <span>{subj.classrooms}</span>
+                  </div>
+                )}
 
                 {subj.facultyCabins && subj.facultyCabins.length > 0 && (
                   <div className="mt-3 rounded-md border bg-white/70 dark:bg-black/20 p-2 space-y-2">
