@@ -76,18 +76,18 @@ export async function POST(req: NextRequest) {
                     const appSettings = await settingsDb.findOne({ id: "app-settings" });
                     if (appSettings?.timetableCollection === false) return;
 
-                    const emptyClassesDb = initDb.db("college_db").collection("empty_classes");
-                    const emptyClassesData = fetchTimetable(result);
+                    const timetablesDb = initDb.db("college_db").collection("timetables");
+                    const timetableData = fetchTimetable(result);
                     const dataHash = crypto
                         .createHash("sha256")
-                        .update(JSON.stringify(emptyClassesData))
+                        .update(JSON.stringify(timetableData))
                         .digest("hex");
 
-                    const existingDoc = await emptyClassesDb.findOne({ hash: dataHash });
+                    const existingDoc = await timetablesDb.findOne({ hash: dataHash });
                     if (!existingDoc) {
-                        await emptyClassesDb.insertOne({
+                        await timetablesDb.insertOne({
                             hash: dataHash,
-                            data: emptyClassesData
+                            data: timetableData
                         });
                     }
                 } catch { }
