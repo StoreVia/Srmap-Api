@@ -43,6 +43,7 @@
 | **Dynamic Resources Hub** | Centralized study hub for past mid-term/end-sem question papers, lecture slides, and notes with in-app preview. |
 | **Admin Resource Editor** | Full CRUD administrative control panel to manage years, courses, subjects, and study materials on the fly. |
 | **Multi-Account Storage** | Up to 5 switchable student accounts with local encrypted credential preservation. |
+| **Secure File Transfer** | Temporary, access-controlled file and text sharing with password verification, registration-number access lists, single-use download tokens, and scheduled hard purging. |
 | **Offline & Cached Mode** | Offline fallback allowing students to access attendance & schedules even when SRM servers are down. |
 
 ---
@@ -50,7 +51,7 @@
 ## Tech Stack
 
 <div align="center">
-  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,nodejs,mongodb" alt="Tech Stack Icons" />
+  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,tailwind,nodejs,mongodb,aws" alt="Tech Stack Icons" />
 </div>
 
 <br/>
@@ -58,7 +59,8 @@
 - **Frontend & App Framework:** [Next.js 16 (App Router)](https://nextjs.org/) + [React 19](https://react.dev/)
 - **Styling & UI Components:** [Tailwind CSS](https://tailwindcss.com/) + [Radix UI](https://www.radix-ui.com/) + [Lucide Icons](https://lucide.dev/)
 - **Machine Learning / AI:** [TensorFlow.js (TFLite Runtime)](https://www.tensorflow.org/js) + [Sharp](https://sharp.pixelplumbing.com/)
-- **Database & Cache:** [MongoDB](https://www.mongodb.com/) (`college_db` for users/settings and `resources` for study hub)
+- **Database & Cache:** [MongoDB](https://www.mongodb.com/) (`college_db`, `resources`, `secureShare`)
+- **Cloud Object Storage:** [Backblaze B2 (S3-Compatible)](https://www.backblaze.com/b2/cloud-storage.html) with configured multi-bucket replica uploads
 - **PWA & Service Worker:** [Serwist (@serwist/next)](https://serwist.pages.dev/)
 - **HTTP Client & Parsing:** [Axios](https://axios-http.com/) + [Cheerio](https://cheerio.js.org/) + [Tough-Cookie](https://github.com/salesforce/tough-cookie)
 
@@ -89,13 +91,28 @@ Ensure you have the following installed on your machine:
 3. **Configure Environment Variables:**
    Create a `.env` file in the root directory:
    ```env
-   NODE_ENV=development
-   MONGO_URI="mongodb+srv://<username>:<password>@cluster0.mongodb.net/?retryWrites=true&w=majority"
-   ACCESS_SECRET="your-ultra-secure-random-jwt-signing-secret"
-   ENCRYPT_SECRET="your-encryption-secret-key"
-   ACCESS_EXPIRE=365
-   D_REPORT="https://discord.com/api/webhooks/your-webhook-url"
+    NODE_ENV=production
+    ACCESS_SECRET="jwt-secret-here"
+    ACCESS_EXPIRE=365
+    MONGO_URI="mongodb://127.0.0.1:27017"
+    SECURE_SHARE_MONGO_URI="mongodb://127.0.0.1:27017"
+    NEXT_PUBLIC_TURNSTILE_SITEKEY="turnstile-sitekey-here"
+    TURNSTILE_SECRET="turnstile-secret-here"
+    B2_ENDPOINT="https://s3.<region>.backblazeb2.com"
+    B2_REGION="<region>"
+    B2_BUCKET_1_NAME="<bucket-1-name>"
+    B2_BUCKET_1_KEY_ID="<bucket-1-key-id>"
+    B2_BUCKET_1_APP_KEY="<bucket-1-application-key>"
+    B2_BUCKET_2_NAME="<bucket-2-name>"
+    B2_BUCKET_2_KEY_ID="<bucket-2-key-id>"
+    B2_BUCKET_2_APP_KEY="<bucket-2-application-key>"
+    B2_BUCKET_3_NAME="<bucket-3-name>"
+    B2_BUCKET_3_KEY_ID="<bucket-3-key-id>"
+    B2_BUCKET_3_APP_KEY="<bucket-3-application-key>"
+    D_REPORT=""
    ```
+
+   Or copy `.env.example` and replace its placeholders. Never commit `.env`.
 
 4. **Run the Development Server:**
    ```bash
@@ -145,5 +162,5 @@ srmapi.next/
 ---
 
 <div align="center">
-  <sub>Built with ❤️ for SRM AP students. Not affiliated with or endorsed by SRM University.</sub>
+  <sub>Made by SRM-AP Students. Not affiliated with or endorsed by SRM University.</sub>
 </div>

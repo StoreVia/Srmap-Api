@@ -69,6 +69,18 @@ const TermsAndConditions = () => {
     },
     {
       id: 6,
+      title: "Secure File Transfer & Content Policy",
+      icon: Shield,
+      description: "Rules Governing File Sharing and Content Uploads",
+      content: `When using the Secure Share feature, you agree to the following terms:
+
+    • You are solely responsible for the content, accuracy, and legality of all text and files you upload or transmit.
+    • You must not upload or share copyrighted material without permission, malware, harmful scripts, unlawful media, or content violating institutional conduct policies.
+    • Secure Share is a temporary, access-controlled transfer service with a 10MB quota and maximum 120-minute retention. It is not a permanent cloud backup service. Files are scheduled for permanent hard purging after expiration or download-limit exhaustion, and uploaded content is not encrypted by the application.
+    • The platform reserves the right to remove shares, block abusers, and terminate access for violating content policies.`
+    },
+    {
+      id: 7,
       title: "Session Management & Data Freshness",
       icon: RefreshCw,
       description: "How We Handle Session Tokens and Data Updates",
@@ -80,7 +92,7 @@ const TermsAndConditions = () => {
     • Attendance marking requires an active JSESSIONID session and will automatically initiate login if needed.`
     },
     {
-      id: 7,
+      id: 8,
       title: "Service Availability & Limitations",
       icon: Clock,
       description: "Information About SRMAPI Portal Availability",
@@ -93,7 +105,7 @@ const TermsAndConditions = () => {
     • Emergency maintenance may occur without prior notice for security updates.`
     },
     {
-      id: 8,
+      id: 9,
       title: "Prohibited Activities",
       icon: AlertTriangle,
       description: "Activities Not Permitted on Our Platform",
@@ -101,13 +113,14 @@ const TermsAndConditions = () => {
 
     • Using the service for any illegal or unauthorized purpose
     • Attempting to reverse engineer, decompile, or hack our systems
+    • Uploading malicious payloads or circumventing file download limits
     • Using automated scripts or bots beyond our provided functionality
     • Sharing academic data obtained through our service with unauthorized parties
     • Attempting to access other users' accounts or data
     • Violating SRMAP's institutional policies through use of our service`
     },
     {
-      id: 9,
+      id: 10,
       title: "Limitation of Liability",
       icon: Scale,
       description: "Understanding Our Responsibilities and Limitations",
@@ -115,7 +128,7 @@ const TermsAndConditions = () => {
 
     • We are not affiliated with SRM University or the official SRMAP portal
     • We provide convenience tools but cannot guarantee 100% accuracy of academic data
-    • We are not responsible for any academic consequences resulting from service unavailability
+    • We are not responsible for any lost files or academic consequences resulting from service unavailability
     • We reserve the right to modify or discontinue services at any time
     • In no event shall we be liable for any indirect, incidental, or consequential damages`
     }

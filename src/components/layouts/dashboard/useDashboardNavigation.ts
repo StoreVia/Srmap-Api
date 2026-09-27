@@ -13,7 +13,7 @@ export function useDashboardNavigation() {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
-      { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2, highlight: true },
+      { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
@@ -30,6 +30,7 @@ export function useDashboardNavigation() {
         ],
       },
       { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
+      { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2 },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
       { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
@@ -57,6 +58,7 @@ export function useDashboardNavigation() {
         icon: Shield,
         subItems: [
           { title: "Admin", path: "/admin" },
+          { title: "SS Admin", path: "/admin/secureshare" },
           { title: "Resource Admin", path: "/admin/resources" },
         ],
       });

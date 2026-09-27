@@ -1,7 +1,7 @@
 import {
     connectToMongoClient,
-    // connectToForumsMongoClient,
+    connectToSecureShareMongoClient,
 } from '@/lib/database/mongodb';
 
 export const useMongo = connectToMongoClient;
-// export const useForumsMongo = connectToForumsMongoClient;
+export const useSecureShareMongo = connectToSecureShareMongoClient;

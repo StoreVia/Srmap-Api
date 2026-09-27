@@ -21,6 +21,7 @@ const PrivacyPolicy = () => {
             content: `The information we collect includes:
         • Academic Information: Attendance, timetable, subjects, and profile data encrypted using cryptographer package - only decryptable with your password
         • Session Data: JSESSIONID token stored locally in your browser for SRMAP portal authentication
+        • Secure Share Files & Text: User-uploaded text and file attachments transmitted voluntarily for peer file transfer
         • Empty Classrooms Data: Completely anonymized classroom occupancy information (no personal identifiers)`
         },
         {
@@ -33,6 +34,7 @@ const PrivacyPolicy = () => {
         • Automate the SRMAP portal login process (captcha solving and credential submission)
         • Fetch and display your academic data from SRMAP portal
         • Maintain your session with SRMAP portal using JSESSIONID tokens
+        • Deliver temporary peer-to-peer file transfers and text shares via Secure Share
         • Provide the Empty Classrooms feature using anonymized timetable data
         • Improve our services and user experience
         • Ensure platform security and prevent abuse`
@@ -46,7 +48,8 @@ const PrivacyPolicy = () => {
 
         • All academic data in database is encrypted using advanced cryptography and can only be decrypted with your password
         • Your SRMAP credentials are never stored on our servers - they remain in your browser's local storage
-        • JSESSIONID tokens are stored locally and automatically managed by your browser
+        • Secure Share uses access controls, optional password verification, single-use download links, and temporary retention. It does not encrypt uploaded file or text content at the application level
+        • Ephemeral download links utilize single-use 60-second tokens that immediately self-destruct after the first access
         • Even our developers cannot access your encrypted academic data
         • We employ industry-standard security practices to prevent unauthorized access
         • Regular security audits and updates are performed to maintain protection`
@@ -60,6 +63,7 @@ const PrivacyPolicy = () => {
 
         • We do not sell, trade, or rent your personal data to third parties
         • We do not share your academic information with any external services
+        • Cloudflare Turnstile CAPTCHA is utilized exclusively for bot mitigation on file downloads without collecting user profiles
         • Anonymous Empty Classrooms data is aggregated and contains no personal identifiers`
         },
         {
@@ -82,6 +86,7 @@ const PrivacyPolicy = () => {
         • Captcha Solving: We use a CRNN model trained on 5000+ captchas to automatically solve SRMAP captchas
         • Login Automation: We automate the login process to SRMAP portal on your behalf
         • Data Fetching: We automatically retrieve and update your academic data from SRMAP portal
+        • Automated Expiration & Purging: Secure Share files and records are scheduled for hard purging after expiration or download-limit exhaustion; failed storage deletion is retained for retry
         • All automated processes only occur with your explicit login and consent`
         },
         {
@@ -92,16 +97,17 @@ const PrivacyPolicy = () => {
             content: `You have full control over your data:
 
         • Right to Access: View all data we have about you through your account dashboard
-        • Right to Delete: Permanently delete your account and all associated data`
+        • Right to Delete: Permanently delete your account, saved uploads, and all associated data at any time`
         },
         {
             id: 8,
-            title: "Data Retention",
+            title: "Data Retention & Auto-Purging",
             icon: Clock,
             description: "How long we keep your information",
             content: `We follow strict data retention policies:
 
-        • Active Accounts: Data is retained as long as your account remains active
+        • Active Accounts: Academic data is retained as long as your account remains active
+        • Secure Share Payloads: Files and text expire within a maximum of 120 minutes. After the download limit is reached, hard deletion is scheduled after a short grace period so the final download can complete
         • Account Deletion: All data is permanently deleted immediately upon account deletion
         • Local Storage: Data in your browser persists until you clear browser storage
         • JSESSIONID Tokens: Automatically expire based on SRMAP portal's session policies
@@ -198,7 +204,7 @@ const PrivacyPolicy = () => {
                     <CardContent>
                         <div className="space-y-3 text-sm text-green-900 dark:text-green-200">
                             <p>
-                                <strong>Your privacy is important to us.</strong> We store your data in an encrypted format and can only be decrypted with your password. Even our developers cannot see your data.
+                                <strong>Your privacy is important to us.</strong> Academic data stored for cached access is encrypted. Secure Share content is temporary and access-controlled, but is not encrypted by the application.
                             </p>
                             <p>
                                 <strong>We do not share your data with any third parties</strong> for marketing purposes.

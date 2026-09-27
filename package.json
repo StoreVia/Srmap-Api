@@ -1,6 +1,6 @@
 {
   "name": "srmapi.next",
-  "version": "5.8.5",
+  "version": "5.9.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -69,6 +69,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/luxon": "^3.7.1",
+    "@types/node": "^26.6.3",
     "@types/nprogress": "^0.2.3",
     "@types/react-dom": "^19.2.5",
     "eslint-plugin-prettier": "^5.5.4",

@@ -21,6 +21,7 @@ const PrivacyPolicy = () => {
       content: `The information we collect includes:
 • Academic Information: Attendance, timetable, subjects, profile data, and related SRMAP records needed for the app to work.
 • Session Data: Local session tokens and login metadata required to keep your SRMAP session active on your device.
+• Secure Share Data: User-uploaded text and file attachments provided voluntarily for ephemeral file transfer.
 • App Usage Data: Basic usage and reliability information used to improve stability and prevent abuse.`
     },
     {
@@ -32,6 +33,7 @@ const PrivacyPolicy = () => {
 • automate the SRMAP login workflow when needed
 • fetch and display academic data from the SRMAP portal
 • maintain your session securely on your device
+• deliver temporary peer file transfers and text shares
 • provide app features such as attendance, timetable, marks, CGPA, and profile views
 • improve app reliability and user experience`
     },
@@ -43,6 +45,7 @@ const PrivacyPolicy = () => {
       content: `We implement reasonable technical safeguards to protect your data:
 • session data and login-related information are stored locally on your device
 • the app does not store your SRMAP credentials on a public server
+• Secure Share uses access controls, optional password verification, and single-use download tokens. Uploaded file and text content is not encrypted by the application
 • data is used only for app functionality and service reliability
 • access is limited to what is required for the app to operate`
     },
@@ -54,6 +57,7 @@ const PrivacyPolicy = () => {
       content: `We are committed to protecting your privacy:
 • we do not sell, trade, or rent your personal data to third parties
 • we do not share your academic information for advertising purposes
+• Cloudflare Turnstile is used strictly for bot prevention during file downloads
 • app usage and reliability data may be processed by supporting services only when required for app operations`
     },
     {
@@ -74,6 +78,7 @@ const PrivacyPolicy = () => {
       content: `Our service uses automation to enhance your experience:
 • captcha handling may be automated during login
 • login and data fetch flows may interact with the official SRMAP portal
+• expired or download-exhausted files are scheduled for hard purging from storage servers; failed deletion is retained for retry
 • all processing is done to provide the requested academic information and app functionality`
     },
     {
@@ -83,16 +88,17 @@ const PrivacyPolicy = () => {
       description: "Your privacy rights and how to exercise them",
       content: `You have control over your data:
 • you can log out at any time
-• you can clear app data from your device settings
+• you can delete your uploaded shares or clear app data from your device settings
 • you should keep your SRMAP account credentials private and secure`
     },
     {
       id: 8,
-      title: "Data Retention",
+      title: "Data Retention & Auto-Purging",
       icon: Clock,
       description: "How long we keep your information",
       content: `We retain only what is necessary:
 • session data is kept only as needed for app functionality
+• Secure Share uploads are strictly temporary (maximum 120 minutes or until the download limit is reached) and are scheduled for permanent hard purging
 • app data is removed when you log out or clear app data
 • local device data may remain until you choose to remove it`
     },
@@ -186,7 +192,7 @@ const PrivacyPolicy = () => {
           <CardContent>
             <div className="space-y-3 text-sm text-green-900 dark:text-green-200">
               <p>
-                <strong>Your privacy is important to us.</strong> We store your data in an encrypted format and can only be decrypted with your password. Even our developers cannot see your data.
+                <strong>Your privacy is important to us.</strong> Academic data stored for cached access is encrypted. Secure Share content is temporary and access-controlled, but is not encrypted by the application.
               </p>
               <p>
                 <strong>We do not share your data with any third parties</strong> for marketing purposes.

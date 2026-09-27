@@ -24,13 +24,15 @@ flowchart LR
   Browser["Browser / React client"] -->|"Bearer JWT + JSON"| Next["Next.js app and Route Handlers"]
   Next -->|"MongoDB: college_db"| MongoCore["Users, Settings, Blocks, Timetables"]
   Next -->|"MongoDB: resources"| MongoRes["Years, Courses, Subjects, Resources"]
+  Next -->|"MongoDB: secureShare"| MongoShare["Secure Share Metadata & Tokens"]
+  Next -->|"S3 API (Replicated)"| B2Storage["Backblaze B2 (srmapi.1, srmapi.2, srmapi.3)"]
   Next -->|"HTTP + JSESSIONID"| SRM["student.srmap.edu.in"]
   Next -->|"In-Memory TFLite"| Captcha["Node.js CAPTCHA solver (src/lib/captcha)"]
   Captcha -->|"TFLite Runtime"| Model["captcha_float32.tflite"]
   Next -->|"POST webhook"| Report["D_REPORT issue-report webhook"]
 ```
 
-The browser never calls SRM directly. `src/lib/api/axiosClient.ts` adds the active account's JWT from local storage to every `/api` request. Route handlers authenticate that token, then use the supplied SRM session ID to make portal requests. The initial dashboard fetch also writes encrypted portal data to MongoDB so users can choose cached data when SRM is unavailable.
+The browser never calls SRM directly. `src/lib/api/axiosClient.ts` adds the active account's JWT from local storage to every `/api` request. Route handlers authenticate that token, then use the supplied SRM session ID to make portal requests. The initial dashboard fetch also writes encrypted portal data to MongoDB so users can choose cached data when SRM is unavailable. Secure Share provides temporary, access-controlled text and file sharing with PBKDF2 password verification, single-use download tokens, and direct B2 presigned-download redirects across configured bucket replicas. It does not encrypt Secure Share file or text content at the application level. For full details, see [secure share.md](secure%20share.md).
 
 ## Prerequisites and local setup
 
@@ -43,13 +45,28 @@ npm install
 Create a `.env` file in the repository root.
 
 ```dotenv
-NODE_ENV=development
-MONGO_URI="mongodb://127.0.0.1:27017"
-ACCESS_SECRET="replace-with-a-long-random-signing-secret"
-ENCRYPT_SECRET="replace-with-an-encryption-secret"
+NODE_ENV=production
+ACCESS_SECRET="jwt-secret-here"
 ACCESS_EXPIRE=365
-D_REPORT="https://example.invalid/webhook"
+MONGO_URI="mongodb://127.0.0.1:27017"
+SECURE_SHARE_MONGO_URI="mongodb://127.0.0.1:27017"
+NEXT_PUBLIC_TURNSTILE_SITEKEY="turnstile-sitekey-here"
+TURNSTILE_SECRET="turnstile-secret-here"
+B2_ENDPOINT="https://s3.<region>.backblazeb2.com"
+B2_REGION="<region>"
+B2_BUCKET_1_NAME="<bucket-1-name>"
+B2_BUCKET_1_KEY_ID="<bucket-1-key-id>"
+B2_BUCKET_1_APP_KEY="<bucket-1-application-key>"
+B2_BUCKET_2_NAME="<bucket-2-name>"
+B2_BUCKET_2_KEY_ID="<bucket-2-key-id>"
+B2_BUCKET_2_APP_KEY="<bucket-2-application-key>"
+B2_BUCKET_3_NAME="<bucket-3-name>"
+B2_BUCKET_3_KEY_ID="<bucket-3-key-id>"
+B2_BUCKET_3_APP_KEY="<bucket-3-application-key>"
+D_REPORT=""
 ```
+
+Copy [`.env.example`](.env.example) to `.env`, then replace every placeholder with deployment-specific values. Do not commit `.env`.
 
 Start the application:
 
@@ -172,6 +189,20 @@ All API responses are JSON. With the exception of `POST /api/auth/login` and `PO
 | `GET /api/resources/subjects` | `?course=&year=` | Queries `resources.subjects` for subjects matching course code and year. |
 | `GET /api/resources/resource` | `?course=&year=&subjectId=` | Queries `resources.resources` for question papers and notes attached to `subjectId`. |
 
+### Secure Share (Database: `secureShare` & Storage: Backblaze B2)
+
+| Method and route | Input / Body | Behavior |
+| --- | --- | --- |
+| `GET /api/share/list` | none | Returns active created shares (`myShares`), received shares (`sharedWithMe`), and quota metrics (`storage`). |
+| `POST /api/share/create` | FormData (`files`, `text`, `isPublic`, `allowedRegNos`, `password`, `expiryMinutes`, `maxDownloads`) | Validates quota, attempts parallel uploads to configured B2 replicas, and saves metadata in `secureShare.secureShare` when at least one upload succeeds. |
+| `GET /api/share/:id` | optional `?password=` | Fetches share metadata; text is visible for public shares; files locked to authenticated users. |
+| `GET /api/share/:id` | optional `?password=` or `x-share-password` | Verifies a password hash for protected shares and returns the permitted payload. |
+| `PATCH /api/share/:id` | `isPublic`, `allowedRegNos` | Updates share access controls (owner/admin only). |
+| `DELETE /api/share/:id` | none | Deletes share document and permanently purges all file versions from all storage buckets. |
+| `POST /api/share/:id/download` | `fileId`, `turnstileToken`, optional `password` | Verifies Turnstile and permissions, decrements download count atomically, and returns a single-use token URL. |
+| `GET /api/share/download/:token` | none | Consumes single-use token atomically (60s TTL) and returns a 302 redirect to a 15-second S3 presigned URL. |
+| `GET /api/share/storage` | none | Returns active storage quota metrics. |
+
 ### Rooms, notifications, settings, and reporting
 
 | Method and route | Input | Behavior |
@@ -181,7 +212,7 @@ All API responses are JSON. With the exception of `POST /api/auth/login` and `PO
 | `POST /api/sync` | `settings` | Updates synced user settings in database and returns updated settings and notifications. |
 | `POST /api/tools/report` | `title`, `reason`, optional `time`, optional `id` | Checks title and user existence, then posts an embed to `D_REPORT`. |
 
-### Administration (Database: `college_db` & `resources`)
+### Administration (Database: `college_db`, `resources`, & `secureShare`)
 
 The admin allowlist is hard-coded in `isAdmin` in `src/server/utils/functions.ts`; being an admin is also embedded as `admin: true` in the issued JWT.
 
@@ -205,6 +236,9 @@ The admin allowlist is hard-coded in `isAdmin` in `src/server/utils/functions.ts
 | `POST /api/admin/resources/resources` | `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl` | Adds a new question paper or lecture slide. |
 | `PUT /api/admin/resources/resources` | `id`, `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl` | Updates resource file details. |
 | `DELETE /api/admin/resources/resources` | `id` | Deletes a specific resource item. |
+| `GET /api/admin/share` | optional `?action=&bucket=` | Returns overview statistics or lists files in a specific Backblaze B2 bucket. |
+| `DELETE /api/admin/share` | `?action=purge-expired` \| `?action=purge-all` \| `?shareId=` | Purges expired shares, wipes all buckets, or deletes an individual share. |
+| `POST /api/admin/share` | `shareId`, `fileId` | Generates an administrative direct presigned download URL. |
 
 ## SRM scraper and CAPTCHA service
 
@@ -220,7 +254,7 @@ Because the model is cached in memory, each CAPTCHA solve takes ~2ms within Node
 
 ## Database and cache model
 
-MongoDB stores core application state across two distinct databases:
+MongoDB stores core application state across three distinct databases:
 
 ### 1. `college_db` (Core Student & App State)
 
@@ -240,6 +274,13 @@ MongoDB stores core application state across two distinct databases:
 | `resources.courses` | admin resources, student resources reader | `year`, `code`, `name`, `createdAt`, `updatedAt`. |
 | `resources.subjects` | admin resources, student resources reader | `courseCode`, `year`, `code`, `name`, `createdAt`, `updatedAt`. |
 | `resources.resources` | admin resources, student resources reader | `courseCode`, `year`, `subjectId`, `category`, `examType`, `title`, `size`, `fileType`, `downloadUrl`, `createdAt`, `updatedAt`. |
+
+### 3. `secureShare` (Secure Share & Ephemeral Tokens)
+
+| Collection | Written/read by | Stored fields and purpose |
+| --- | --- | --- |
+| `secureShare.secureShare` | share creation, reader, deletion, download | `shareId`, `creatorUsername`, `text`, `files`, `totalBytes`, `isPublic`, `allowedRegNos`, `passwordHash`, `passwordSalt`, `maxDownloads`, `remainingDownloads`, `expiresAt`, `purgeAfter`, `createdAt`. `purgeAfter` is indexed but not TTL-managed, so B2 cleanup can always read the object keys. |
+| `secureShare.secureShareTokens` | download issue, token consumer | `token`, `shareId`, `fileId`, `s3Key`, `filename`, `username`, `used`, `expiresAt`, `createdAt`. TTL index on `expiresAt`. |
 
 ## Authentication, credentials, and security
 
@@ -274,7 +315,10 @@ createToken({ username, password, admin: isAdmin(username) })
 | `src/app/api/srmapi/*` | Session initiation, aggregate portal fetch, attendance, examinations, and feedback endpoints. |
 | `src/app/api/admin/*` | Admin verification, metrics, blocks, notifications, application controls, and resource CRUD routes. |
 | `src/app/api/resources/*` | Dynamic learning resources reader endpoints (`courses`, `subjects`, `resource`). |
+| `src/app/api/share/*` | Secure Share creation, download token generation, consumer redirect, and storage routes. |
 | `src/app/api/vacant`, `api/tools/*`, `api/sync` | Room availability, user document viewer, issue reporting, and client settings synchronization. |
+| `src/server/share/*` | Multi-bucket Backblaze S3 clients, presigned URL generation, versioned hard purging, and share services. |
+| `src/types/share.ts` | Type models for Secure Share payloads, files, storage statistics, and download responses. |
 | `src/static/captcha/*` | Captcha TFLite model (`src/static/captcha/model/captcha_float32.tflite`) and path definition. |
 | `src/lib/captcha/*` | In-house Node.js TFLite captcha solver module with in-memory caching and sharp preprocessing. |
 | `src/server/auth/*` | SRM login exchange, encrypted session persistence/cached-login fallback, and bearer-token extraction. |
