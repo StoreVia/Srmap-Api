@@ -5,12 +5,17 @@ import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import { useSubjectMaps } from "@/hooks/timetable/useSubjectMaps";
 import { useCurrentClass } from "@/hooks/timetable/useCurrentClass";
 import { useSubjectDialog } from "@/hooks/timetable/useSubjectDialog";
+import { useAbsentSimulation } from "@/hooks/timetable/useAbsentSimulation";
 import { SubjectDialog } from "@/components/page/timetable/SubjectDialog";
+import { MultiDateSelectDialog } from "@/components/page/timetable/MultiDateSelectDialog";
+import { WhatIfAbsentButton } from "@/components/page/timetable/WhatIfAbsentButton";
 import { TIME_SLOTS, WEEK_DAYS, ALL_DAYS, parseSubject, formatCountdown } from "@/shared/utils/timetable";
+import { mapManyToAttendanceShape } from "@/shared/utils/attendance";
 import { trimText } from "@/shared/utils/functions";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Clock, Calendar, Play } from "lucide-react";
+import { MapPin, Clock, Calendar, Play, RotateCcw } from "lucide-react";
 
 const Timetable = () => {
   const { timetable, subjects, attendance } = useStudentData();
@@ -28,6 +33,17 @@ const Timetable = () => {
   const { ongoingClass, upcomingClass } = useCurrentClass(timetable, currentDay, subjectCodeToName, isWeekend);
   const { dialogOpen, setDialogOpen, selectedSubject, selectedSubjectAttendance, handleSubjectClick } = useSubjectDialog(subjectCodeToName, subjectCodeToAttendance);
 
+  const mappedAttendance = mapManyToAttendanceShape(attendance);
+  const {
+    calendarOpen,
+    setCalendarOpen,
+    selectedDateStrings,
+    setDates,
+    clearAll,
+    simulationSummary,
+    isSimulationActive,
+  } = useAbsentSimulation(timetable, mappedAttendance, subjectCodeToName);
+
   useEffect(() => {
     const interval = setInterval(() => {
       const now = new Date();
@@ -39,15 +55,39 @@ const Timetable = () => {
   }, [ongoingClass, upcomingClass]);
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="mb-4 flex justify-end">
+    <div className="h-full flex flex-col space-y-4">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <WhatIfAbsentButton
+            isSimulationActive={isSimulationActive}
+            selectedCount={selectedDateStrings.length}
+            onClick={() => setCalendarOpen(true)}
+          />
+
+          {isSimulationActive && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={clearAll}
+              className="h-8 text-xs text-muted-foreground hover:text-destructive gap-1 px-2.5"
+            >
+              <RotateCcw className="w-3 h-3" />
+              Reset
+            </Button>
+          )}
+        </div>
+
         <div className="flex items-center space-x-1 rounded-lg border border-slate-200 bg-slate-100 p-1 dark:border-0 dark:bg-muted">
           {(["old", "new"] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => updateSettings({ timeTableViewMode: mode })}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${viewMode === mode ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground" : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
-                }`}
+              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                viewMode === mode
+                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground"
+                  : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
+              }`}
             >
               {mode === "old" ? "Detailed View" : "Minimal View"}
             </button>
@@ -55,7 +95,7 @@ const Timetable = () => {
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 flex-shrink-0">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 flex-shrink-0">
         {(ongoingClass || upcomingClass) ? (
           <>
             <Card className={`p-3 md:p-4 shadow-sm dark:shadow-none ${ongoingClass ? "border-emerald-300 bg-emerald-50 dark:border-border dark:bg-green-900/30" : "border-slate-200 bg-white dark:border-gray-700 dark:bg-card"}`}>
@@ -130,6 +170,15 @@ const Timetable = () => {
         onOpenChange={setDialogOpen}
         subject={selectedSubject}
         attendance={selectedSubjectAttendance}
+      />
+
+      <MultiDateSelectDialog
+        open={calendarOpen}
+        onOpenChange={setCalendarOpen}
+        selectedDates={selectedDateStrings}
+        simulationSummary={simulationSummary}
+        onApply={setDates}
+        onReset={clearAll}
       />
 
       <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card dark:shadow-none">

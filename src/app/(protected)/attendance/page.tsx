@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import API from "@/lib/api/axiosClient";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/utils/useToast";
@@ -10,6 +10,10 @@ import { useSessionValidator } from "@/hooks/auth/useSessionValidator";
 import { useScrollIndicator } from "@/hooks/utils/useScrollIndicator";
 import { useLocalStorageContext } from "@/context/LocalStorageContext";
 import type { AttendanceShape } from "@/hooks/timetable/useSubjectMaps";
+import { useSubjectMaps } from "@/hooks/timetable/useSubjectMaps";
+import { useAbsentSimulation } from "@/hooks/timetable/useAbsentSimulation";
+import { MultiDateSelectDialog } from "@/components/page/timetable/MultiDateSelectDialog";
+import { WhatIfAbsentButton } from "@/components/page/timetable/WhatIfAbsentButton";
 import AttendanceCard from "@/components/page/attendance/AttendanceCard";
 import { mapManyToAttendanceShape } from "@/shared/utils/attendance";
 import { History, ArrowUpDown, ArrowUp, ArrowDown, Check, Loader2, RotateCcw, MoreVertical } from "lucide-react";
@@ -80,10 +84,11 @@ function findMatchingSubject(itemSubject: string, subjects: AttendanceShape[]): 
 
 const AttendanceDetails = () => {
   const { toast } = useToast();
-  const { attendance } = useStudentData();
+  const { attendance, timetable, subjects } = useStudentData();
   const { sessionValid, sessionId } = useSessionValidator();
   const { settings, updateSettings } = useLocalStorageContext();
   const { ScrollIndicator } = useScrollIndicator();
+  const { subjectCodeToName } = useSubjectMaps(subjects, attendance);
 
   const [rawSubjects, setRawSubjects] = useState<AttendanceShape[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
@@ -94,17 +99,55 @@ const AttendanceDetails = () => {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const pendingCalculateRef = useRef(false);
 
+  const baseMappedAttendance = useMemo(() => mapManyToAttendanceShape(attendance), [attendance]);
+  const {
+    calendarOpen,
+    setCalendarOpen,
+    selectedDateStrings,
+    setDates,
+    clearAll,
+    simulationSummary,
+    isSimulationActive,
+  } = useAbsentSimulation(timetable, baseMappedAttendance, subjectCodeToName);
+
   const currentSort = (settings.attendanceSortOption as SortOption) || "default";
   const displayedSubjects = sortSubjects(rawSubjects, currentSort);
 
   const handleReset = () => {
     setIsResetting(true);
+    clearAll();
     setRawSubjects(mapManyToAttendanceShape(attendance));
     setIsPredicted(false);
     setChangedSubjectCodes(new Set());
     setTimeout(() => {
       setIsResetting(false);
     }, 500);
+  };
+
+  const handleApplyAbsenceDates = (dates: string[]) => {
+    setDates(dates);
+    if (dates.length === 0) {
+      handleReset();
+      return;
+    }
+    const changed = new Set<string>();
+    const baseSubjects = mapManyToAttendanceShape(attendance);
+    const updated = baseSubjects.map((sub) => {
+      const sim = simulationSummary.subjects.find((s) => s.subject_code === sub.subject_code);
+      if (!sim || sim.missedClasses === 0) return sub;
+      changed.add(sub.subject_code);
+      return {
+        ...sub,
+        attended: sim.simulatedAttended,
+        conducted: sim.simulatedConducted,
+        percentage: sim.simulatedPercentage,
+        absent: sub.absent + sim.missedClasses,
+        present_percentage: sim.simulatedConducted === 0 ? 0 : Number(((sim.simulatedAttended / sim.simulatedConducted) * 100).toFixed(2)),
+      };
+    });
+    setRawSubjects(updated);
+    setChangedSubjectCodes(changed);
+    setIsPredicted(true);
   };
 
   useEffect(() => {
@@ -209,35 +252,55 @@ const AttendanceDetails = () => {
 
   return (
     <div className="relative">
+      <MultiDateSelectDialog
+        open={calendarOpen}
+        onOpenChange={setCalendarOpen}
+        selectedDates={selectedDateStrings}
+        simulationSummary={simulationSummary}
+        showAttendanceList={false}
+        onApply={handleApplyAbsenceDates}
+        onReset={handleReset}
+      />
+
       <div className="flex mb-6 items-center justify-between">
-        <div className="flex items-center gap-2 ml-auto">
+        <div className="flex items-center gap-1 sm:gap-2 ml-auto flex-nowrap shrink-0">
           {isPredicted && (
             <Button
               variant="outline"
               size="sm"
               onClick={handleReset}
               disabled={isResetting}
-              className="text-xs sm:text-sm px-2.5 sm:px-3 h-8 sm:h-9 gap-1.5 dark:bg-white dark:text-black shrink-0"
+              className="text-xs px-2 sm:px-2.5 h-8 gap-1 dark:bg-white dark:text-black shrink-0 whitespace-nowrap"
             >
               <RotateCcw className={`h-3.5 w-3.5 shrink-0 ${isResetting ? "animate-spin" : ""}`} />
-              <span>Reset</span>
+              <span className="hidden sm:inline">Reset</span>
             </Button>
           )}
+
+          <WhatIfAbsentButton
+            isSimulationActive={isSimulationActive}
+            selectedCount={selectedDateStrings.length}
+            onClick={() => setCalendarOpen(true)}
+          />
 
           <Button
             variant="default"
             size="sm"
             onClick={handleCalculateToday}
             disabled={isCalculating}
-            className="text-xs sm:text-sm px-3 sm:px-4 h-8 sm:h-9 gap-1.5 shrink-0"
+            className="text-xs px-2 sm:px-3 h-8 gap-1 sm:gap-1.5 shrink-0 whitespace-nowrap"
           >
             {isCalculating ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin shrink-0" />
-                <span>Calculating...</span>
+                <span className="hidden sm:inline">Calculating...</span>
+                <span className="sm:hidden">...</span>
               </>
             ) : (
-              <span>Calculate Today</span>
+              <>
+                <span className="hidden sm:inline">Calculate Today</span>
+                <span className="sm:hidden">Today</span>
+              </>
             )}
           </Button>
 
@@ -246,7 +309,7 @@ const AttendanceDetails = () => {
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 sm:h-9 w-8 sm:w-9 p-0 flex items-center justify-center shrink-0"
+                className="h-8 w-8 p-0 flex items-center justify-center shrink-0"
                 title="Options"
               >
                 <MoreVertical className="h-4 w-4" />
@@ -268,7 +331,7 @@ const AttendanceDetails = () => {
             variant={currentSort !== "default" ? "default" : "outline"}
             size="sm"
             onClick={handleCycleSort}
-            className="h-8 sm:h-9 w-8 sm:w-9 p-0 flex items-center justify-center shrink-0"
+            className="h-8 w-8 p-0 flex items-center justify-center shrink-0"
             title={`Sort mode: ${currentSort}`}
           >
             {getSortIcon(currentSort)}
