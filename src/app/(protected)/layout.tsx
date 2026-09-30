@@ -34,6 +34,13 @@ function ProtectedDashboardLayoutContent({ children }: { children: React.ReactNo
       router.push(`/login?redirect=${encodeURIComponent(fullPath)}`);
     } else if (isAuthenticated) {
       setChecked(true);
+      if (!isPublicRoute && pathname && pathname !== "/dashboard") {
+        try {
+          if (typeof window !== "undefined") {
+            localStorage.setItem("last_opened_page", pathname);
+          }
+        } catch {}
+      }
     }
   }, [isAuthenticated, initialized, isLoading, isPublicRoute, pathname, searchParams, router]);
 

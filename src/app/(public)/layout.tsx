@@ -15,10 +15,21 @@ function PublicLayoutContent({ children }: { children: React.ReactNode }) {
     if (isLoading || !ready) return;
     if (isAuthenticated) {
       const redirectParam = searchParams.get("redirect") || searchParams.get("callbackUrl");
-      if (redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//")) {
+      if (redirectParam && redirectParam.startsWith("/") && !redirectParam.startsWith("//") && redirectParam !== "/dashboard") {
         router.push(redirectParam);
       } else {
-        router.push(`/${settings.startupPage}`);
+        if (settings.startupPage === "timetable") {
+          router.push("/timetable");
+        } else if (settings.startupPage === "attendance") {
+          router.push("/attendance");
+        } else {
+          let lastPage = typeof window !== "undefined" ? localStorage.getItem("last_opened_page") : null;
+          if (lastPage && lastPage.startsWith("/") && lastPage !== "/dashboard") {
+            router.push(lastPage);
+          } else {
+            router.push("/attendance");
+          }
+        }
       }
     }
   }, [isLoading, isAuthenticated, ready, settings.startupPage, searchParams, router]);

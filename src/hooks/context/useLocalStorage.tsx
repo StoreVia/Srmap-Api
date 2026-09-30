@@ -11,7 +11,7 @@ export const DEFAULT_STORAGE = {
     feedbackExplanationSeen: false,
     sidebarTutorialDone: false,
     mobileNavigationLayout: "single" as "single" | "double" | "mini" | "sidebar",
-    startupPage: "dashboard" as "dashboard" | "timetable" | "dashboard",
+    startupPage: "default" as "default" | "attendance" | "timetable",
   },
   profile: {
     activeAccountId: "",
@@ -54,6 +54,9 @@ export default function useLocalStorage<T extends StorageType>(key: T) {
       const raw = typeof window !== "undefined" ? localStorage.getItem(key) : null;
       if (raw) {
         const parsed = JSON.parse(raw);
+        if (key === "settings" && parsed && parsed.startupPage === "dashboard") {
+          parsed.startupPage = "default";
+        }
         setData(prev => ({ ...DEFAULT_STORAGE[key], ...prev, ...parsed }));
       } else {
         persistData(DEFAULT_STORAGE[key]);

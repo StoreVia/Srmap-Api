@@ -17,7 +17,7 @@ const NotFound = () => {
     };
 
     const handleGoHome = () => {
-        window.location.href = "/dashboard";
+        window.location.href = "/attendance";
     };
 
     return (

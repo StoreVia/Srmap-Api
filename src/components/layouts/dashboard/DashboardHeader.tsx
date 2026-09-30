@@ -53,7 +53,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
     setShowTutorial(false);
   };
 
-  const handleHomeNavigation = () => router.push("/dashboard");
   const handleRefresh = () => fetchFreshData();
   const handleAccountSwitch = (accountId: string) => {
     switchAccount(accountId);
@@ -192,13 +191,6 @@ export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-52">
-              <DropdownMenuItem
-                onClick={handleHomeNavigation}
-                className="cursor-pointer"
-              >
-                <Home className="mr-2 h-4 w-4" />
-                Dashboard
-              </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={handleRefresh}
                 className="cursor-pointer"

@@ -23,7 +23,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                     description: "You don't have admin privileges.",
                     variant: "destructive"
                 });
-                router.replace("/dashboard");
+                router.replace("/attendance");
                 return;
             }
             setChecked(true);

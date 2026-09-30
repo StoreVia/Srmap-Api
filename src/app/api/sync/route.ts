@@ -20,7 +20,11 @@ function filterAllowedSettings(rawSettings: Record<string, any>): Partial<Record
 
   for (const key of ALLOWED_SYNC_KEYS) {
     if (key in rawSettings && rawSettings[key] !== undefined) {
-      filtered[key] = rawSettings[key];
+      if (key === "startupPage" && rawSettings[key] === "dashboard") {
+        filtered[key] = "default";
+      } else {
+        filtered[key] = rawSettings[key];
+      }
     }
   }
   return filtered;
@@ -40,6 +44,13 @@ export async function GET(req: NextRequest) {
     const existingUser = await userCol.findOne({
       username: { $regex: new RegExp(`^${username}$`, "i") },
     });
+
+    if (existingUser?.settings?.startupPage === "dashboard") {
+      await userCol.updateOne(
+        { _id: existingUser._id },
+        { $set: { "settings.startupPage": "default" } }
+      );
+    }
 
     const dbSettings = filterAllowedSettings(existingUser?.settings || {});
 
@@ -85,8 +96,11 @@ export async function POST(req: NextRequest) {
 
     const currentDbSettings = existingUser?.settings || {};
     const finalSettings = { ...currentDbSettings, ...incomingSettings };
+    if (finalSettings.startupPage === "dashboard") {
+      finalSettings.startupPage = "default";
+    }
 
-    if (Object.keys(incomingSettings).length > 0) {
+    if (Object.keys(incomingSettings).length > 0 || currentDbSettings.startupPage === "dashboard") {
       await userCol.updateOne(
         { username: existingUser?.username || username },
         { $set: { settings: finalSettings } },

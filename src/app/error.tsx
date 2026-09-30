@@ -16,7 +16,7 @@ const Error = ({ error, resetError }: ErrorFallbackProps) => {
     const [showReportModal, setShowReportModal] = useState(false);
 
     const handleGoHome = () => {
-        return window.location.href = "/dashboard";
+        return window.location.href = "/attendance";
     };
 
     const reportMail = (errorData: { message?: string; stack?: string; url: string; timestamp: string }) => {

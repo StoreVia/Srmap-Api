@@ -27,7 +27,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "vacant", priority: 0.75, changeFrequency: "weekly" as const },
     { path: "apps", priority: 0.75, changeFrequency: "monthly" as const },
     { path: "markattendance", priority: 0.85, changeFrequency: "weekly" as const },
-    { path: "dashboard", priority: 0.8, changeFrequency: "daily" as const },
     { path: "feedback", priority: 0.7, changeFrequency: "monthly" as const },
   ];
 

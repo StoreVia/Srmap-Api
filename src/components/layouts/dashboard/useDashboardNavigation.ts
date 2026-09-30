@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { Home, List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, Database } from "lucide-react";
+import { List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, Database } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -12,7 +12,6 @@ export function useDashboardNavigation() {
 
   useEffect(() => {
     const baseMenu: MenuItem[] = [
-      { title: "Dashboard", shortTitle: "Home", path: "/dashboard", icon: Home },
       { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
@@ -85,7 +84,7 @@ export function useDashboardNavigation() {
   const isSubPathActive = useCallback(
     (basePath: string) => {
       if (pathname === basePath) return true;
-      if (basePath === "/admin" || basePath === "/dashboard") {
+      if (basePath === "/admin") {
         return pathname === basePath;
       }
       return pathname.startsWith(basePath + "/");
@@ -103,10 +102,10 @@ export function useDashboardNavigation() {
     const exactMatch = menuItems.find((item) => isActive(item.path));
     if (exactMatch) return exactMatch.title;
     const subPathMatch = menuItems.find(
-      (item) => pathname.startsWith(item.path + "/") && item.path !== "/dashboard"
+      (item) => pathname.startsWith(item.path + "/")
     );
     if (subPathMatch) return subPathMatch.title;
-    return "Dashboard";
+    return "Attendance Details";
   }, [menuItems, pathname, isActive]);
 
   return {

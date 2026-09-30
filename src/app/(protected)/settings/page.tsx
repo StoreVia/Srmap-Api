@@ -19,7 +19,7 @@ import { useIsMobile } from "@/hooks/utils/useMobile";
 import { handleRegNumberChange } from "@/shared/utils/functions";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Turnstile } from "@/components/utils/Turnstile";
-import { Sun, Moon, Database, Lock, User, Calendar, Clock, Hash, Expand, Shrink, ChevronDown, ChevronUp, RefreshCw, Trash2, Flag, LayoutDashboard, Fingerprint, CalendarDays, CheckSquare, Sunrise, Check } from "lucide-react";
+import { Sun, Moon, Database, Lock, User, Calendar, Clock, Hash, Expand, Shrink, ChevronDown, ChevronUp, RefreshCw, Trash2, Flag, LayoutDashboard, Fingerprint, CalendarDays, CheckSquare, Sunrise, Check, History } from "lucide-react";
 
 const FIELD_META: Record<string, { label: string; icon: React.ReactNode; sensitive?: boolean }> = {
   username: { label: "Username", icon: <User className="h-3.5 w-3.5" /> },
@@ -152,9 +152,9 @@ function DatabaseDataViewer({ data }: { data: Record<string, unknown> }) {
 }
 
 const STARTUP_PAGES = [
+  { value: "default", label: "Default", icon: <History className="h-4 w-4" /> },
   { value: "attendance", label: "Attendance", icon: <CheckSquare className="h-4 w-4" /> },
   { value: "timetable", label: "Timetable", icon: <CalendarDays className="h-4 w-4" /> },
-  { value: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="h-4 w-4" /> },
 ] as const;
 
 const MOBILE_NAVIGATION_OPTIONS = [
@@ -357,7 +357,7 @@ const SettingsContent = () => {
       setNewAccountUsername("");
       setNewAccountPassword("");
       setAddAccountTurnstileToken(null);
-      setTimeout(() => router.push("/dashboard"), 200);
+      setTimeout(() => router.push("/attendance"), 200);
     } else if (result?.hasCachedData) {
       setAddAccountDialogOpen(false);
       setWarningBox({
@@ -372,7 +372,7 @@ const SettingsContent = () => {
             setNewAccountUsername("");
             setNewAccountPassword("");
             setAddAccountTurnstileToken(null);
-            setTimeout(() => router.push("/dashboard"), 200);
+            setTimeout(() => router.push("/attendance"), 200);
           } else {
             toast({ title: "Failed to add account", description: cachedResult?.error || "Unknown error occurred.", variant: "destructive" });
           }
