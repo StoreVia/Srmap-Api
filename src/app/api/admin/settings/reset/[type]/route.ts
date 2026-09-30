@@ -25,7 +25,7 @@ export async function POST(
     }
 
     if (type === "timetable") {
-      const collection = collegeDb.collection("empty_classes");
+      const collection = collegeDb.collection("timetables");
       const result = await collection.deleteMany({});
       return NextResponse.json({ success: true, deletedCount: result.deletedCount });
     }

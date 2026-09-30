@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const db = (await useMongo()).db("college_db");
-    const timetableCount = await db.collection("empty_classes").countDocuments();
+    const timetableCount = await db.collection("timetables").countDocuments();
 
     if (timetableCount < MINIMUM_TIMETABLES) {
       return NextResponse.json({

@@ -37,7 +37,7 @@ export async function generateEmptyClassrooms() {
         await client.connect()
 
         const db = client.db("college_db")
-        const collection = db.collection("empty_classes")
+        const collection = db.collection("timetables")
 
         const timetables = await collection
             .find({}, { projection: { "data.timetable": 1 } })

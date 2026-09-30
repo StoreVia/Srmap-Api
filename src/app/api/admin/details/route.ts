@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     const blockedDb = db.collection("blocked");
     const notificationsDb = db.collection("notifications");
     const settingsDb = db.collection("settings");
-    const timetablesDb = db.collection("empty_classes");
+    const timetablesDb = db.collection("timetables");
 
     const feedbackCountDoc = await settingsDb.findOne({ id: "feedback" });
     const appSettingsDoc = await settingsDb.findOne({ id: "app-settings" });
