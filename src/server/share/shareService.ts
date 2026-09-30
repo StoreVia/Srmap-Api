@@ -4,7 +4,7 @@ import { ShareDocument, ShareFile, StorageStats, ShareListItem, ShareDetailRespo
 import { uploadToAllBuckets, generatePresignedDownloadUrl, deleteFromAllBuckets } from "./s3Clients";
 import { verifyTurnstileToken } from "@/lib/turnstile";
 
-const MAX_STORAGE_BYTES = 10 * 1024 * 1024;
+const MAX_STORAGE_BYTES = 20 * 1024 * 1024;
 const MAX_EXPIRY_MINUTES = 120;
 const MAX_DOWNLOAD_LIMIT = 10;
 
@@ -78,7 +78,7 @@ export async function createShare(params: {
 
     const stats = await getUserActiveStorage(creator);
     if (stats.usedBytes + totalBytes > MAX_STORAGE_BYTES) {
-        throw new Error(`Upload exceeds your 10MB active quota. Available storage: ${(stats.remainingBytes / (1024 * 1024)).toFixed(2)} MB`);
+        throw new Error(`Upload exceeds your 20MB active quota. Available storage: ${(stats.remainingBytes / (1024 * 1024)).toFixed(2)} MB`);
     }
 
     const minutes = Math.max(1, Math.min(params.expiryMinutes || 120, MAX_EXPIRY_MINUTES));

@@ -1,12 +1,15 @@
 import { useState, useMemo, useCallback } from "react";
 import type { TimetableEntry } from "@/types/context/studentContext";
 import type { AttendanceShape } from "@/hooks/timetable/useSubjectMaps";
-import type { SelectedAbsenceDate, SimulationSummary } from "@/types/simulation";
+import type {
+  SelectedSimulationDate,
+  SimulationDayStatus,
+  SimulationSummary,
+} from "@/types/simulation";
 import {
   calculateAbsenceSimulation,
   getDayNameFromDate,
   getClassesForDay,
-  getIsoDateString,
 } from "@/shared/utils/attendanceSimulation";
 
 export function useAbsentSimulation(
@@ -15,111 +18,58 @@ export function useAbsentSimulation(
   subjectCodeToName: Record<string, string>
 ) {
   const [calendarOpen, setCalendarOpen] = useState(false);
-  const [dateSlotMap, setDateSlotMap] = useState<Record<string, number[]>>({});
+  const [dateStatusMap, setDateStatusMap] = useState<Record<string, SimulationDayStatus>>({});
 
-  const selectedDatesList: SelectedAbsenceDate[] = useMemo(() => {
-    return Object.entries(dateSlotMap).map(([date, slots]) => {
+  const selectedDatesList: SelectedSimulationDate[] = useMemo(() => {
+    return Object.entries(dateStatusMap).map(([date, status]) => {
       const dayName = getDayNameFromDate(date);
+      const classes = getClassesForDay(timetable, dayName, subjectCodeToName);
       return {
         date,
         dayName,
-        selectedSlots: slots,
+        status,
+        selectedSlots: classes.map((c) => c.slotIndex),
       };
     });
-  }, [dateSlotMap]);
+  }, [dateStatusMap, timetable, subjectCodeToName]);
 
   const selectedDateStrings = useMemo(() => {
-    return Object.keys(dateSlotMap);
-  }, [dateSlotMap]);
+    return Object.keys(dateStatusMap).sort();
+  }, [dateStatusMap]);
 
-  const setDates = useCallback(
-    (dates: string[]) => {
-      const newMap: Record<string, number[]> = {};
-      dates.forEach((dateStr) => {
-        const dayName = getDayNameFromDate(dateStr);
-        const classes = getClassesForDay(timetable, dayName, subjectCodeToName);
-        const existingSlots = dateSlotMap[dateStr];
-        newMap[dateStr] = existingSlots !== undefined ? existingSlots : classes.map((c) => c.slotIndex);
-      });
-      setDateSlotMap(newMap);
-    },
-    [timetable, subjectCodeToName, dateSlotMap]
-  );
+  const toggleDate = useCallback((dateStr: string) => {
+    if (!dateStr) return;
+    setDateStatusMap((prev) => {
+      const copy = { ...prev };
+      if (!copy[dateStr]) {
+        copy[dateStr] = "absent";
+      } else if (copy[dateStr] === "absent") {
+        copy[dateStr] = "present";
+      } else {
+        delete copy[dateStr];
+      }
+      return copy;
+    });
+  }, []);
 
-  const addDate = useCallback(
-    (dateStr: string) => {
-      if (!dateStr) return;
-      const dayName = getDayNameFromDate(dateStr);
-      const classes = getClassesForDay(timetable, dayName, subjectCodeToName);
-      const allSlots = classes.map((c) => c.slotIndex);
-
-      setDateSlotMap((prev) => ({
-        ...prev,
-        [dateStr]: allSlots,
-      }));
-    },
-    [timetable, subjectCodeToName]
-  );
+  const setDateStatus = useCallback((dateStr: string, status: SimulationDayStatus) => {
+    if (!dateStr) return;
+    setDateStatusMap((prev) => ({
+      ...prev,
+      [dateStr]: status,
+    }));
+  }, []);
 
   const removeDate = useCallback((dateStr: string) => {
-    setDateSlotMap((prev) => {
+    setDateStatusMap((prev) => {
       const copy = { ...prev };
       delete copy[dateStr];
       return copy;
     });
   }, []);
 
-  const toggleSlot = useCallback(
-    (dateStr: string, slotIndex: number) => {
-      setDateSlotMap((prev) => {
-        const currentSlots = prev[dateStr] || [];
-        const exists = currentSlots.includes(slotIndex);
-        const updated = exists
-          ? currentSlots.filter((idx) => idx !== slotIndex)
-          : [...currentSlots, slotIndex];
-
-        return {
-          ...prev,
-          [dateStr]: updated,
-        };
-      });
-    },
-    []
-  );
-
-  const toggleAllSlotsForDate = useCallback(
-    (dateStr: string) => {
-      const dayName = getDayNameFromDate(dateStr);
-      const classes = getClassesForDay(timetable, dayName, subjectCodeToName);
-      const allSlots = classes.map((c) => c.slotIndex);
-
-      setDateSlotMap((prev) => {
-        const currentSlots = prev[dateStr] || [];
-        const isAllSelected = currentSlots.length === allSlots.length;
-
-        return {
-          ...prev,
-          [dateStr]: isAllSelected ? [] : allSlots,
-        };
-      });
-    },
-    [timetable, subjectCodeToName]
-  );
-
-  const selectToday = useCallback(() => {
-    const todayStr = getIsoDateString(new Date());
-    addDate(todayStr);
-  }, [addDate]);
-
-  const selectTomorrow = useCallback(() => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const tomorrowStr = getIsoDateString(tomorrow);
-    addDate(tomorrowStr);
-  }, [addDate]);
-
   const clearAll = useCallback(() => {
-    setDateSlotMap({});
+    setDateStatusMap({});
   }, []);
 
   const simulationSummary: SimulationSummary = useMemo(() => {
@@ -131,43 +81,21 @@ export function useAbsentSimulation(
     );
   }, [attendance, timetable, subjectCodeToName, selectedDatesList]);
 
-  const isSimulationActive = simulationSummary.totalMissedClasses > 0;
-
-  const isClassSimulatedAbsent = useCallback(
-    (dayName: string, slotIndex: number) => {
-      return selectedDatesList.some(
-        (item) =>
-          item.dayName.toLowerCase() === dayName.toLowerCase() &&
-          item.selectedSlots.includes(slotIndex)
-      );
-    },
-    [selectedDatesList]
-  );
-
-  const isDateSelected = useCallback(
-    (dateStr: string) => {
-      return Boolean(dateSlotMap[dateStr]);
-    },
-    [dateSlotMap]
-  );
+  const isSimulationActive =
+    simulationSummary.totalMissedClasses > 0 ||
+    simulationSummary.totalAttendedClasses > 0;
 
   return {
     calendarOpen,
     setCalendarOpen,
-    dateSlotMap,
+    dateStatusMap,
     selectedDatesList,
     selectedDateStrings,
-    setDates,
-    addDate,
+    toggleDate,
+    setDateStatus,
     removeDate,
-    toggleSlot,
-    toggleAllSlotsForDate,
-    selectToday,
-    selectTomorrow,
     clearAll,
     simulationSummary,
     isSimulationActive,
-    isClassSimulatedAbsent,
-    isDateSelected,
   };
 }

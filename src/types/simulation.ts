@@ -1,3 +1,5 @@
+export type SimulationDayStatus = "absent" | "present";
+
 export interface DayClassSlot {
   slotIndex: number;
   timeSlot: string;
@@ -16,6 +18,7 @@ export interface SubjectSimulationResult {
   simulatedConducted: number;
   simulatedPercentage: number;
   missedClasses: number;
+  attendedClasses: number;
   percentageDiff: number;
   classesNeeded: number;
   remainingBunks: number;
@@ -25,6 +28,7 @@ export interface SubjectSimulationResult {
 
 export interface SimulationSummary {
   totalMissedClasses: number;
+  totalAttendedClasses: number;
   overallOriginalPercentage: number;
   overallSimulatedPercentage: number;
   overallPercentageDiff: number;
@@ -33,19 +37,25 @@ export interface SimulationSummary {
   subjects: SubjectSimulationResult[];
 }
 
-export interface SelectedAbsenceDate {
+export interface SelectedSimulationDate {
   date: string;
   dayName: string;
-  selectedSlots: number[];
+  status: SimulationDayStatus;
+  selectedSlots?: number[];
 }
+
+export type SelectedAbsenceDate = SelectedSimulationDate;
 
 export interface MultiDateSelectDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedDates: string[];
+  dateStatusMap: Record<string, SimulationDayStatus>;
   simulationSummary: SimulationSummary;
   showAttendanceList?: boolean;
-  onApply: (dates: string[]) => void;
+  onToggleDate: (dateStr: string) => void;
+  onSetDateStatus: (dateStr: string, status: SimulationDayStatus) => void;
+  onRemoveDate: (dateStr: string) => void;
   onReset: () => void;
 }
 

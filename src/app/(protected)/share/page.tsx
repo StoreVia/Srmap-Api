@@ -13,7 +13,7 @@ import API from "@/lib/api/axiosClient";
 import Link from "next/link";
 import { ShareListItem } from "@/types/share";
 
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 
 const SecureShare = () => {
     const { toast } = useToast();
@@ -190,7 +190,7 @@ const SecureShare = () => {
             const combined = [...prev, ...newFiles];
             const totalSize = combined.reduce((acc, f) => acc + f.size, 0);
             if (totalSize > MAX_UPLOAD_BYTES) {
-                toast({ title: "Size limit exceeded", description: `Total files cannot exceed 10 MB. Current selection: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`, variant: "destructive" });
+                toast({ title: "Size limit exceeded", description: `Total files cannot exceed 20 MB. Current selection: ${(totalSize / (1024 * 1024)).toFixed(2)} MB`, variant: "destructive" });
                 return prev;
             }
             return combined;
@@ -209,7 +209,7 @@ const SecureShare = () => {
             return;
         }
         if (totalFilesSize > MAX_UPLOAD_BYTES) {
-            toast({ title: "Size limit exceeded", description: "Total files cannot exceed 10 MB.", variant: "destructive" });
+            toast({ title: "Size limit exceeded", description: "Total files cannot exceed 20 MB.", variant: "destructive" });
             return;
         }
         if (storageStats && (storageStats.remainingBytes < totalFilesSize)) {
@@ -383,7 +383,7 @@ const SecureShare = () => {
                                         <div className="flex items-center justify-between px-1 pt-1">
                                             <p className="text-xs text-muted-foreground">{files.length} file{files.length !== 1 ? 's' : ''} selected</p>
                                             <p className={`text-xs font-medium ${totalFilesSize > MAX_UPLOAD_BYTES ? 'text-destructive' : 'text-muted-foreground'}`}>
-                                                {totalFilesSizeLabel} / 10 MB
+                                                {totalFilesSizeLabel} / 20 MB
                                             </p>
                                         </div>
                                     </div>

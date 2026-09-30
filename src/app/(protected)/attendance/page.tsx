@@ -16,14 +16,12 @@ import { MultiDateSelectDialog } from "@/components/page/timetable/MultiDateSele
 import { WhatIfAbsentButton } from "@/components/page/timetable/WhatIfAbsentButton";
 import AttendanceCard from "@/components/page/attendance/AttendanceCard";
 import { mapManyToAttendanceShape } from "@/shared/utils/attendance";
-import { History, ArrowUpDown, ArrowUp, ArrowDown, Check, Loader2, RotateCcw, MoreVertical } from "lucide-react";
+import { History, ArrowUpDown, ArrowUp, ArrowDown, Loader2, RotateCcw, MoreVertical } from "lucide-react";
 import { AttendanceHistoryDialog } from "@/components/page/attendance/AttendanceHistoryDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -100,60 +98,73 @@ const AttendanceDetails = () => {
   const pendingCalculateRef = useRef(false);
 
   const baseMappedAttendance = useMemo(() => mapManyToAttendanceShape(attendance), [attendance]);
+
   const {
     calendarOpen,
     setCalendarOpen,
+    dateStatusMap,
     selectedDateStrings,
-    setDates,
+    toggleDate,
+    setDateStatus,
+    removeDate,
     clearAll,
     simulationSummary,
     isSimulationActive,
   } = useAbsentSimulation(timetable, baseMappedAttendance, subjectCodeToName);
 
   const currentSort = (settings.attendanceSortOption as SortOption) || "default";
-  const displayedSubjects = sortSubjects(rawSubjects, currentSort);
+
+  const effectiveSubjects = useMemo(() => {
+    if (isSimulationActive) {
+      return baseMappedAttendance.map((sub) => {
+        const sim = simulationSummary.subjects.find((s) => s.subject_code === sub.subject_code);
+        if (!sim || (sim.missedClasses === 0 && sim.attendedClasses === 0)) return sub;
+        return {
+          ...sub,
+          attended: sim.simulatedAttended,
+          conducted: sim.simulatedConducted,
+          percentage: sim.simulatedPercentage,
+          absent: sub.absent + sim.missedClasses,
+          present_percentage:
+            sim.simulatedConducted === 0
+              ? 0
+              : Number(((sim.simulatedAttended / sim.simulatedConducted) * 100).toFixed(2)),
+        };
+      });
+    }
+    return rawSubjects.length > 0 ? rawSubjects : baseMappedAttendance;
+  }, [isSimulationActive, baseMappedAttendance, simulationSummary, rawSubjects]);
+
+  const effectiveChangedCodes = useMemo(() => {
+    if (isSimulationActive) {
+      const set = new Set<string>();
+      simulationSummary.subjects.forEach((s) => {
+        if (s.missedClasses > 0 || s.attendedClasses > 0) {
+          set.add(s.subject_code);
+        }
+      });
+      return set;
+    }
+    return changedSubjectCodes;
+  }, [isSimulationActive, simulationSummary, changedSubjectCodes]);
+
+  const displayedSubjects = sortSubjects(effectiveSubjects, currentSort);
 
   const handleReset = () => {
     setIsResetting(true);
     clearAll();
-    setRawSubjects(mapManyToAttendanceShape(attendance));
+    setRawSubjects(baseMappedAttendance);
     setIsPredicted(false);
     setChangedSubjectCodes(new Set());
     setTimeout(() => {
       setIsResetting(false);
-    }, 500);
-  };
-
-  const handleApplyAbsenceDates = (dates: string[]) => {
-    setDates(dates);
-    if (dates.length === 0) {
-      handleReset();
-      return;
-    }
-    const changed = new Set<string>();
-    const baseSubjects = mapManyToAttendanceShape(attendance);
-    const updated = baseSubjects.map((sub) => {
-      const sim = simulationSummary.subjects.find((s) => s.subject_code === sub.subject_code);
-      if (!sim || sim.missedClasses === 0) return sub;
-      changed.add(sub.subject_code);
-      return {
-        ...sub,
-        attended: sim.simulatedAttended,
-        conducted: sim.simulatedConducted,
-        percentage: sim.simulatedPercentage,
-        absent: sub.absent + sim.missedClasses,
-        present_percentage: sim.simulatedConducted === 0 ? 0 : Number(((sim.simulatedAttended / sim.simulatedConducted) * 100).toFixed(2)),
-      };
-    });
-    setRawSubjects(updated);
-    setChangedSubjectCodes(changed);
-    setIsPredicted(true);
+    }, 400);
   };
 
   useEffect(() => {
     if (isPredicted) return;
-    setRawSubjects(mapManyToAttendanceShape(attendance));
-  }, [attendance, isPredicted]);
+    setRawSubjects(baseMappedAttendance);
+  }, [baseMappedAttendance, isPredicted]);
 
   const handleCalculateToday = async () => {
     if (!sessionValid || !sessionId) {
@@ -250,21 +261,26 @@ const AttendanceDetails = () => {
     }
   }, [sessionValid]);
 
+  const hasActiveModifications = isPredicted || isSimulationActive;
+
   return (
     <div className="relative">
       <MultiDateSelectDialog
         open={calendarOpen}
         onOpenChange={setCalendarOpen}
         selectedDates={selectedDateStrings}
+        dateStatusMap={dateStatusMap}
         simulationSummary={simulationSummary}
-        showAttendanceList={false}
-        onApply={handleApplyAbsenceDates}
+        showAttendanceList={true}
+        onToggleDate={toggleDate}
+        onSetDateStatus={setDateStatus}
+        onRemoveDate={removeDate}
         onReset={handleReset}
       />
 
       <div className="flex mb-6 items-center justify-between">
         <div className="flex items-center gap-1 sm:gap-2 ml-auto flex-nowrap shrink-0">
-          {isPredicted && (
+          {hasActiveModifications && (
             <Button
               variant="outline"
               size="sm"
@@ -346,7 +362,7 @@ const AttendanceDetails = () => {
             <AttendanceCard
               key={subject.subject_code}
               subject={subject}
-              isPredictedChanged={changedSubjectCodes.has(subject.subject_code)}
+              isPredictedChanged={effectiveChangedCodes.has(subject.subject_code)}
             />
           ))}
         </div>

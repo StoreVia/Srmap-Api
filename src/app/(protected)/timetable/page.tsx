@@ -37,8 +37,11 @@ const Timetable = () => {
   const {
     calendarOpen,
     setCalendarOpen,
+    dateStatusMap,
     selectedDateStrings,
-    setDates,
+    toggleDate,
+    setDateStatus,
+    removeDate,
     clearAll,
     simulationSummary,
     isSimulationActive,
@@ -176,8 +179,11 @@ const Timetable = () => {
         open={calendarOpen}
         onOpenChange={setCalendarOpen}
         selectedDates={selectedDateStrings}
+        dateStatusMap={dateStatusMap}
         simulationSummary={simulationSummary}
-        onApply={setDates}
+        onToggleDate={toggleDate}
+        onSetDateStatus={setDateStatus}
+        onRemoveDate={removeDate}
         onReset={clearAll}
       />
 

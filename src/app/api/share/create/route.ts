@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuthResponse, errorResponse } from "@/server/utils/functions";
 import { createShare } from "@/server/share/shareService";
 
-const MAX_TOTAL_BYTES = 10 * 1024 * 1024;
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 const MAX_FILES_COUNT = 20;
 const MAX_ALLOWED_REG_NOS = 100;
 
@@ -46,12 +46,12 @@ export async function POST(req: NextRequest) {
         for (const entry of fileEntries) {
             if (entry instanceof File && entry.size > 0) {
                 if (entry.size > MAX_TOTAL_BYTES) {
-                    return errorResponse(`File "${entry.name}" exceeds the 10MB maximum file size limit`, {}, 400);
+                    return errorResponse(`File "${entry.name}" exceeds the 20MB maximum file size limit`, {}, 400);
                 }
 
                 totalFilesBytes += entry.size;
                 if (totalFilesBytes > MAX_TOTAL_BYTES) {
-                    return errorResponse("Total attached files size exceeds the 10MB upload limit", {}, 400);
+                    return errorResponse("Total attached files size exceeds the 20MB upload limit", {}, 400);
                 }
 
                 const arrayBuffer = await entry.arrayBuffer();
@@ -68,11 +68,11 @@ export async function POST(req: NextRequest) {
 
         const textBytes = Buffer.byteLength(text, "utf8");
         if (textBytes > MAX_TOTAL_BYTES) {
-            return errorResponse("Text content exceeds the 10MB maximum limit", {}, 400);
+            return errorResponse("Text content exceeds the 20MB maximum limit", {}, 400);
         }
 
         if (textBytes + totalFilesBytes > MAX_TOTAL_BYTES) {
-            return errorResponse("Total share payload (text + files) exceeds 10MB limit", {}, 400);
+            return errorResponse("Total share payload (text + files) exceeds 20MB limit", {}, 400);
         }
 
         if (textBytes === 0 && filesData.length === 0) {

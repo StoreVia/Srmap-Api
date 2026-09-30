@@ -5,14 +5,16 @@ import type {
   DayClassSlot,
   SubjectSimulationResult,
   SimulationSummary,
-  SelectedAbsenceDate,
+  SelectedSimulationDate,
+  SimulationDayStatus,
 } from "@/types/simulation";
 
 export type {
   DayClassSlot,
   SubjectSimulationResult,
   SimulationSummary,
-  SelectedAbsenceDate,
+  SelectedSimulationDate,
+  SimulationDayStatus,
 };
 
 export function getDayNameFromDate(dateStr: string): string {
@@ -73,14 +75,15 @@ export function getClassesForDay(
 
 export function calculateSimulatedSubject(
   subject: AttendanceShape,
-  additionalAbsents: number
+  additionalAbsents: number,
+  additionalPresents: number = 0
 ): SubjectSimulationResult {
   const originalAttended = subject.attended;
   const originalConducted = subject.conducted;
   const originalPercentage = subject.percentage;
 
-  const simulatedAttended = originalAttended;
-  const simulatedConducted = originalConducted + additionalAbsents;
+  const simulatedAttended = originalAttended + additionalPresents;
+  const simulatedConducted = originalConducted + additionalAbsents + additionalPresents;
 
   const odMlRate = subject.od_ml_percentage / 100;
   const odMlEquivalent = odMlRate * simulatedConducted;
@@ -128,6 +131,7 @@ export function calculateSimulatedSubject(
     simulatedConducted,
     simulatedPercentage,
     missedClasses: additionalAbsents,
+    attendedClasses: additionalPresents,
     percentageDiff,
     classesNeeded,
     remainingBunks,
@@ -140,19 +144,32 @@ export function calculateAbsenceSimulation(
   attendance: AttendanceShape[],
   timetable: TimetableEntry[],
   subjectCodeToName: Record<string, string>,
-  absenceDates: SelectedAbsenceDate[]
+  simulationDates: SelectedSimulationDate[]
 ): SimulationSummary {
   const missedCountMap = new Map<string, number>();
+  const attendedCountMap = new Map<string, number>();
 
-  absenceDates.forEach(({ dayName, selectedSlots }) => {
+  simulationDates.forEach(({ dayName, selectedSlots, status }) => {
     const dayClasses = getClassesForDay(timetable, dayName, subjectCodeToName);
-    selectedSlots.forEach((slotIndex) => {
+    const slots =
+      selectedSlots && selectedSlots.length > 0
+        ? selectedSlots
+        : dayClasses.map((c) => c.slotIndex);
+
+    slots.forEach((slotIndex) => {
       const cls = dayClasses.find((c) => c.slotIndex === slotIndex);
       if (cls && cls.code) {
-        missedCountMap.set(
-          cls.code,
-          (missedCountMap.get(cls.code) || 0) + 1
-        );
+        if (status === "present") {
+          attendedCountMap.set(
+            cls.code,
+            (attendedCountMap.get(cls.code) || 0) + 1
+          );
+        } else {
+          missedCountMap.set(
+            cls.code,
+            (missedCountMap.get(cls.code) || 0) + 1
+          );
+        }
       }
     });
   });
@@ -160,6 +177,11 @@ export function calculateAbsenceSimulation(
   let totalMissed = 0;
   missedCountMap.forEach((count) => {
     totalMissed += count;
+  });
+
+  let totalAttended = 0;
+  attendedCountMap.forEach((count) => {
+    totalAttended += count;
   });
 
   let origTotalAttended = 0;
@@ -171,7 +193,8 @@ export function calculateAbsenceSimulation(
 
   const subjectResults: SubjectSimulationResult[] = attendance.map((sub) => {
     const missed = missedCountMap.get(sub.subject_code) || 0;
-    const sim = calculateSimulatedSubject(sub, missed);
+    const attended = attendedCountMap.get(sub.subject_code) || 0;
+    const sim = calculateSimulatedSubject(sub, missed, attended);
 
     origTotalAttended += sub.attended;
     origTotalConducted += sub.conducted;
@@ -181,7 +204,7 @@ export function calculateAbsenceSimulation(
     if (sim.status === "danger") {
       criticalCount += 1;
     }
-    if (missed > 0) {
+    if (missed > 0 || attended > 0) {
       affectedCount += 1;
     }
 
@@ -202,6 +225,7 @@ export function calculateAbsenceSimulation(
 
   return {
     totalMissedClasses: totalMissed,
+    totalAttendedClasses: totalAttended,
     overallOriginalPercentage,
     overallSimulatedPercentage,
     overallPercentageDiff,

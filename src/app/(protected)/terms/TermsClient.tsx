@@ -76,7 +76,7 @@ const TermsAndConditions = () => {
 
     • You are solely responsible for the content, accuracy, and legality of all text and files you upload or transmit.
     • You must not upload or share copyrighted material without permission, malware, harmful scripts, unlawful media, or content violating institutional conduct policies.
-    • Secure Share is a temporary, access-controlled transfer service with a 10MB quota and maximum 120-minute retention. It is not a permanent cloud backup service. Files are scheduled for permanent hard purging after expiration or download-limit exhaustion, and uploaded content is not encrypted by the application.
+    • Secure Share is a temporary, access-controlled transfer service with a 20MB quota and maximum 120-minute retention. It is not a permanent cloud backup service. Files are scheduled for permanent hard purging after expiration or download-limit exhaustion, and uploaded content is not encrypted by the application.
     • The platform reserves the right to remove shares, block abusers, and terminate access for violating content policies.`
     },
     {
