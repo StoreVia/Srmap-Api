@@ -211,7 +211,6 @@ export default function TypingTestPage() {
 
   const currentLeaderboard = dailyLeaderboard?.typing[selectedDifficulty] || [];
   const currentLineText = promptLines[currentLineIndex] || '';
-  const nextLineText = promptLines[currentLineIndex + 1] || '';
 
   return (
     <div className="w-full space-y-6 animate-in fade-in">
@@ -274,7 +273,7 @@ export default function TypingTestPage() {
                   ? 'Easy Mode: Lowercase words only, no punctuation.'
                   : selectedDifficulty === 'medium'
                     ? 'Medium Mode: Sentences with capital letters & commas.'
-                    : 'Hard Mode: Code syntax, hyphens, and symbols.'}
+                    : 'Hard Mode: Advanced vocabulary with complex punctuation.'}
               </p>
             </div>
             <Button
@@ -331,43 +330,57 @@ export default function TypingTestPage() {
 
               <div
                 onClick={() => inputRef.current?.focus()}
-                className="space-y-3 cursor-text select-none py-2"
+                className="cursor-text select-none py-2"
               >
-                <div className="font-mono text-base sm:text-lg leading-relaxed p-3.5 sm:p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[58px] flex flex-wrap items-center">
-                  {currentLineText.split('').map((char, index) => {
-                    let statusClass = 'text-muted-foreground/70';
-                    const isCurrent = index === currentLineInput.length;
+                <div className="font-mono text-base sm:text-lg leading-relaxed p-3.5 sm:p-4 rounded-xl bg-muted/40 border border-border/60 min-h-[58px] space-y-1.5">
+                  {/* Current active line with character-by-character highlighting */}
+                  <div className="flex flex-wrap items-center">
+                    {currentLineText.split('').map((char, index) => {
+                      let statusClass = 'text-muted-foreground/70';
+                      const isCurrent = index === currentLineInput.length;
 
-                    if (index < currentLineInput.length) {
-                      if (currentLineInput[index] === char) {
-                        statusClass = 'text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/15 rounded-xs';
-                      } else {
-                        statusClass = 'text-red-500 bg-red-500/20 underline decoration-red-500 decoration-2 rounded-xs font-semibold';
+                      if (index < currentLineInput.length) {
+                        if (currentLineInput[index] === char) {
+                          statusClass = 'text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/15 rounded-xs';
+                        } else {
+                          statusClass = 'text-red-500 bg-red-500/20 underline decoration-red-500 decoration-2 rounded-xs font-semibold';
+                        }
                       }
-                    }
 
-                    return (
-                      <span
-                        key={index}
-                        className={`${statusClass} ${isCurrent
-                            ? 'bg-primary/30 text-foreground border-b-2 border-primary animate-pulse rounded-xs'
-                            : ''
-                          }`}
-                      >
-                        {char === ' ' ? '\u00A0' : char}
-                      </span>
-                    );
-                  })}
-                </div>
-
-                {nextLineText && (
-                  <div className="font-mono text-sm sm:text-base text-muted-foreground/80 px-2 py-1 -mt-1.5 flex items-center gap-2 truncate">
-                    <span className="text-[10px] sm:text-[11px] uppercase font-sans font-bold px-1.5 py-0.5 rounded-md bg-muted border border-border/70 text-muted-foreground tracking-wider shrink-0">
-                      Next
-                    </span>
-                    <span className="truncate font-medium">{nextLineText}</span>
+                      return (
+                        <span
+                          key={index}
+                          className={`${statusClass} ${isCurrent
+                              ? 'bg-primary/30 text-foreground border-b-2 border-primary animate-pulse rounded-xs'
+                              : ''
+                            }`}
+                        >
+                          {char === ' ' ? '\u00A0' : char}
+                        </span>
+                      );
+                    })}
                   </div>
-                )}
+
+                  {/* Next lines shown inline within the same box for seamless flow */}
+                  {promptLines[currentLineIndex + 1] && (
+                    <div className="flex flex-wrap items-center text-muted-foreground/40">
+                      {promptLines[currentLineIndex + 1].split('').map((char, index) => (
+                        <span key={`next1-${index}`}>
+                          {char === ' ' ? '\u00A0' : char}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  {promptLines[currentLineIndex + 2] && (
+                    <div className="flex flex-wrap items-center text-muted-foreground/25">
+                      {promptLines[currentLineIndex + 2].split('').map((char, index) => (
+                        <span key={`next2-${index}`}>
+                          {char === ' ' ? '\u00A0' : char}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
