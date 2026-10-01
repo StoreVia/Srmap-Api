@@ -18,19 +18,35 @@ export async function handleUserSession({ username, password }: { username: stri
     const result = await login(username, password);
 
     if (!result?.success) {
-        if (result?.message?.includes("SRM server is unreachable") && user) {
-            try {
-                const sessionId = decryptData(user.session_id, password);
-                if (sessionId) {
-                    return {
-                        success: false,
-                        message: result.message,
-                        hasCachedData: true,
-                        cachedSessionId: sessionId,
-                        cachedSessionTime: user.session_time,
-                    };
-                }
-            } catch (err) {}
+        if (user) {
+            let canDecrypt = false;
+            let sessionId = "";
+            if (user.session_id) {
+                try {
+                    const dec = decryptData(user.session_id, password);
+                    if (dec) {
+                        canDecrypt = true;
+                        sessionId = typeof dec === "string" ? dec : String(dec);
+                    }
+                } catch (err) {}
+            }
+            if (!canDecrypt && user.data) {
+                try {
+                    const dec = decryptData(user.data, password);
+                    if (dec) {
+                        canDecrypt = true;
+                    }
+                } catch (err) {}
+            }
+            if (canDecrypt) {
+                return {
+                    success: false,
+                    message: "SRM server is unreachable. Please try again later.",
+                    hasCachedData: true,
+                    cachedSessionId: sessionId,
+                    cachedSessionTime: user.session_time || "",
+                };
+            }
         }
         return { success: false, message: result?.message || "Invalid credentials" };
     }

@@ -38,9 +38,12 @@ const Login = () => {
       return;
     }
     const result: any = await login(username, password, false, turnstileToken);
-    if (result && !result.success && result.error?.includes("SRM server is unreachable")) {
-      if (result.hasCachedData) {
-        const normalizedUsername = username.toUpperCase();
+    const normalizedUsername = username.toUpperCase();
+    const localAccount = profile.accounts?.find((a: any) => a.id === normalizedUsername);
+    const hasCachedData = result?.hasCachedData || !!localAccount?.data;
+
+    if (result && !result.success && (result.error?.includes("SRM server is unreachable") || result.hasCachedData)) {
+      if (hasCachedData) {
         setCachedUsername(normalizedUsername);
         setShowCachedPrompt(true);
       } else {

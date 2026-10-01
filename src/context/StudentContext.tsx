@@ -55,7 +55,7 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
       loadDataToState(data);
     } catch (err) {
       const errMsg = extractErrorMessage(err);
-      if (errMsg.includes("SRM server is unreachable")) {
+      if (errMsg.includes("SRM server is unreachable") || errMsg.includes("Network Error") || errMsg.includes("timeout") || lProfile.data) {
         setLoadCachedDataPrompt(true);
       } else {
         toast.error(errMsg);
@@ -63,7 +63,7 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
     } finally {
       setLoading(false);
     }
-  }, [lProfile.sessionTime, lProfile.sessionId]);
+  }, [lProfile.sessionTime, lProfile.sessionId, lProfile.hasCachedData, lProfile.data, updateActiveAccount]);
 
   const useCachedData = useCallback(async () => {
     updateActiveAccount({ hasCachedData: true });
@@ -86,13 +86,15 @@ export const StudentDataProvider = ({ children }: { children: ReactNode }) => {
       return { sessionId: newSessionId, sessionTime: newSessionTime };
     } catch (err) {
       const errMsg = extractErrorMessage(err);
-      if (errMsg.includes("SRM server is unreachable")) {
+      if (errMsg.includes("SRM server is unreachable") || errMsg.includes("Network Error") || errMsg.includes("timeout") || lProfile.data) {
         setLoadCachedDataPrompt(true);
+      } else {
+        toast.error(errMsg);
       }
       console.error("Session initiation failed:", err);
       return null;
     }
-  }, [lProfile.sessionId, lProfile.sessionTime, updateActiveAccount, fetchFreshData, lProfile.data]);
+  }, [lProfile.sessionId, lProfile.sessionTime, lProfile.data, updateActiveAccount, fetchFreshData]);
 
   const initializeStudentData = useCallback(async () => {
     try {

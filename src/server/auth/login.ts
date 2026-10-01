@@ -18,7 +18,7 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
 
   const setCookie = mainRes.headers.get("set-cookie") || "";
   const jsessionIdMatch = setCookie.match(/JSESSIONID=([^;]+)/);
-  if (!jsessionIdMatch) throw new Error("Session ID not found");
+  if (!jsessionIdMatch) throw new Error("SRM server is unreachable. Please try again later.");
   const jsessionId = jsessionIdMatch[1];
 
   let captchaRes: Response;
@@ -35,7 +35,7 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
 
   const captchaBuffer = Buffer.from(await captchaRes.arrayBuffer());
   const captchaTextRaw = await solveCaptcha(captchaBuffer);
-  if (!captchaTextRaw) throw new Error("Captcha solving failed");
+  if (!captchaTextRaw) throw new Error("SRM server is unreachable. Please try again later.");
 
   const payload = new URLSearchParams({
     txtUserName: username,
@@ -54,9 +54,16 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
     throw new Error("SRM server is unreachable. Please try again later.");
   }
 
+  if (!loginRes.ok) throw new Error("SRM server is unreachable. Please try again later.");
+
   const html = await loginRes.text();
   const nameMatch = html.match(/<h2>(.*?)<\/h2>/);
-  if (!nameMatch) throw new Error("Invalid credentials");
+  if (!nameMatch) {
+    if (html.includes("Invalid") || html.includes("invalid") || html.includes("Incorrect") || html.includes("incorrect")) {
+      throw new Error("Invalid credentials");
+    }
+    throw new Error("SRM server is unreachable. Please try again later.");
+  }
 
   return { success: true, sessionId: jsessionId };
 }

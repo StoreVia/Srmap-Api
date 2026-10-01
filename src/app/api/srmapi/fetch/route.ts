@@ -29,8 +29,28 @@ export async function POST(req: NextRequest) {
         const validSession = isSessionValid(user.session_time);
 
         if (validSession && sessionId) {
-            const result = await fetchFromWebsite(sessionId);
+            let result = null;
+            try {
+                result = await fetchFromWebsite(sessionId);
+            } catch (fetchErr: any) {
+                if (fetchErr?.message?.includes("SRM server is unreachable")) {
+                    if (user.data) {
+                        try {
+                            const data = decryptData(user.data, auth.payload.password);
+                            return NextResponse.json({ success: true, message: "Success!", data, student: { id: user.username }, source: "Database", cached: true });
+                        } catch {}
+                    }
+                    return errorResponse("SRM server is unreachable. Please try again later.", {}, 503);
+                }
+                throw fetchErr;
+            }
             if (!result) {
+                if (user.data) {
+                    try {
+                        const data = decryptData(user.data, auth.payload.password);
+                        return NextResponse.json({ success: true, message: "Success!", data, student: { id: user.username }, source: "Database", cached: true });
+                    } catch {}
+                }
                 return errorResponse(INVALID_CREDENTIALS, { action: "logout" });
             }
 

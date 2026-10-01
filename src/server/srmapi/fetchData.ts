@@ -235,7 +235,13 @@ async function fetchFromWebsite(sessionId: string): Promise<WebsiteData | null> 
       error?.message?.includes("ECONNREFUSED") ||
       error?.message?.includes("ENOTFOUND") ||
       error?.message?.includes("network") ||
-      error?.code === "ETIMEDOUT"
+      error?.message?.includes("timeout") ||
+      error?.code === "ECONNABORTED" ||
+      error?.code === "ETIMEDOUT" ||
+      error?.code === "ECONNREFUSED" ||
+      error?.code === "ENOTFOUND" ||
+      error?.code === "ERR_BAD_RESPONSE" ||
+      (error?.response?.status && error.response.status >= 500)
     ) {
       throw new Error("SRM server is unreachable. Please try again later.");
     }
