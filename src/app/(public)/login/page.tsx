@@ -52,9 +52,13 @@ const Login = () => {
     }
   };
 
-  const handleUseCachedData = async () => {
+  const handleUseCachedData = async (token?: string) => {
+    if (!token) {
+      toast.error("Please complete the verification.");
+      return;
+    }
     setShowCachedPrompt(false);
-    await login(username, password, true, turnstileToken || undefined);
+    await login(username, password, true, token);
   };
 
   return (
@@ -201,6 +205,7 @@ const Login = () => {
         onOpenChange={setShowCachedPrompt}
         onConfirm={handleUseCachedData}
         onCancel={() => setShowCachedPrompt(false)}
+        requireTurnstile={true}
         description="The college portal is currently down, but you have previously logged in. Would you like to view your last updated data?"
       />
     </div>
