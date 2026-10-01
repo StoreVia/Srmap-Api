@@ -15,10 +15,49 @@ const BLOCKS = ["C"]
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 const SLOTS = ["09:00-09:50", "10:00-10:50", "11:00-11:50", "12:00-12:50", "01:00-01:50", "02:00-02:50", "03:00-03:50", "04:00-04:50"]
 
+function getCurrentDay(): string {
+  const dayIndex = new Date().getDay()
+  if (dayIndex >= 1 && dayIndex <= 5) {
+    return DAYS[dayIndex - 1]
+  }
+  return DAYS[0]
+}
+
+function getCurrentSlot(): string {
+  const now = new Date()
+  let hours = now.getHours()
+  const minutes = now.getMinutes()
+  const totalMinutes = hours * 60 + minutes
+
+  const slotRanges = SLOTS.map(s => {
+    const [startStr, endStr] = s.split('-')
+    const parseTime = (t: string) => {
+      let [h, m] = t.split(':').map(Number)
+      if (h >= 1 && h <= 4) h += 12
+      return h * 60 + m
+    }
+    return { start: parseTime(startStr), end: parseTime(endStr) }
+  })
+
+  for (let i = 0; i < slotRanges.length; i++) {
+    if (totalMinutes >= slotRanges[i].start && totalMinutes <= slotRanges[i].end) {
+      return SLOTS[i]
+    }
+  }
+
+  for (let i = 0; i < slotRanges.length; i++) {
+    if (totalMinutes < slotRanges[i].start) {
+      return SLOTS[i]
+    }
+  }
+
+  return SLOTS[SLOTS.length - 1]
+}
+
 export default function VacantPage() {
   const [block, setBlock] = useState("C")
-  const [day, setDay] = useState("Monday")
-  const [slot, setSlot] = useState(SLOTS[0])
+  const [day, setDay] = useState(getCurrentDay)
+  const [slot, setSlot] = useState(getCurrentSlot)
   const [data, setData] = useState<VacantResult>({})
   const [activeFloor, setActiveFloor] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
