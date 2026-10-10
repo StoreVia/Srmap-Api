@@ -11,9 +11,9 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const course = searchParams.get("course");
     const year = searchParams.get("year");
-    const subjectId = searchParams.get("subjectId");
+    const subjectCode = searchParams.get("subjectCode");
 
-    if (!course || !year || !subjectId) {
+    if (!course || !year || !subjectCode) {
       return errorResponse(PARAMETERS);
     }
 
@@ -21,9 +21,10 @@ export async function GET(req: NextRequest) {
     const db = initDb.db("resources");
     const resourcesCollection = db.collection("resources");
 
+    const trimmedCode = String(subjectCode).trim();
     const resources = await resourcesCollection
       .find({
-        subjectId: String(subjectId),
+        subjectCode: { $regex: new RegExp(`^${trimmedCode.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, "i") },
       })
       .toArray();
 
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
       }));
 
     const semPapers = resources
-      .filter((r) => r.category === "previousYearPapers" && r.examType === "sem")
+      .filter((r) => r.category === "previousYearPapers" && (r.examType === "sem" || r.examType === "end"))
       .map((r) => ({
         id: r._id.toString(),
         title: r.title,
@@ -57,14 +58,24 @@ export async function GET(req: NextRequest) {
         downloadUrl: r.downloadUrl,
       }));
 
+    const deduplicate = (items: Array<{ id: string; title: string; size: string; type: string; downloadUrl: string }>) => {
+      const seen = new Set<string>();
+      return items.filter((item) => {
+        const key = `${item.title.toLowerCase().trim()}_${item.size.toLowerCase().trim()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+
     return NextResponse.json({
       success: true,
       data: {
         previousYearPapers: {
-          mid: midPapers,
-          sem: semPapers,
+          mid: deduplicate(midPapers),
+          sem: deduplicate(semPapers),
         },
-        slidesAndNotes: slides,
+        slidesAndNotes: deduplicate(slides),
       },
     });
   } catch (err) {

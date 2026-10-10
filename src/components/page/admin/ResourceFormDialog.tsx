@@ -17,7 +17,7 @@ interface ResourceFormDialogProps {
   contextData?: {
     year?: string;
     courseCode?: string;
-    subjectId?: string;
+    subjectCode?: string;
     yearsList?: string[];
     coursesList?: Array<{ code: string; name: string }>;
     subjectsList?: Array<{ id: string; code: string; name: string }>;
@@ -49,7 +49,7 @@ export function ResourceFormDialog({
   const [resCourseCode, setResCourseCode] = useState("CSE");
   const [resSubjectId, setResSubjectId] = useState("");
   const [resCategory, setResCategory] = useState<"previousYearPapers" | "slidesAndNotes">("previousYearPapers");
-  const [resExamType, setResExamType] = useState<"mid" | "sem">("mid");
+  const [resExamType, setResExamType] = useState<"mid" | "sem" | "end">("mid");
   const [resTitle, setResTitle] = useState("");
   const [resSize, setResSize] = useState("");
   const [resFileType, setResFileType] = useState("pdf");
@@ -84,7 +84,7 @@ export function ResourceFormDialog({
       if (mode === "edit" && initialData) {
         setResYear(initialData.year || "1");
         setResCourseCode(initialData.courseCode || "CSE");
-        setResSubjectId(initialData.subjectId || "");
+        setResSubjectId(initialData.subjectCode || "");
         setResCategory(initialData.category || "previousYearPapers");
         setResExamType(initialData.examType || "mid");
         setResTitle(initialData.title || "");
@@ -94,7 +94,7 @@ export function ResourceFormDialog({
       } else {
         setResYear(contextData?.year || "1");
         setResCourseCode(contextData?.courseCode || "CSE");
-        setResSubjectId(contextData?.subjectId || "");
+        setResSubjectId(contextData?.subjectCode || "");
         setResCategory("previousYearPapers");
         setResExamType("mid");
         setResTitle("");
@@ -144,7 +144,7 @@ export function ResourceFormDialog({
         ...(mode === "edit" ? { id: initialData?._id || initialData?.id } : {}),
         year: resYear.trim(),
         courseCode: resCourseCode.trim().toUpperCase(),
-        subjectId: resSubjectId.trim(),
+        subjectCode: resSubjectId.trim(),
         category: resCategory,
         ...(resCategory === "previousYearPapers" ? { examType: resExamType } : {}),
         title: resTitle.trim(),
@@ -298,7 +298,7 @@ export function ResourceFormDialog({
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold">Exam Type</label>
                     <Select
-                      value={resExamType}
+                      value={resExamType === "end" ? "sem" : resExamType}
                       onValueChange={(val: "mid" | "sem") => setResExamType(val)}
                     >
                       <SelectTrigger>

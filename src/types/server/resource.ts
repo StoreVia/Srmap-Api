@@ -31,9 +31,9 @@ export interface ResourceDocument {
   _id?: ObjectId | string;
   courseCode: string;
   year: string;
-  subjectId: string;
+  subjectCode: string;
   category: "previousYearPapers" | "slidesAndNotes";
-  examType?: "mid" | "sem";
+  examType?: "mid" | "sem" | "end";
   title: string;
   size: string;
   fileType: string;

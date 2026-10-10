@@ -53,7 +53,7 @@ export const isValidSubject = (data: { courseCode?: string; year?: string; code?
 export const isValidResource = (data: {
   courseCode?: string;
   year?: string;
-  subjectId?: string;
+  subjectCode?: string;
   category?: string;
   examType?: string;
   title?: string;
@@ -69,15 +69,15 @@ export const isValidResource = (data: {
     return [false, "Year is required"];
   }
 
-  if (!data.subjectId || !data.subjectId.trim()) {
-    return [false, "Subject ID is required"];
+  if (!data.subjectCode || !data.subjectCode.trim()) {
+    return [false, "Subject code is required"];
   }
 
   if (!data.category || !["previousYearPapers", "slidesAndNotes"].includes(data.category)) {
     return [false, "Category must be previousYearPapers or slidesAndNotes"];
   }
 
-  if (data.category === "previousYearPapers" && (!data.examType || !["mid", "sem"].includes(data.examType))) {
+  if (data.category === "previousYearPapers" && (!data.examType || !["mid", "sem", "end"].includes(data.examType))) {
     return [false, "Exam type must be mid or sem for previous year papers"];
   }
 

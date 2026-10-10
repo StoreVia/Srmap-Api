@@ -161,8 +161,8 @@ export function ResourceEditor() {
 
   const activeSubjectResources = useMemo(() => {
     if (!selectedSubjectId) return [];
-    return resources.filter((r) => r.subjectId === selectedSubjectId);
-  }, [resources, selectedSubjectId]);
+    return resources.filter((r) => r.subjectCode === activeSubject?.code);
+  }, [resources, selectedSubjectId, activeSubject]);
 
   const filteredMidPapers = useMemo(() => {
     return activeSubjectResources.filter((r) => {
@@ -175,7 +175,7 @@ export function ResourceEditor() {
 
   const filteredSemPapers = useMemo(() => {
     return activeSubjectResources.filter((r) => {
-      const isSem = r.category === "previousYearPapers" && r.examType === "sem";
+      const isSem = r.category === "previousYearPapers" && (r.examType === "sem" || r.examType === "end");
       if (!isSem) return false;
       if (!resourceSearch.trim()) return true;
       return r.title.toLowerCase().includes(resourceSearch.toLowerCase().trim());
@@ -541,7 +541,7 @@ export function ResourceEditor() {
                 ) : (
                   filteredSubjects.map((subject) => {
                     const isSelected = selectedSubjectId === subject._id;
-                    const resCount = resources.filter((r) => r.subjectId === subject._id).length;
+                    const resCount = resources.filter((r) => r.subjectCode === subject.code).length;
 
                     return (
                       <div
@@ -785,7 +785,7 @@ export function ResourceEditor() {
         contextData={{
           year: selectedYear,
           courseCode: selectedCourse,
-          subjectId: selectedSubjectId,
+          subjectCode: activeSubject?.code || "",
         }}
         onSubmit={handleFormSubmit}
         loading={formLoading}

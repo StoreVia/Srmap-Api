@@ -19,11 +19,15 @@ export async function GET(req: NextRequest) {
     const initDb = await useMongo();
     const db = initDb.db("resources");
     const subjectsCollection = db.collection("subjects");
+    const resourcesCollection = db.collection("resources");
+
+    const availableCodes = await resourcesCollection.distinct("subjectCode");
 
     const subjects = await subjectsCollection
       .find({
         courseCode: course.toUpperCase(),
         year,
+        code: { $in: availableCodes },
       })
       .sort({ code: 1 })
       .toArray();

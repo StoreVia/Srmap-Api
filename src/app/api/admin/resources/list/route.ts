@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const year = searchParams.get("year");
     const courseCode = searchParams.get("courseCode");
-    const subjectId = searchParams.get("subjectId");
+    const subjectCode = searchParams.get("subjectCode");
 
     const initDb = await useMongo();
     const db = initDb.db("resources");
@@ -36,8 +36,8 @@ export async function GET(req: NextRequest) {
       resourceQuery.courseCode = courseCode.toUpperCase();
     }
 
-    if (subjectId) {
-      resourceQuery.subjectId = subjectId;
+    if (subjectCode) {
+      resourceQuery.subjectCode = subjectCode;
     }
 
     const [courses, subjects, resources, years, totalCourses, totalSubjects, totalResources, totalYears] = await Promise.all([

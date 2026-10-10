@@ -19,6 +19,15 @@ export async function GET(req: NextRequest) {
     const coursesCollection = db.collection("courses");
     const courses = await coursesCollection.find({ year }).toArray();
 
+    courses.sort((a, b) => {
+      const aCode = (a.code || "").toUpperCase();
+      const bCode = (b.code || "").toUpperCase();
+      const aPriority = aCode === "CSE" ? 3 : aCode.startsWith("CSE") ? 2 : 1;
+      const bPriority = bCode === "CSE" ? 3 : bCode.startsWith("CSE") ? 2 : 1;
+      if (aPriority !== bPriority) return bPriority - aPriority;
+      return aCode.localeCompare(bCode);
+    });
+
     const yearData: Record<string, { name: string; code: string }> = {};
     for (const course of courses) {
       yearData[course.code] = {

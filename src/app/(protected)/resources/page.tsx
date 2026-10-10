@@ -157,14 +157,14 @@ const Resources = () => {
         }
     };
 
-    const fetchResources = async (course: string, year: string, subjectId: string | number) => {
-        if (!course || !year || !subjectId) {
+    const fetchResources = async (course: string, year: string, subjectCode: string | number) => {
+        if (!course || !year || !subjectCode) {
             setResources(null);
             return;
         }
         setLoading(prev => ({ ...prev, resources: true }));
         try {
-            const response = await API.get(`/resources/resource?course=${course}&year=${year}&subjectId=${subjectId}`);
+            const response = await API.get(`/resources/resource?course=${course}&year=${year}&subjectCode=${subjectCode}`);
             const data = response.data;
             if (data.success) {
                 setResources(data.data);
@@ -200,7 +200,10 @@ const Resources = () => {
     useEffect(() => {
         const courseKeys = Object.keys(courses);
         if (courseKeys.length > 0 && !selectedCourse && selectedYear) {
-            const defaultCourse = courseKeys.includes("CSE") ? "CSE" : courseKeys[0];
+            const defaultCourse =
+                courseKeys.find((k) => k.toUpperCase() === "CSE") ||
+                courseKeys.find((k) => k.toUpperCase().startsWith("CSE")) ||
+                courseKeys[0];
             setSelectedCourse(defaultCourse);
             fetchSubjects(defaultCourse, selectedYear);
         }
@@ -209,7 +212,8 @@ const Resources = () => {
     const handleSubjectClick = (subjectId: string | number) => {
         setSelectedSubject(subjectId);
         if (selectedCourse && selectedYear) {
-            fetchResources(selectedCourse, selectedYear, subjectId);
+            const subject = subjects.find(s => String(s.id) === String(subjectId));
+            if (subject) fetchResources(selectedCourse, selectedYear, subject.code);
         }
         if (isMobile) setShowSubjects(false);
     };
@@ -256,7 +260,7 @@ const Resources = () => {
         setIsSearchActive(false);
         fetchCourses(result.year);
         fetchSubjects(result.courseCode, result.year);
-        fetchResources(result.courseCode, result.year, result.id);
+        fetchResources(result.courseCode, result.year, result.code);
         if (isMobile) setShowSubjects(false);
     };
 
@@ -451,13 +455,24 @@ const Resources = () => {
                                 }
                             />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent align="end" className="w-[var(--radix-select-trigger-width)] max-w-[calc(100vw-2rem)]">
                             <SelectGroup>
-                                {Object.entries(courses).map(([code, course]) => (
-                                    <SelectItem key={code} value={code}>
-                                        {course.code} - {course.name}
-                                    </SelectItem>
-                                ))}
+                                {Object.entries(courses)
+                                    .sort(([aCode], [bCode]) => {
+                                        const aUpper = aCode.toUpperCase();
+                                        const bUpper = bCode.toUpperCase();
+                                        const aPriority = aUpper === "CSE" ? 3 : aUpper.startsWith("CSE") ? 2 : 1;
+                                        const bPriority = bUpper === "CSE" ? 3 : bUpper.startsWith("CSE") ? 2 : 1;
+                                        if (aPriority !== bPriority) return bPriority - aPriority;
+                                        return aUpper.localeCompare(bUpper);
+                                    })
+                                    .map(([code, course]) => (
+                                        <SelectItem key={code} value={code} className="py-2">
+                                            <span className="block truncate max-w-[calc(100vw-6rem)] sm:max-w-md" title={`${course.code} - ${course.name}`}>
+                                                {course.code} - {course.name}
+                                            </span>
+                                        </SelectItem>
+                                    ))}
                             </SelectGroup>
                         </SelectContent>
                     </Select>
@@ -468,23 +483,23 @@ const Resources = () => {
             <div className="md:hidden">
                 <Button
                     variant="outline"
-                    className="w-full flex justify-between items-center"
+                    className="w-full flex justify-between items-center overflow-hidden"
                     onClick={() => setShowSubjects(!showSubjects)}
                     disabled={!selectedCourse && !selectedSubject}
                 >
-                    <span>
+                    <span className="truncate text-left mr-2 flex-1">
                         {currentSubject
                             ? `${currentSubject.code} - ${currentSubject.name}`
                             : "Select Subject"}
                     </span>
-                    {showSubjects ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    {showSubjects ? <ChevronUp size={16} className="shrink-0" /> : <ChevronDown size={16} className="shrink-0" />}
                 </Button>
             </div>
 
             {/* Main Content Layout */}
-            <div className="flex flex-col md:flex-row gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 min-w-0">
                 {/* Subjects Column */}
-                <div className={`w-full md:w-1/3 lg:w-1/4 border border-primary/20 rounded-lg p-3 ${showSubjects ? "block" : "hidden md:block"}`}>
+                <div className={`w-full md:w-1/3 lg:w-1/4 border border-primary/20 rounded-lg p-3 min-w-0 ${showSubjects ? "block" : "hidden md:block"}`}>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-base">Subjects</h3>
@@ -537,7 +552,7 @@ const Resources = () => {
                 </div>
 
                 {/* Resources Content Column */}
-                <div className={`w-full md:w-2/3 lg:w-3/4 ${!showSubjects || isMobile ? "block" : "hidden md:block"}`}>
+                <div className={`w-full md:w-2/3 lg:w-3/4 min-w-0 ${!showSubjects || isMobile ? "block" : "hidden md:block"}`}>
                     {!selectedYear ? (
                         <div className="flex flex-col items-center justify-center h-64 border border-primary/20 rounded-lg text-gray-500">
                             <FileText className="h-12 w-12 mb-2 opacity-50" />
@@ -554,12 +569,12 @@ const Resources = () => {
                             <p className="mt-2">Select a subject from the left panel to view available resources</p>
                         </div>
                     ) : (
-                        <div>
-                            <div className="mb-4">
-                                <h3 className="text-lg sm:text-xl font-semibold break-words">
+                        <div className="min-w-0">
+                            <div className="mb-4 min-w-0 max-w-full">
+                                <h3 className="text-base sm:text-lg md:text-xl font-semibold break-words [overflow-wrap:anywhere] hyphens-auto leading-snug">
                                     {currentSubject ? `${currentSubject.code} - ${currentSubject.name}` : "Subject Resources"}
                                 </h3>
-                                <p className="text-xs text-muted-foreground mt-0.5">
+                                <p className="text-xs text-muted-foreground mt-0.5 break-words [overflow-wrap:anywhere]">
                                     Year {selectedYear} • {selectedCourse}
                                 </p>
                             </div>

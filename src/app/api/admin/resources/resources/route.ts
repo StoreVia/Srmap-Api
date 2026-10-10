@@ -11,12 +11,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { courseCode, year, subjectId, category, examType, title, size, fileType, downloadUrl } = body;
+    const { courseCode, year, subjectCode, category, examType, title, size, fileType, downloadUrl } = body;
 
     const [valid, errorMsg] = isValidResource({
       courseCode,
       year,
-      subjectId,
+      subjectCode,
       category,
       examType,
       title,
@@ -36,36 +36,40 @@ export async function POST(req: NextRequest) {
 
     const trimmedCourseCode = String(courseCode).trim().toUpperCase();
     const trimmedYear = String(year).trim();
-    const trimmedSubjectId = String(subjectId).trim();
-
-    let subjectObjectId: ObjectId | null = null;
-    try {
-      subjectObjectId = new ObjectId(trimmedSubjectId);
-    } catch {
-      subjectObjectId = null;
-    }
+    const trimmedSubjectCode = String(subjectCode).trim();
 
     const subjectExists = await subjectsCollection.findOne({
-      $or: [
-        ...(subjectObjectId ? [{ _id: subjectObjectId }] : []),
-        { id: trimmedSubjectId },
-        { id: Number(trimmedSubjectId) },
-      ],
+      code: trimmedSubjectCode,
     });
 
     if (!subjectExists) {
       return errorResponse("Subject does not exist", {}, 404);
     }
 
+    const trimmedTitle = String(title).trim();
+    const trimmedSize = String(size).trim();
+
+    const existingResource = await resourcesCollection.findOne({
+      subjectCode: trimmedSubjectCode,
+      category,
+      title: trimmedTitle,
+      size: trimmedSize,
+      ...(category === "previousYearPapers" ? { examType } : {}),
+    });
+
+    if (existingResource) {
+      return errorResponse("A resource with the same title, category, and size already exists", {}, 409);
+    }
+
     const timestamp = getTime();
     const newDoc = {
       courseCode: trimmedCourseCode,
       year: trimmedYear,
-      subjectId: trimmedSubjectId,
+      subjectCode: trimmedSubjectCode,
       category,
       ...(category === "previousYearPapers" ? { examType } : {}),
-      title: String(title).trim(),
-      size: String(size).trim(),
+      title: trimmedTitle,
+      size: trimmedSize,
       fileType: String(fileType).trim().toLowerCase(),
       downloadUrl: String(downloadUrl).trim(),
       createdAt: timestamp,
@@ -91,7 +95,7 @@ export async function PUT(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { id, _id, courseCode, year, subjectId, category, examType, title, size, fileType, downloadUrl } = body;
+    const { id, _id, courseCode, year, subjectCode, category, examType, title, size, fileType, downloadUrl } = body;
     const targetId = id || _id;
 
     if (!targetId) {
@@ -101,7 +105,7 @@ export async function PUT(req: NextRequest) {
     const [valid, errorMsg] = isValidResource({
       courseCode,
       year,
-      subjectId,
+      subjectCode,
       category,
       examType,
       title,
@@ -134,7 +138,7 @@ export async function PUT(req: NextRequest) {
     const updateDoc = {
       courseCode: String(courseCode).trim().toUpperCase(),
       year: String(year).trim(),
-      subjectId: String(subjectId).trim(),
+      subjectCode: String(subjectCode).trim(),
       category,
       ...(category === "previousYearPapers" ? { examType } : { examType: null }),
       title: String(title).trim(),

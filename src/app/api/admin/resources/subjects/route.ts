@@ -200,7 +200,7 @@ export async function DELETE(req: NextRequest) {
     await subjectsCollection.deleteOne({ _id: objectId });
 
     await resourcesCollection.deleteMany({
-      subjectId: String(targetId),
+      subjectCode: subjectDoc.code,
     });
 
     return NextResponse.json({
