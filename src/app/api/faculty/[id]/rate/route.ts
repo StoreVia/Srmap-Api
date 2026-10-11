@@ -31,13 +31,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const facultyCollection = db.collection("faculty");
     const ratingsCollection = db.collection("faculty_ratings");
 
-    const facultyQuery = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { slug: id };
+    const isHex24 = typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
+    const facultyQuery = isHex24 ? { $or: [{ _id: new ObjectId(id) }, { slug: id }] } : { slug: id };
     const faculty = await facultyCollection.findOne(facultyQuery);
     if (!faculty) {
       return errorResponse("Faculty not found", {}, 404);
     }
 
     const facultyIdStr = String(faculty._id);
+    const overall = Number(((teaching + exams + correction + marks) / 4).toFixed(1));
 
     const existingRating = await ratingsCollection.findOne({
       username,
@@ -45,23 +47,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     });
 
     if (existingRating) {
-      return errorResponse("You have already rated this faculty", {}, 400);
+      await ratingsCollection.updateOne(
+        { _id: existingRating._id },
+        {
+          $set: {
+            teaching,
+            exams,
+            correction,
+            marks,
+            overall,
+            updatedAt: new Date()
+          }
+        }
+      );
+    } else {
+      await ratingsCollection.insertOne({
+        facultyId: facultyIdStr,
+        facultySlug: faculty.slug,
+        facultyEmail: faculty.email,
+        username,
+        teaching,
+        exams,
+        correction,
+        marks,
+        overall,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
     }
-
-    const overall = Number(((teaching + exams + correction + marks) / 4).toFixed(1));
-
-    await ratingsCollection.insertOne({
-      facultyId: facultyIdStr,
-      facultySlug: faculty.slug,
-      facultyEmail: faculty.email,
-      username,
-      teaching,
-      exams,
-      correction,
-      marks,
-      overall,
-      createdAt: new Date()
-    });
 
     const allRatings = await ratingsCollection.find({ facultyId: facultyIdStr }).toArray();
     const count = allRatings.length;

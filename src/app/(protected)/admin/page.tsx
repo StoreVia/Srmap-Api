@@ -67,7 +67,7 @@ export default function AdminPage() {
   const fetchAdminStats = useCallback(async () => {
     try {
       setStatsLoading(true);
-      const response = await API.get(`/admin/details`);
+      const response = await API.get(`/admin/index`);
       const data = response.data;
 
       if (data.success) {
@@ -116,7 +116,7 @@ export default function AdminPage() {
     }
     try {
       setBlockLoading(true);
-      const response = await API.post("/admin/block/add", {
+      const response = await API.post("/admin/index/block", {
         username: usernameToBlock.trim()
       });
       if (response.data.success) {
@@ -137,7 +137,7 @@ export default function AdminPage() {
 
   const handleUnblock = async (username: string) => {
     try {
-      const response = await API.post("/admin/block/remove", { username });
+      const response = await API.delete("/admin/index/block", { data: { username } });
       if (response.data.success) {
         setStats(prev => {
           if (!prev) return null;
@@ -173,7 +173,7 @@ export default function AdminPage() {
     }
     try {
       setNotificationsLoading(true);
-      const response = await API.post("/admin/notification/add", { notification });
+      const response = await API.post("/admin/index/notification", { notification });
       if (response.data.success) {
         setNotification("");
         setNotificationsDialogOpen(false);
@@ -192,7 +192,7 @@ export default function AdminPage() {
 
   const handleRemoveNotification = async (notificationId: string) => {
     try {
-      const response = await API.post("/admin/notification/remove", { notificationId });
+      const response = await API.delete("/admin/index/notification", { data: { notificationId } });
       if (response.data.success) {
         setStats(prev => {
           if (!prev) return null;
@@ -211,7 +211,7 @@ export default function AdminPage() {
     } catch (err: any) {
       toast({
         title: "Error",
-        description: err.response?.data?.message || "Failed To Unblock User!",
+        description: err.response?.data?.message || "Failed To Remove Notification!",
         variant: "destructive"
       });
     }
@@ -220,7 +220,7 @@ export default function AdminPage() {
   const handleToggleFeedback = async () => {
     try {
       setSettingsAction("feedback-toggle");
-      const res = await API.post("/admin/settings/toggle/feedback");
+      const res = await API.post("/admin/index/settings/toggle/feedback");
       if (res.data.success) setFeedbackEnabled(res.data.feedback);
     } catch {
       toast({ title: "Error", description: "Failed to update feedback setting", variant: "destructive" });
@@ -232,7 +232,7 @@ export default function AdminPage() {
   const handleResetFeedback = async () => {
     try {
       setSettingsAction("feedback-reset");
-      const res = await API.post("/admin/settings/reset/feedback");
+      const res = await API.post("/admin/index/settings/reset/feedback");
       if (res.data.success) fetchAdminStats();
     } catch {
       toast({ title: "Error", description: "Failed to reset feedback count", variant: "destructive" });
@@ -244,7 +244,7 @@ export default function AdminPage() {
   const handleToggleTimetableCollection = async () => {
     try {
       setSettingsAction("timetable-toggle");
-      const res = await API.post("/admin/settings/toggle/timetable");
+      const res = await API.post("/admin/index/settings/toggle/timetable");
       if (res.data.success) setTimetableCollectionEnabled(res.data.timetableCollection);
     } catch (error: any) {
       toast({ title: "Error", description: error.response?.data?.message || "Failed to update timetable collection", variant: "destructive" });
@@ -256,7 +256,7 @@ export default function AdminPage() {
   const handleResetTimetables = async () => {
     try {
       setSettingsAction("timetable-reset");
-      const res = await API.post("/admin/settings/reset/timetable");
+      const res = await API.post("/admin/index/settings/reset/timetable");
       if (res.data.success) {
         toast({ title: "Timetables reset", description: `${res.data.deletedCount} collected timetable records removed.` });
         fetchAdminStats();

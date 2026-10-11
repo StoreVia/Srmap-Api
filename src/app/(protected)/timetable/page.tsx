@@ -16,7 +16,7 @@ import { trimText } from "@/shared/utils/functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Clock, Calendar, Play, RotateCcw } from "lucide-react";
+import { MapPin, Clock, Calendar, Play, RotateCcw, GraduationCap } from "lucide-react";
 
 const Timetable = () => {
   const { timetable, subjects, attendance } = useStudentData();
@@ -25,6 +25,7 @@ const Timetable = () => {
 
   const [countdown, setCountdown] = useState<number | null>(null);
   const [upcomingCountdown, setUpcomingCountdown] = useState<number | null>(null);
+  const [showFacultyTimetable, setShowFacultyTimetable] = useState(false);
 
   const viewMode = (settings.timeTableViewMode as "old" | "new") || "old";
 
@@ -62,12 +63,23 @@ const Timetable = () => {
     <div className="flex flex-col space-y-4 pb-12">
       <div className="flex flex-wrap items-center justify-between gap-2">
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <WhatIfAbsentButton
             isSimulationActive={isSimulationActive}
             selectedCount={selectedDateStrings.length}
             onClick={() => setCalendarOpen(true)}
           />
+
+          <Button
+            type="button"
+            variant={showFacultyTimetable ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowFacultyTimetable((prev) => !prev)}
+            className="h-8 px-2 sm:px-3 text-xs font-semibold gap-1 sm:gap-1.5 shadow-sm transition-all shrink-0 whitespace-nowrap"
+          >
+            <GraduationCap className="w-3.5 h-3.5 shrink-0" />
+            <span>Faculty Timetables</span>
+          </Button>
 
           {isSimulationActive && (
             <Button
@@ -83,21 +95,23 @@ const Timetable = () => {
           )}
         </div>
 
-        <div className="flex items-center space-x-1 rounded-lg border border-slate-200 bg-slate-100 p-1 dark:border-0 dark:bg-muted">
-          {(["old", "new"] as const).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => updateSettings({ timeTableViewMode: mode })}
-              className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
-                viewMode === mode
-                  ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground"
-                  : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
-              }`}
-            >
-              {mode === "old" ? "Detailed View" : "Minimal View"}
-            </button>
-          ))}
-        </div>
+        {!showFacultyTimetable && (
+          <div className="flex items-center space-x-1 rounded-lg border border-slate-200 bg-slate-100 p-1 dark:border-0 dark:bg-muted">
+            {(["old", "new"] as const).map((mode) => (
+              <button
+                key={mode}
+                onClick={() => updateSettings({ timeTableViewMode: mode })}
+                className={`px-3 py-1 text-sm font-medium rounded-md transition-colors ${
+                  viewMode === mode
+                    ? "bg-primary text-primary-foreground shadow-sm dark:bg-background dark:text-foreground"
+                    : "text-slate-600 hover:bg-white hover:text-slate-950 dark:text-muted-foreground dark:hover:bg-transparent dark:hover:text-foreground"
+                }`}
+              >
+                {mode === "old" ? "Detailed View" : "Minimal View"}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-4 flex-shrink-0">
@@ -189,96 +203,97 @@ const Timetable = () => {
         onReset={clearAll}
       />
 
-      <Card className="flex flex-col border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card dark:shadow-none">
-        <CardHeader className="flex-shrink-0 border-b border-slate-200 bg-slate-50 py-3 dark:border-0 dark:bg-transparent">
-          <CardTitle className="flex items-center gap-2 text-base md:text-lg">
-            <Clock className="w-4 h-4 md:w-5 md:h-5" />
-            Class Schedule
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-2 md:p-4">
-          <div className="overflow-x-auto rounded-md bg-slate-100 p-1 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent dark:bg-transparent dark:p-0 dark:pr-1 dark:scrollbar-thumb-gray-600">
-            <table className="w-full border-separate border-spacing-1 table-fixed">
-
-              <thead className="sticky top-0 z-[2] bg-background dark:bg-gray-900">
-                <tr>
-                  <th className="sticky left-0 z-[3] w-16 min-w-[64px] rounded-md bg-slate-800 p-2 text-left text-white md:w-20 md:min-w-[80px] dark:bg-gray-800 dark:text-foreground">
-                    <div className="font-semibold text-xs">Day / Time</div>
-                  </th>
-                  {TIME_SLOTS.map((time) => (
-                    <th key={time} className={`rounded-md bg-slate-800 p-2 text-left text-white dark:bg-gray-800 dark:text-foreground ${viewMode === "new" ? "w-20 md:w-24 min-w-[80px] md:min-w-[96px]" : "w-28 md:w-36 min-w-[112px] md:min-w-[140px]"}`}>
-                      <div className="font-semibold text-xs">{time}</div>
+      {showFacultyTimetable ? (
+        <FacultyTimetableSection subjects={subjects} />
+      ) : (
+        <Card className="flex flex-col border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card dark:shadow-none">
+          <CardHeader className="flex-shrink-0 border-b border-slate-200 bg-slate-50 py-3 dark:border-0 dark:bg-transparent">
+            <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+              <Clock className="w-4 h-4 md:w-5 md:h-5" />
+              Class Schedule
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-2 md:p-4">
+            <div className="overflow-x-auto rounded-md bg-slate-100 p-1 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent dark:bg-transparent dark:p-0 dark:pr-1 dark:scrollbar-thumb-gray-600">
+              <table className="w-full border-separate border-spacing-1 table-fixed">
+                <thead className="sticky top-0 z-[2] bg-background dark:bg-gray-900">
+                  <tr>
+                    <th className="sticky left-0 z-[3] w-16 min-w-[64px] rounded-md bg-slate-800 p-2 text-left text-white md:w-20 md:min-w-[80px] dark:bg-gray-800 dark:text-foreground">
+                      <div className="font-semibold text-xs">Day / Time</div>
                     </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {WEEK_DAYS.map((day) => {
-                  const dayData = timetable.find((t) => t.day === day);
-                  return (
-                    <tr key={day} className="align-middle transition-colors hover:bg-muted/30 dark:hover:bg-muted/10">
-                      <td className="sticky left-0 z-[1] rounded-md bg-slate-200 p-2 text-xs font-bold text-slate-800 dark:bg-muted dark:font-semibold dark:text-foreground">
-                        {trimText(day, 3)}
-                      </td>
-                      {TIME_SLOTS.map((timeSlot, idx) => {
-                        const subjStr = dayData?.subjects[idx] || "";
-                        const { code, venue } = parseSubject(subjStr);
-                        return (
-                          <td key={`${day}-${idx}`} className="p-0 h-px">
-                            <div
-                              onClick={() => code && handleSubjectClick(code, venue, day, timeSlot)}
-                              className={`h-full rounded-md transition-colors p-1 md:p-2 ${code ? "cursor-pointer" : "cursor-default"} ${!code
-                                ? "flex flex-col items-center justify-center"
-                                : viewMode === "new"
-                                  ? "min-h-[100px] md:min-h-[70px] flex flex-col justify-center items-center"
-                                  : ""
-                                } ${code
-                                  ? "border border-blue-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 dark:border-0 dark:bg-blue-900/30 dark:shadow-none dark:hover:bg-blue-800/40"
-                                  : "border border-slate-200 bg-slate-50/80 dark:border-0 dark:bg-muted/10"
-                                }`}
-                            >
-                              {code ? (
-                                viewMode === "new" ? (
-                                  <div className="space-y-1 text-center">
-                                    <div className="font-bold text-xs leading-none text-slate-900 dark:text-gray-300 md:text-sm">{code}</div>
-                                    {venue && (
-                                      <div className="flex items-center gap-1 text-[10px] leading-none text-slate-600 dark:text-slate-400">
-                                        <MapPin className="w-3 h-3 shrink-0" /><span>{venue}</span>
-                                      </div>
-                                    )}
-                                  </div>
+                    {TIME_SLOTS.map((time) => (
+                      <th key={time} className={`rounded-md bg-slate-800 p-2 text-left text-white dark:bg-gray-800 dark:text-foreground ${viewMode === "new" ? "w-20 md:w-24 min-w-[80px] md:min-w-[96px]" : "w-28 md:w-36 min-w-[112px] md:min-w-[140px]"}`}>
+                        <div className="font-semibold text-xs">{time}</div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {WEEK_DAYS.map((day) => {
+                    const dayData = timetable.find((t) => t.day === day);
+                    return (
+                      <tr key={day} className="align-middle transition-colors hover:bg-muted/30 dark:hover:bg-muted/10">
+                        <td className="sticky left-0 z-[1] rounded-md bg-slate-200 p-2 text-xs font-bold text-slate-800 dark:bg-muted dark:font-semibold dark:text-foreground">
+                          {trimText(day, 3)}
+                        </td>
+                        {TIME_SLOTS.map((timeSlot, idx) => {
+                          const subjStr = dayData?.subjects[idx] || "";
+                          const { code, venue } = parseSubject(subjStr);
+                          return (
+                            <td key={`${day}-${idx}`} className="p-0 h-px">
+                              <div
+                                onClick={() => code && handleSubjectClick(code, venue, day, timeSlot)}
+                                className={`h-full rounded-md transition-colors p-1 md:p-2 ${code ? "cursor-pointer" : "cursor-default"} ${!code
+                                  ? "flex flex-col items-center justify-center"
+                                  : viewMode === "new"
+                                    ? "min-h-[100px] md:min-h-[70px] flex flex-col justify-center items-center"
+                                    : ""
+                                  } ${code
+                                    ? "border border-blue-200 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 dark:border-0 dark:bg-blue-900/30 dark:shadow-none dark:hover:bg-blue-800/40"
+                                    : "border border-slate-200 bg-slate-50/80 dark:border-0 dark:bg-muted/10"
+                                  }`}
+                              >
+                                {code ? (
+                                  viewMode === "new" ? (
+                                    <div className="space-y-1 text-center">
+                                      <div className="font-bold text-xs leading-none text-slate-900 dark:text-gray-300 md:text-sm">{code}</div>
+                                      {venue && (
+                                        <div className="flex items-center gap-1 text-[10px] leading-none text-slate-600 dark:text-slate-400">
+                                          <MapPin className="w-3 h-3 shrink-0" /><span>{venue}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-0.5 text-xs">
+                                      <div title={subjectCodeToName[code]} className="truncate font-bold leading-tight text-slate-800 dark:text-gray-300">{code}</div>
+                                      <Badge variant="secondary" className="w-full justify-start truncate border border-blue-200 bg-blue-100 px-1.5 text-[10px] font-semibold text-blue-950 dark:border-0 dark:bg-secondary dark:px-2 dark:text-secondary-foreground">
+                                        {subjectCodeToName[code]}
+                                      </Badge>
+                                      {venue && (
+                                        <div className="flex items-center gap-1 truncate text-[10px] text-slate-600 dark:text-slate-400">
+                                          <MapPin className="w-3 h-3 shrink-0" /><span>{venue}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )
                                 ) : (
-                                  <div className="space-y-0.5 text-xs">
-                                    <div title={subjectCodeToName[code]} className="truncate font-bold leading-tight text-slate-800 dark:text-gray-300">{code}</div>
-                                    <Badge variant="secondary" className="w-full justify-start truncate border border-blue-200 bg-blue-100 px-1.5 text-[10px] font-semibold text-blue-950 dark:border-0 dark:bg-secondary dark:px-2 dark:text-secondary-foreground">
-                                      {subjectCodeToName[code]}
-                                    </Badge>
-                                    {venue && (
-                                      <div className="flex items-center gap-1 truncate text-[10px] text-slate-600 dark:text-slate-400">
-                                        <MapPin className="w-3 h-3 shrink-0" /><span>{venue}</span>
-                                      </div>
-                                    )}
+                                  <div className="text-center">
+                                    <Badge variant="outline" className="border-slate-300 bg-white text-xs font-medium text-slate-500 dark:border-input dark:bg-transparent dark:text-gray-500">Free</Badge>
                                   </div>
-                                )
-                              ) : (
-                                <div className="text-center">
-                                  <Badge variant="outline" className="border-slate-300 bg-white text-xs font-medium text-slate-500 dark:border-input dark:bg-transparent dark:text-gray-500">Free</Badge>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <FacultyTimetableSection subjects={subjects} />
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

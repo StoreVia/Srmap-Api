@@ -16,11 +16,26 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const facultyCollection = db.collection("faculty");
     const ratingsCollection = db.collection("faculty_ratings");
 
-    const query = ObjectId.isValid(id) ? { _id: new ObjectId(id) } : { slug: id };
+    const isHex24 = typeof id === "string" && /^[0-9a-fA-F]{24}$/.test(id);
+    const query = isHex24 ? { $or: [{ _id: new ObjectId(id) }, { slug: id }] } : { slug: id };
     const faculty = await facultyCollection.findOne(query);
 
     if (!faculty) {
       return errorResponse("Faculty not found", {}, 404);
+    }
+
+    const url = new URL(req.url);
+    const field = url.searchParams.get("field");
+
+    if (field) {
+      const fieldData = faculty.details?.[field] || [];
+      return NextResponse.json({
+        success: true,
+        data: {
+          field,
+          value: fieldData
+        }
+      });
     }
 
     const username = auth.payload.username;

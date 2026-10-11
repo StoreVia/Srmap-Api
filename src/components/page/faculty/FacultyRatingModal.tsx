@@ -48,16 +48,17 @@ export function FacultyRatingModal({
   const displayName = cleanName(faculty?.name || "");
 
   const handleSubmit = async () => {
-    if (!faculty?._id) return;
+    const targetId = faculty?._id || faculty?.slug;
+    if (!targetId) return;
     setSubmitting(true);
     try {
-      const res = await API.post(`/faculty/${faculty._id}/rate`, ratings);
+      const res = await API.post(`/faculty/${targetId}/rate`, ratings);
       if (res.data?.success) {
         toast({
           title: "Rating Submitted",
           description: `Thank you for rating ${displayName}.`
         });
-        onRatingSuccess(faculty._id, res.data.data.ratingSummary, res.data.data.userRating);
+        onRatingSuccess(String(faculty?._id || targetId), res.data.data.ratingSummary, res.data.data.userRating);
         onOpenChange(false);
       }
     } catch (err: any) {

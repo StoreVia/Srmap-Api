@@ -26,6 +26,8 @@ export function FacultyDetailModal({
   const [timetableRecord, setTimetableRecord] = useState<FacultyTimetableRecord | null>(null);
   const [timetableLoading, setTimetableLoading] = useState(false);
   const [timetableLoaded, setTimetableLoaded] = useState(false);
+  const [loadedDetails, setLoadedDetails] = useState<Record<string, any>>({});
+  const [loadingSections, setLoadingSections] = useState<Record<string, boolean>>({});
   const [periodModalData, setPeriodModalData] = useState<{ entry: FacultyTimetableSlotEntry; day: string; timeSlot: string } | null>(null);
   const [periodModalOpen, setPeriodModalOpen] = useState(false);
 
@@ -33,29 +35,59 @@ export function FacultyDetailModal({
     setTimetableRecord(null);
     setTimetableLoaded(false);
     setTimetableLoading(false);
+    setLoadedDetails(faculty?.details || {});
+    setLoadingSections({});
   }, [faculty?.slug]);
 
-
   if (!faculty) return null;
+
+  const sectionFieldMap: Record<string, string> = {
+    education: "education",
+    experience: "experience",
+    research: "researchInterests",
+    patents: "patents",
+    publications: "publications",
+    projects: "projects",
+    scholars: "doctoralScholars"
+  };
 
   const toggleSection = async (key: string) => {
     const nextState = !openSections[key];
     setOpenSections(prev => ({ ...prev, [key]: nextState }));
-    if (key === "timetable" && nextState && !timetableLoaded && !timetableLoading && faculty?.slug) {
-      setTimetableLoading(true);
-      try {
-        const res = await API.get(`/faculty/timetables?slug=${encodeURIComponent(faculty.slug)}`);
-        if (res.data?.success && res.data.data) {
-          setTimetableRecord(res.data.data);
+
+    if (key === "timetable") {
+      if (nextState && !timetableLoaded && !timetableLoading && faculty?.slug) {
+        setTimetableLoading(true);
+        try {
+          const res = await API.get(`/faculty/timetables?slug=${encodeURIComponent(faculty.slug)}`);
+          if (res.data?.success && res.data.data) {
+            setTimetableRecord(res.data.data);
+          }
+        } catch {}
+        finally {
+          setTimetableLoading(false);
+          setTimetableLoaded(true);
         }
-      } catch {}
-      finally {
-        setTimetableLoading(false);
-        setTimetableLoaded(true);
+      }
+      return;
+    }
+
+    const field = sectionFieldMap[key];
+    if (field && nextState && loadedDetails[field] === undefined && (faculty?.slug || faculty?._id)) {
+      setLoadingSections(prev => ({ ...prev, [key]: true }));
+      try {
+        const id = faculty.slug || faculty._id;
+        const res = await API.get(`/faculty/${encodeURIComponent(id!)}?field=${field}`);
+        if (res.data?.success && res.data.data) {
+          setLoadedDetails(prev => ({ ...prev, [field]: res.data.data.value || [] }));
+        }
+      } catch {
+        setLoadedDetails(prev => ({ ...prev, [field]: [] }));
+      } finally {
+        setLoadingSections(prev => ({ ...prev, [key]: false }));
       }
     }
   };
-
 
   const cleanName = (name: string) => {
     if (!name) return "";
@@ -69,14 +101,13 @@ export function FacultyDetailModal({
 
   const displayName = cleanName(faculty.name);
   const displayImage = faculty.imageUrl || "https://www.srmap.edu.in/wp-content/uploads/2025/03/Faculty-Fallback_1.png";
-  const details = faculty.details || {};
+  const details = { ...(faculty.details || {}), ...loadedDetails };
 
   const sections = [
     {
       key: "timetable",
       title: "Timetable",
       icon: Calendar,
-      count: timetableRecord ? timetableRecord.totalClasses : 0,
       content: (
         <div className="pt-2 space-y-2">
           {timetableLoading ? (
@@ -104,10 +135,14 @@ export function FacultyDetailModal({
       key: "education",
       title: "Education",
       icon: GraduationCap,
-      count: details.education?.length || 0,
-      content: details.education && (
+      content: loadingSections.education ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading education...
+        </div>
+      ) : details.education && details.education.length > 0 ? (
         <div className="space-y-2.5 pl-2 border-l-2 border-border mt-2">
-          {details.education.map((edu, idx) => (
+          {details.education.map((edu: any, idx: number) => (
             <div key={idx} className="relative pl-4 space-y-0.5">
               <div className="flex items-center gap-2">
                 <span className="font-semibold text-sm">{edu.degree}</span>
@@ -119,89 +154,127 @@ export function FacultyDetailModal({
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No education recorded.</p>
       )
     },
     {
       key: "experience",
       title: "Experience",
       icon: Briefcase,
-      count: details.experience?.length || 0,
-      content: details.experience && (
+      content: loadingSections.experience ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading experience...
+        </div>
+      ) : details.experience && details.experience.length > 0 ? (
         <ul className="space-y-2 list-disc list-inside text-xs text-muted-foreground mt-2">
-          {details.experience.map((item, idx) => (
+          {details.experience.map((item: string, idx: number) => (
             <li key={idx} className="leading-relaxed">{item}</li>
           ))}
         </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No experience recorded.</p>
       )
     },
     {
       key: "research",
       title: "Research Interests",
       icon: BookOpen,
-      count: details.researchInterests?.length || 0,
-      content: details.researchInterests && (
+      content: loadingSections.research ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading research interests...
+        </div>
+      ) : details.researchInterests && details.researchInterests.length > 0 ? (
         <div className="flex flex-wrap gap-1.5 mt-2">
-          {details.researchInterests.map((item, idx) => (
+          {details.researchInterests.map((item: string, idx: number) => (
             <Badge key={idx} variant="outline" className="text-xs py-1">
               {item}
             </Badge>
           ))}
         </div>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No research interests recorded.</p>
       )
     },
     {
       key: "patents",
       title: "Patents",
       icon: Lightbulb,
-      count: details.patents?.length || 0,
-      content: details.patents && (
+      content: loadingSections.patents ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading patents...
+        </div>
+      ) : details.patents && details.patents.length > 0 ? (
         <ul className="space-y-2 list-disc list-inside text-xs text-muted-foreground mt-2">
-          {details.patents.map((item, idx) => (
+          {details.patents.map((item: string, idx: number) => (
             <li key={idx} className="leading-relaxed">{item}</li>
           ))}
         </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No patents recorded.</p>
       )
     },
     {
       key: "publications",
       title: "Publications",
       icon: FileText,
-      count: details.publications?.length || 0,
-      content: details.publications && (
+      content: loadingSections.publications ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading publications...
+        </div>
+      ) : details.publications && details.publications.length > 0 ? (
         <ul className="space-y-2.5 list-disc list-inside text-xs text-muted-foreground mt-2">
-          {details.publications.map((item, idx) => (
+          {details.publications.map((item: string, idx: number) => (
             <li key={idx} className="leading-relaxed">{item}</li>
           ))}
         </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No publications recorded.</p>
       )
     },
     {
       key: "projects",
       title: "Projects",
       icon: FolderGit2,
-      count: details.projects?.length || 0,
-      content: details.projects && (
+      content: loadingSections.projects ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading projects...
+        </div>
+      ) : details.projects && details.projects.length > 0 ? (
         <ul className="space-y-2 list-disc list-inside text-xs text-muted-foreground mt-2">
-          {details.projects.map((item, idx) => (
+          {details.projects.map((item: string, idx: number) => (
             <li key={idx} className="leading-relaxed">{item}</li>
           ))}
         </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No projects recorded.</p>
       )
     },
     {
       key: "scholars",
       title: "Doctoral Scholars",
       icon: Users,
-      count: details.doctoralScholars?.length || 0,
-      content: details.doctoralScholars && (
+      content: loadingSections.scholars ? (
+        <div className="flex items-center justify-center p-4 text-xs text-muted-foreground">
+          <Loader2 className="w-4 h-4 animate-spin mr-2" />
+          Loading doctoral scholars...
+        </div>
+      ) : details.doctoralScholars && details.doctoralScholars.length > 0 ? (
         <ul className="space-y-1.5 list-disc list-inside text-xs text-muted-foreground mt-2">
-          {details.doctoralScholars.map((item, idx) => (
+          {details.doctoralScholars.map((item: string, idx: number) => (
             <li key={idx}>{item}</li>
           ))}
         </ul>
+      ) : (
+        <p className="text-xs text-muted-foreground py-2.5 text-center">No doctoral scholars recorded.</p>
       )
     }
-  ].filter(sec => sec.key === "timetable" || sec.count > 0);
+  ];
 
 
   return (

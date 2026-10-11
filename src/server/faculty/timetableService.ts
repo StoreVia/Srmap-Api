@@ -1,8 +1,26 @@
 import { useMongo, useSecondaryMongo } from "@/lib/database/useMongo";
 import { getFacultyCabin } from "@/server/faculty/faculty";
-import { FacultyTimetableRecord, FacultyTimetableSlotEntry, FacultyTimetableMeta } from "@/types/faculty";
+import { FacultyTimetableRecord, FacultyTimetableSlotEntry, FacultyTimetableMeta, FacultyTimetableProgressState } from "@/types/faculty";
 
-let isGeneratingInProgress = false;
+let timetableProgressState: FacultyTimetableProgressState = {
+  inProgress: false,
+  stage: "idle",
+  total: 0,
+  completed: 0,
+  currentTarget: "",
+  error: null,
+  lastGeneratedAt: null,
+  count: 0,
+  totalClasses: 0
+};
+
+export function getFacultyTimetableProgress(): FacultyTimetableProgressState {
+  return { ...timetableProgressState };
+}
+
+function updateTimetableProgress(patch: Partial<FacultyTimetableProgressState>) {
+  timetableProgressState = { ...timetableProgressState, ...patch };
+}
 
 function cleanName(str: string): string {
   return str
@@ -81,11 +99,19 @@ function slugify(name: string): string {
 }
 
 export async function generateAllFacultyTimetables() {
-  if (isGeneratingInProgress) {
+  if (timetableProgressState.inProgress) {
     throw new Error("Faculty timetable generation is already in progress");
   }
 
-  isGeneratingInProgress = true;
+  updateTimetableProgress({
+    inProgress: true,
+    stage: "loading_students",
+    total: 0,
+    completed: 0,
+    currentTarget: "Loading faculty database and student timetables",
+    error: null
+  });
+
   try {
     const mainClient = await useMongo();
     const collegeDb = mainClient.db("college_db");
@@ -107,6 +133,13 @@ export async function generateAllFacultyTimetables() {
     }));
 
     const timetables = await collegeDb.collection("timetables").find().toArray();
+
+    updateTimetableProgress({
+      stage: "matching",
+      total: timetables.length,
+      completed: 0,
+      currentTarget: `Matching ${timetables.length} student timetables with faculty directory`
+    });
 
     const matchCache = new Map<string, typeof facultyList[0] | null>();
     function findFaculty(rawName: string) {
@@ -134,7 +167,15 @@ export async function generateAllFacultyTimetables() {
 
     const facultySchedules = new Map<string, FacultyTimetableRecord>();
 
+    let processedDocCount = 0;
     for (const doc of timetables) {
+      processedDocCount++;
+      if (processedDocCount % 50 === 0 || processedDocCount === timetables.length) {
+        updateTimetableProgress({
+          completed: processedDocCount,
+          currentTarget: `Processed ${processedDocCount}/${timetables.length} student timetables`
+        });
+      }
       const tt = (doc as any).data?.timetable;
       const subjects = (doc as any).data?.subjects || [];
       const profile = (doc as any).data?.profile || {};
@@ -213,11 +254,15 @@ export async function generateAllFacultyTimetables() {
     const timetableRecords = Array.from(facultySchedules.values());
     const timetablesCollection = facultyDb.collection("faculty_timetables");
 
+    updateTimetableProgress({
+      stage: "saving",
+      currentTarget: `Saving ${timetableRecords.length} faculty timetables to database`
+    });
+
     await timetablesCollection.deleteMany({});
     if (timetableRecords.length > 0) {
       await timetablesCollection.insertMany(timetableRecords as any);
     }
-
 
     await timetablesCollection.createIndex({ facultySlug: 1 });
     await timetablesCollection.createIndex({ facultyName: "text" });
@@ -228,8 +273,9 @@ export async function generateAllFacultyTimetables() {
       totalClassesCount += r.totalClasses;
     }
 
+    const nowIso = new Date().toISOString();
     const meta: FacultyTimetableMeta = {
-      lastGeneratedAt: new Date(),
+      lastGeneratedAt: nowIso,
       totalFacultyWithSchedules: timetableRecords.length,
       totalClasses: totalClassesCount,
       totalTimetablesProcessed: timetables.length,
@@ -242,14 +288,31 @@ export async function generateAllFacultyTimetables() {
       { upsert: true }
     );
 
+    updateTimetableProgress({
+      inProgress: false,
+      stage: "completed",
+      total: timetables.length,
+      completed: timetables.length,
+      count: timetableRecords.length,
+      totalClasses: totalClassesCount,
+      lastGeneratedAt: nowIso,
+      currentTarget: `Completed. Mapped ${timetableRecords.length} faculty across ${totalClassesCount} classes.`
+    });
+
     return {
       success: true,
       count: timetableRecords.length,
       totalClasses: totalClassesCount,
       processedTimetables: timetables.length
     };
-  } finally {
-    isGeneratingInProgress = false;
+  } catch (err: any) {
+    updateTimetableProgress({
+      inProgress: false,
+      stage: "error",
+      error: err.message || "Failed generating timetables",
+      currentTarget: "Generation failed"
+    });
+    throw err;
   }
 }
 
@@ -265,7 +328,8 @@ export async function getFacultyTimetableMeta(): Promise<FacultyTimetableMeta> {
     totalFacultyWithSchedules: count,
     totalClasses: metaDoc?.totalClasses || 0,
     totalTimetablesProcessed: metaDoc?.totalTimetablesProcessed || 0,
-    inProgress: isGeneratingInProgress
+    inProgress: timetableProgressState.inProgress,
+    progress: getFacultyTimetableProgress()
   };
 }
 

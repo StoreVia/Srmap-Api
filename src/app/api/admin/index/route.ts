@@ -56,7 +56,6 @@ export async function GET(req: NextRequest) {
       notifications
     });
   } catch (err) {
-    console.log("Error From /api/admin/details:- ", err);
     return errorResponse(undefined, {}, 500);
   }
 }

@@ -12,27 +12,31 @@ export async function POST(
   const { type } = await props.params;
 
   try {
-    const mongo = await useMongo();
-    const collegeDb = mongo.db("college_db");
+    const db = (await useMongo()).db("college_db").collection("settings");
+    const setting = await db.findOne({ id: "app-settings" });
 
     if (type === "feedback") {
-      await collegeDb.collection("settings").updateOne(
-        { id: "feedback" },
-        { $set: { count: 0 } },
+      const feedback = !(setting?.feedback ?? false);
+      await db.updateOne(
+        { id: "app-settings" },
+        { $set: { feedback } },
         { upsert: true }
       );
-      return NextResponse.json({ success: true });
+      return NextResponse.json({ success: true, feedback });
     }
 
     if (type === "timetable") {
-      const collection = collegeDb.collection("timetables");
-      const result = await collection.deleteMany({});
-      return NextResponse.json({ success: true, deletedCount: result.deletedCount });
+      const timetableCollection = !(setting?.timetableCollection ?? true);
+      await db.updateOne(
+        { id: "app-settings" },
+        { $set: { timetableCollection } },
+        { upsert: true }
+      );
+      return NextResponse.json({ success: true, timetableCollection });
     }
 
     return errorResponse("Invalid setting type", {}, 400);
   } catch (error) {
-    console.error(`Error resetting ${type} setting:`, error);
     return errorResponse(undefined, {}, 500);
   }
 }

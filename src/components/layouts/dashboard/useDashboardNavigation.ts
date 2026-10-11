@@ -12,10 +12,9 @@ export function useDashboardNavigation() {
 
   useEffect(() => {
     const baseMenu: MenuItem[] = [
-      { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2, highlight: true },
+      { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
-      { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
       { title: "Vacant", shortTitle: "Empty", path: "/vacant", icon: Building },
       {
@@ -30,9 +29,10 @@ export function useDashboardNavigation() {
         ],
       },
       { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
-      { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2 },
+      // { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2 },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
+      { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2 },
       { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
       { title: "Profile", shortTitle: "Profile", path: "/profile", icon: User },
       { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit },

@@ -84,7 +84,7 @@ export default function SSAdminPage() {
     const fetchShares = useCallback(async () => {
         setIsLoadingShares(true);
         try {
-            const res = await API.get("/admin/share");
+            const res = await API.get("/admin/secureshare");
             if (res.data?.success) {
                 setStats(res.data.data.stats);
                 setShares(res.data.data.shares || []);
@@ -99,7 +99,7 @@ export default function SSAdminPage() {
     const fetchBucketFiles = useCallback(async (bucketName: string) => {
         setIsLoadingBucket(true);
         try {
-            const res = await API.get(`/admin/share?action=list-bucket&bucket=${bucketName}`);
+            const res = await API.get(`/admin/secureshare?action=list-bucket&bucket=${bucketName}`);
             if (res.data?.success) {
                 setBucketFiles(res.data.data.files || []);
             }
@@ -126,7 +126,7 @@ export default function SSAdminPage() {
     const handlePurgeAll = async () => {
         setIsPurgingAll(true);
         try {
-            const res = await API.delete("/admin/share?action=purge-all");
+            const res = await API.delete("/admin/secureshare?action=purge-all");
             if (res.data?.success) {
                 toast.success(res.data.message || "All 3 databases purged successfully");
                 setShowPurgeAllModal(false);
@@ -144,7 +144,7 @@ export default function SSAdminPage() {
     const handlePurgeExpired = async () => {
         setIsPurgingExpired(true);
         try {
-            const res = await API.delete("/admin/share?action=purge-expired");
+            const res = await API.delete("/admin/secureshare?action=purge-expired");
             if (res.data?.success) {
                 toast.success(res.data.message || "Expired shares purged");
                 refreshAll();
@@ -162,7 +162,7 @@ export default function SSAdminPage() {
         if (!shareToDelete) return;
         setIsDeletingShare(true);
         try {
-            const res = await API.delete(`/admin/share?shareId=${shareToDelete}`);
+            const res = await API.delete(`/admin/secureshare?shareId=${shareToDelete}`);
             if (res.data?.success) {
                 toast.success("Share purged");
                 setShareToDelete(null);

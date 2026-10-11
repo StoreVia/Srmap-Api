@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("Error in GET /api/admin/resources/list:", err);
+    console.error("Error in GET /api/admin/resources:", err);
     return errorResponse(undefined, {}, 500);
   }
 }

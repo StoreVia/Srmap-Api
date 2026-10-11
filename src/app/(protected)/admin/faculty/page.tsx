@@ -5,47 +5,68 @@ import { toast } from "@/hooks/utils/useToast";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { RefreshCw, Database, CheckCircle2, AlertCircle, ShieldAlert, Calendar } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { RefreshCw, Database, CheckCircle2, AlertCircle, ShieldAlert, Calendar, Trash2, Star } from "lucide-react";
 import { FacultyTimetableMeta } from "@/types/faculty";
 
-interface StatusResponse {
-  progress: {
-    inProgress: boolean;
-    stage: "idle" | "faculty_list" | "faculty_details" | "staff_list" | "saving" | "completed" | "error";
-    total: number;
-    completed: number;
-    left: number;
-    currentTarget: string;
-    error?: string | null;
-    lastScrapedAt?: string | null;
-    startedAt?: string | null;
-    totalFaculty?: number;
-    totalStaff?: number;
+interface AdminFacultyData {
+  scraper: {
+    progress: {
+      inProgress: boolean;
+      stage: "idle" | "faculty_list" | "faculty_details" | "staff_list" | "saving" | "completed" | "error";
+      total: number;
+      completed: number;
+      left: number;
+      currentTarget: string;
+      error?: string | null;
+      lastScrapedAt?: string | null;
+      startedAt?: string | null;
+      totalFaculty?: number;
+      totalStaff?: number;
+    };
+    dbStats: {
+      totalFaculty: number;
+      totalStaff: number;
+      lastScrapedAt?: string | null;
+    };
   };
-  dbStats: {
-    totalFaculty: number;
-    totalStaff: number;
-    lastScrapedAt?: string | null;
+  timetables: {
+    meta: FacultyTimetableMeta | null;
+    progress: {
+      inProgress: boolean;
+      stage: string;
+      total: number;
+      completed: number;
+      left: number;
+      currentTarget: string;
+      error?: string | null;
+      startedAt?: string | null;
+    };
+  };
+  ratings: {
+    totalRatings: number;
+    ratedFacultyCount: number;
   };
 }
 
-export default function ScrapeAdminPage() {
-  const [data, setData] = useState<StatusResponse | null>(null);
-  const [timetableMeta, setTimetableMeta] = useState<FacultyTimetableMeta | null>(null);
+export default function FacultyAdminPage() {
+  const [data, setData] = useState<AdminFacultyData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isTriggering, setIsTriggering] = useState(false);
   const [isGeneratingTimetables, setIsGeneratingTimetables] = useState(false);
+  const [isResettingRatings, setIsResettingRatings] = useState(false);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
-  const fetchStatus = useCallback(async () => {
+  const fetchFacultyAdminData = useCallback(async () => {
     try {
-      const res = await API.get("/admin/scrape/status");
+      const res = await API.get("/admin/faculty");
       if (res.data?.success) {
         setData(res.data.data);
       }
     } catch (err: any) {
       toast({
-        title: "Error fetching status",
-        description: err.response?.data?.message || "Failed to load scrape status",
+        title: "Error fetching faculty data",
+        description: err.response?.data?.message || "Failed to load faculty admin data",
         variant: "destructive"
       });
     } finally {
@@ -53,26 +74,17 @@ export default function ScrapeAdminPage() {
     }
   }, []);
 
-  const fetchTimetableMeta = useCallback(async () => {
-    try {
-      const res = await API.get("/admin/faculty/timetables");
-      if (res.data?.success) {
-        setTimetableMeta(res.data.data);
-      }
-    } catch {}
-  }, []);
-
   useEffect(() => {
-    fetchStatus();
-    fetchTimetableMeta();
+    fetchFacultyAdminData();
+    const isWorking = data?.scraper?.progress?.inProgress || data?.timetables?.progress?.inProgress;
     const interval = setInterval(() => {
-      fetchStatus();
-    }, data?.progress?.inProgress ? 1500 : 8000);
+      fetchFacultyAdminData();
+    }, isWorking ? 1500 : 8000);
     return () => clearInterval(interval);
-  }, [fetchStatus, fetchTimetableMeta, data?.progress?.inProgress]);
+  }, [fetchFacultyAdminData, data?.scraper?.progress?.inProgress, data?.timetables?.progress?.inProgress]);
 
   const handleStartScrape = async () => {
-    if (data?.progress?.inProgress || isTriggering) {
+    if (data?.scraper?.progress?.inProgress || isTriggering) {
       toast({
         title: "Scrape in progress",
         description: "A scrape task is currently active. Please wait until it completes.",
@@ -83,13 +95,13 @@ export default function ScrapeAdminPage() {
 
     setIsTriggering(true);
     try {
-      const res = await API.post("/admin/scrape");
+      const res = await API.post("/admin/faculty", { action: "scrape" });
       if (res.data?.success) {
         toast({
           title: "Scraping Started",
           description: "Faculty and staff scraper is now running in the background."
         });
-        await fetchStatus();
+        await fetchFacultyAdminData();
       }
     } catch (err: any) {
       toast({
@@ -103,21 +115,24 @@ export default function ScrapeAdminPage() {
   };
 
   const handleGenerateTimetables = async () => {
-    if (isGeneratingTimetables) return;
-    setIsGeneratingTimetables(true);
-    toast({
-      title: "Generating Faculty Timetables",
-      description: "Processing collected student timetables across all semesters..."
-    });
+    if (data?.timetables?.progress?.inProgress || isGeneratingTimetables) {
+      toast({
+        title: "Generation in progress",
+        description: "Faculty timetables are already being generated. Please wait.",
+        variant: "destructive"
+      });
+      return;
+    }
 
+    setIsGeneratingTimetables(true);
     try {
-      const res = await API.post("/admin/faculty/timetables");
+      const res = await API.post("/admin/faculty", { action: "timetables" });
       if (res.data?.success) {
         toast({
-          title: "Timetables Generated Successfully",
-          description: res.data.message || "Faculty schedules updated"
+          title: "Timetable Generation Started",
+          description: "Generating faculty teaching timetables in the background."
         });
-        await fetchTimetableMeta();
+        await fetchFacultyAdminData();
       }
     } catch (err: any) {
       toast({
@@ -130,9 +145,38 @@ export default function ScrapeAdminPage() {
     }
   };
 
-  const inProgress = !!data?.progress?.inProgress;
-  const progressPercent = data?.progress?.total && data.progress.total > 0
-    ? Math.min(100, Math.round((data.progress.completed / data.progress.total) * 100))
+  const handleResetRatings = async () => {
+    setIsResettingRatings(true);
+    try {
+      const res = await API.post("/admin/faculty", { action: "reset-ratings" });
+      if (res.data?.success) {
+        toast({
+          title: "Ratings Reset Complete",
+          description: res.data?.message || "Successfully reset faculty ratings."
+        });
+        setResetDialogOpen(false);
+        await fetchFacultyAdminData();
+      }
+    } catch (err: any) {
+      toast({
+        title: "Reset Failed",
+        description: err.response?.data?.message || "Failed to reset ratings",
+        variant: "destructive"
+      });
+    } finally {
+      setIsResettingRatings(false);
+    }
+  };
+
+  const scraperProgress = data?.scraper?.progress;
+  const dbStats = data?.scraper?.dbStats;
+  const timetableMeta = data?.timetables?.meta;
+  const timetableProgress = data?.timetables?.progress;
+  const ratings = data?.ratings;
+
+  const inProgress = !!scraperProgress?.inProgress;
+  const progressPercent = scraperProgress?.total && scraperProgress.total > 0
+    ? Math.min(100, Math.round((scraperProgress.completed / scraperProgress.total) * 100))
     : (inProgress ? 15 : 0);
 
   return (
@@ -144,27 +188,40 @@ export default function ScrapeAdminPage() {
               <Database className="w-5 h-5 text-primary" />
               Scrape Faculty & Staff
             </CardTitle>
-            <Button
-              onClick={handleStartScrape}
-              disabled={inProgress || isTriggering}
-              className="min-w-[180px]"
-              size="lg"
-            >
-              {inProgress || isTriggering ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Scraping In Progress...
-                </>
-              ) : (
-                <>
-                  Scrape Faculty & Staff
-                </>
-              )}
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setResetDialogOpen(true)}
+                disabled={isResettingRatings}
+                className="h-9 px-3 text-xs text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 dark:border-red-900/40 dark:text-red-400 dark:hover:bg-red-950/30 gap-1.5 font-medium transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Reset Ratings
+              </Button>
+              <Button
+                onClick={handleStartScrape}
+                disabled={inProgress || isTriggering}
+                className="min-w-[170px]"
+                size="sm"
+              >
+                {inProgress || isTriggering ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                    Scraping In Progress...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                    Scrape Faculty & Staff
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-muted/40 p-3 rounded-lg border">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-xs bg-muted/40 p-3 rounded-lg border">
             <div>
               <span className="text-muted-foreground block">Scraper Status</span>
               <span className="font-semibold text-sm capitalize flex items-center gap-1.5 pt-0.5">
@@ -173,7 +230,7 @@ export default function ScrapeAdminPage() {
                     <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />
                     Active
                   </>
-                ) : data?.progress?.stage === "error" ? (
+                ) : scraperProgress?.stage === "error" ? (
                   <>
                     <AlertCircle className="w-3.5 h-3.5 text-red-500" />
                     Error
@@ -188,17 +245,24 @@ export default function ScrapeAdminPage() {
             </div>
             <div>
               <span className="text-muted-foreground block">Total Faculty</span>
-              <span className="font-semibold text-sm pt-0.5 block">{data?.dbStats?.totalFaculty ?? 0}</span>
+              <span className="font-semibold text-sm pt-0.5 block">{dbStats?.totalFaculty ?? 0}</span>
             </div>
             <div>
               <span className="text-muted-foreground block">Total Staff</span>
-              <span className="font-semibold text-sm pt-0.5 block">{data?.dbStats?.totalStaff ?? 0}</span>
+              <span className="font-semibold text-sm pt-0.5 block">{dbStats?.totalStaff ?? 0}</span>
+            </div>
+            <div>
+              <span className="text-muted-foreground block">Faculty Ratings</span>
+              <span className="font-semibold text-sm pt-0.5 flex items-center gap-1">
+                <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                {ratings?.totalRatings ?? 0} ({ratings?.ratedFacultyCount ?? 0} faculty)
+              </span>
             </div>
             <div>
               <span className="text-muted-foreground block">Last Sync</span>
               <span className="font-semibold text-xs pt-0.5 block truncate">
-                {data?.dbStats?.lastScrapedAt
-                  ? new Date(data.dbStats.lastScrapedAt).toLocaleString()
+                {dbStats?.lastScrapedAt
+                  ? new Date(dbStats.lastScrapedAt).toLocaleString()
                   : "Never"}
               </span>
             </div>
@@ -216,32 +280,32 @@ export default function ScrapeAdminPage() {
               <Progress value={progressPercent} className="h-2.5" />
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-2 text-xs text-muted-foreground">
                 <div>
-                  <span className="font-medium text-foreground">Completed:</span> {data?.progress?.completed ?? 0}
+                  <span className="font-medium text-foreground">Completed:</span> {scraperProgress?.completed ?? 0}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">Remaining:</span> {data?.progress?.left ?? 0}
+                  <span className="font-medium text-foreground">Remaining:</span> {scraperProgress?.left ?? 0}
                 </div>
                 <div>
-                  <span className="font-medium text-foreground">Total:</span> {data?.progress?.total ?? 0}
+                  <span className="font-medium text-foreground">Total:</span> {scraperProgress?.total ?? 0}
                 </div>
               </div>
               <div className="text-xs font-mono bg-background/80 p-2.5 rounded border truncate text-blue-900 dark:text-blue-200">
-                <span className="font-semibold">Current Activity:</span> {data?.progress?.currentTarget || "Working..."}
+                <span className="font-semibold">Current Activity:</span> {scraperProgress?.currentTarget || "Working..."}
               </div>
             </div>
           )}
 
-          {!inProgress && data?.progress?.currentTarget && (
+          {!inProgress && scraperProgress?.currentTarget && (
             <div className="rounded-lg border p-3 text-xs bg-muted/40 flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-green-600 flex-shrink-0" />
-              <span className="text-muted-foreground">{data.progress.currentTarget}</span>
+              <span className="text-muted-foreground">{scraperProgress.currentTarget}</span>
             </div>
           )}
 
-          {data?.progress?.error && (
+          {scraperProgress?.error && (
             <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-3 text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 flex-shrink-0" />
-              <span>{data.progress.error}</span>
+              <span>{scraperProgress.error}</span>
             </div>
           )}
         </CardContent>
@@ -256,24 +320,58 @@ export default function ScrapeAdminPage() {
             </CardTitle>
             <Button
               onClick={handleGenerateTimetables}
-              disabled={isGeneratingTimetables}
+              disabled={isGeneratingTimetables || !!timetableProgress?.inProgress}
               className="min-w-[190px] bg-white text-slate-900 border border-slate-200 hover:bg-slate-100 shadow-sm dark:bg-muted dark:text-foreground dark:border-border dark:hover:bg-muted/80 font-medium"
-              size="lg"
+              size="sm"
             >
-              {isGeneratingTimetables ? (
+              {(isGeneratingTimetables || timetableProgress?.inProgress) ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin text-slate-900 dark:text-foreground" />
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin text-slate-900 dark:text-foreground" />
                   Generating...
                 </>
               ) : (
                 <>
+                  <Calendar className="w-3.5 h-3.5 mr-1.5" />
                   Generate Timetables
                 </>
               )}
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {timetableProgress?.inProgress && (
+            <div className="space-y-2 p-3 bg-muted/40 rounded-lg border">
+              <div className="flex items-center justify-between text-xs font-medium">
+                <span className="flex items-center gap-1.5 text-primary">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  Phase: {timetableProgress.stage}
+                </span>
+                <span className="text-muted-foreground">
+                  {timetableProgress.total > 0
+                    ? `${timetableProgress.completed} / ${timetableProgress.total} (${Math.round((timetableProgress.completed / timetableProgress.total) * 100)}%)`
+                    : "Processing..."}
+                </span>
+              </div>
+              <Progress
+                value={
+                  timetableProgress.total > 0
+                    ? (timetableProgress.completed / timetableProgress.total) * 100
+                    : 20
+                }
+                className="h-2"
+              />
+              <p className="text-[11px] text-muted-foreground truncate">
+                {timetableProgress.currentTarget}
+              </p>
+            </div>
+          )}
+
+          {timetableProgress?.error && (
+            <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/20 p-3 text-xs text-red-600 dark:text-red-400 flex items-center gap-2">
+              <ShieldAlert className="w-4 h-4 flex-shrink-0" />
+              <span>{timetableProgress.error}</span>
+            </div>
+          )}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs bg-muted/40 p-3 rounded-lg border">
             <div>
               <span className="text-muted-foreground block">Processed Timetables</span>
@@ -298,8 +396,48 @@ export default function ScrapeAdminPage() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-destructive">
+              <Trash2 className="w-5 h-5" />
+              Reset All Faculty Ratings?
+            </DialogTitle>
+            <DialogDescription className="space-y-2 pt-2 text-xs leading-relaxed">
+              <span className="block">
+                This action will permanently delete all student rating submissions and clear rating statistics across all faculty members in the database.
+              </span>
+              <span className="block font-medium text-foreground bg-muted p-2 rounded">
+                Current Records: {ratings?.totalRatings ?? 0} ratings across {ratings?.ratedFacultyCount ?? 0} faculty profiles.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0 mt-2">
+            <DialogClose asChild>
+              <Button type="button" variant="outline" size="sm" disabled={isResettingRatings}>
+                Cancel
+              </Button>
+            </DialogClose>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleResetRatings}
+              disabled={isResettingRatings}
+            >
+              {isResettingRatings ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                  Resetting...
+                </>
+              ) : (
+                "Confirm Reset"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
-
-

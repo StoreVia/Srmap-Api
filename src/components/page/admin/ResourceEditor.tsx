@@ -85,7 +85,7 @@ export function ResourceEditor() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await API.get("/admin/resources/list");
+      const res = await API.get("/admin/resources");
       const data = res.data;
 
       if (data.success) {

@@ -107,11 +107,24 @@ export interface FacultyTimetableRecord {
   updatedAt: string | Date;
 }
 
+export interface FacultyTimetableProgressState {
+  inProgress: boolean;
+  stage: "idle" | "loading_students" | "matching" | "saving" | "completed" | "error";
+  total: number;
+  completed: number;
+  currentTarget: string;
+  error?: string | null;
+  lastGeneratedAt?: string | null;
+  count?: number;
+  totalClasses?: number;
+}
+
 export interface FacultyTimetableMeta {
   lastGeneratedAt?: string | Date | null;
   totalFacultyWithSchedules: number;
   totalClasses: number;
   totalTimetablesProcessed: number;
   inProgress?: boolean;
+  progress?: FacultyTimetableProgressState;
 }
 

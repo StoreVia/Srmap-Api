@@ -42,10 +42,21 @@ export async function GET(req: NextRequest) {
       ];
     }
 
-
     const PAGE_SIZE = 20;
+    const projection = type === "faculty" && !slug ? {
+      name: 1,
+      slug: 1,
+      designation: 1,
+      departments: 1,
+      degree: 1,
+      email: 1,
+      imageUrl: 1,
+      officeLocation: 1,
+      ratingSummary: 1
+    } : undefined;
+
     const items = await collection
-      .find(query)
+      .find(query, { projection })
       .sort({ _id: 1 })
       .limit(PAGE_SIZE + 1)
       .toArray();
