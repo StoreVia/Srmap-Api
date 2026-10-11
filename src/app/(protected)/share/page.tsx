@@ -299,7 +299,7 @@ const SecureShare = () => {
     };
 
     return (
-        <div className="grid gap-6">
+        <div className="grid gap-6 overflow-hidden">
             <Tabs defaultValue="uploads" className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">
                     <TabsTrigger value="uploads">Your Uploads</TabsTrigger>
@@ -307,8 +307,8 @@ const SecureShare = () => {
                 </TabsList>
                 
                 <TabsContent value="uploads" className="space-y-6">
-                    <Card>
-                        <CardHeader className="flex flex-row items-center justify-between">
+                    <Card className="overflow-hidden">
+                        <CardHeader className="flex flex-row items-center justify-between gap-3">
                             <CardTitle>Secure File Transfer</CardTitle>
                             {storageStats && (() => {
                                 const usedMB = (storageStats.usedBytes / (1024 * 1024));
@@ -531,7 +531,7 @@ const SecureShare = () => {
                         </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="overflow-hidden">
                         <CardHeader>
                             <CardTitle>Your Active Uploads</CardTitle>
                         </CardHeader>
@@ -547,7 +547,7 @@ const SecureShare = () => {
                             ) : (
                                 <div className="space-y-3">
                                     {myUploads.map((u) => (
-                                        <div key={u.shareId} className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+                                        <div key={u.shareId} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center p-3 sm:p-4 border rounded-lg hover:bg-muted/30 transition-colors overflow-hidden">
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     {u.hasText && u.filesCount === 0 ? (
@@ -555,9 +555,9 @@ const SecureShare = () => {
                                                     ) : (
                                                         <FileIcon className="h-4 w-4 text-university-500 shrink-0" />
                                                     )}
-                                                    <p className="font-medium truncate">{u.displayName}</p>
+                                                    <p className="font-medium truncate text-sm">{u.displayName}</p>
                                                     {!u.isPublic && (
-                                                        <span className="bg-university-100 text-university-800 text-[11px] px-1.5 py-0.5 rounded font-medium">
+                                                        <span className="bg-university-100 text-university-800 text-[11px] px-1.5 py-0.5 rounded font-medium shrink-0">
                                                             Private ({u.allowedRegNos?.length || 0})
                                                         </span>
                                                     )}
@@ -625,7 +625,7 @@ const SecureShare = () => {
                 </TabsContent>
 
                 <TabsContent value="received">
-                    <Card>
+                    <Card className="overflow-hidden">
                         <CardHeader>
                             <CardTitle>Files Shared With You</CardTitle>
                             <CardDescription>Secure links that friends have shared specifically with your account.</CardDescription>
@@ -642,7 +642,7 @@ const SecureShare = () => {
                             ) : (
                                 <div className="space-y-3">
                                     {receivedUploads.map((u) => (
-                                        <div key={u.shareId} className="flex flex-col sm:flex-row gap-4 justify-between items-start sm:items-center p-4 border rounded-lg hover:bg-muted/30 transition-colors">
+                                        <div key={u.shareId} className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center p-3 sm:p-4 border rounded-lg hover:bg-muted/30 transition-colors overflow-hidden">
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     {u.hasText && u.filesCount === 0 ? (
@@ -650,19 +650,19 @@ const SecureShare = () => {
                                                     ) : (
                                                         <FileIcon className="h-4 w-4 text-university-500 shrink-0" />
                                                     )}
-                                                    <p className="font-medium truncate">{u.displayName}</p>
-                                                    <span className="bg-university-100 text-university-800 text-xs px-2 py-0.5 rounded ml-2 flex items-center">
+                                                    <p className="font-medium truncate text-sm">{u.displayName}</p>
+                                                    <span className="bg-university-100 text-university-800 text-[10px] sm:text-xs px-1.5 py-0.5 rounded shrink-0 truncate max-w-[120px]">
                                                         From: {u.creatorUsername}
                                                     </span>
                                                 </div>
-                                                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                                                <div className="flex items-center gap-2 sm:gap-3 mt-1 text-xs text-muted-foreground flex-wrap">
                                                     <span>{(u.totalBytes / 1024 / 1024).toFixed(1)} MB</span>
                                                     <span>•</span>
                                                     <span>{u.maxDownloads - u.remainingDownloads} / {u.maxDownloads} DLs</span>
                                                     {u.isPasswordProtected ? (
-                                                        <span className="text-amber-500 font-medium ml-2 border border-amber-200 bg-amber-50 px-1 rounded">Password Protected</span>
+                                                        <span className="text-amber-500 font-medium border border-amber-200 bg-amber-50 px-1 rounded text-[10px]">PW Protected</span>
                                                     ) : (
-                                                        <span className="text-green-500 font-medium ml-2 border border-green-200 bg-green-50 px-1 rounded">Public</span>
+                                                        <span className="text-green-500 font-medium border border-green-200 bg-green-50 px-1 rounded text-[10px]">Public</span>
                                                     )}
                                                 </div>
                                             </div>

@@ -1,7 +1,8 @@
 "use client"
 import * as React from "react"
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { MapPin } from "lucide-react"
+import { MapPin, GraduationCap } from "lucide-react"
 import AttendanceCard from "@/components/page/attendance/AttendanceCard"
 import type { AttendanceShape } from "@/hooks/timetable/useSubjectMaps"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogWindowClose } from "@/components/ui/dialog"
@@ -51,6 +52,14 @@ export function SubjectDialog({
                     </div>
                   </>
                 )}
+                <span>•</span>
+                <Link
+                  href="/faculty"
+                  className="flex items-center gap-1 text-primary hover:underline font-medium"
+                >
+                  <GraduationCap className="w-3 h-3" />
+                  <span>Faculty</span>
+                </Link>
               </div>
             </div>
             <DialogWindowClose />

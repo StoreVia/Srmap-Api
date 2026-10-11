@@ -245,33 +245,32 @@ export default function SSAdminPage() {
             </div>
 
             {stats && (
-                <Card className="border shadow-sm p-4">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x">
-                        <div className="flex flex-col">
-                            <span className="text-xs text-muted-foreground font-medium">Total Storage</span>
-                            <span className="text-xl font-bold font-mono text-primary mt-1">{formatBytes(stats.totalBytes)}</span>
+                <Card className="border shadow-sm p-3 sm:p-4 overflow-hidden">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">Total Storage</span>
+                            <span className="text-lg sm:text-xl font-bold font-mono text-primary mt-0.5">{formatBytes(stats.totalBytes)}</span>
                         </div>
-                        <div className="flex flex-col sm:pl-4 pt-2 sm:pt-0">
-                            <span className="text-xs text-muted-foreground font-medium">Shares</span>
-                            <span className="text-xl font-bold font-mono mt-1">
-                                {stats.totalShares} <span className="text-xs font-normal text-muted-foreground">({stats.activeShares} active · {stats.expiredShares} expired)</span>
-                            </span>
+                        <div className="flex flex-col min-w-0 sm:pl-4 sm:border-l">
+                            <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">Shares</span>
+                            <span className="text-lg sm:text-xl font-bold font-mono mt-0.5">{stats.totalShares}</span>
+                            <span className="text-[10px] text-muted-foreground">{stats.activeShares} active · {stats.expiredShares} exp</span>
                         </div>
-                        <div className="flex flex-col sm:pl-4 pt-2 sm:pt-0">
-                            <span className="text-xs text-muted-foreground font-medium">Replicated Files</span>
-                            <span className="text-xl font-bold font-mono mt-1">{stats.totalFiles}</span>
+                        <div className="flex flex-col min-w-0 sm:pl-4 sm:border-l">
+                            <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">Replicated Files</span>
+                            <span className="text-lg sm:text-xl font-bold font-mono mt-0.5">{stats.totalFiles}</span>
                         </div>
-                        <div className="flex flex-col sm:pl-4 pt-2 sm:pt-0">
-                            <span className="text-xs text-muted-foreground font-medium">Databases</span>
-                            <span className="text-sm font-semibold font-mono text-green-600 dark:text-green-400 mt-1">
-                                3/3 Online (srmapi.1, .2, .3)
+                        <div className="flex flex-col min-w-0 sm:pl-4 sm:border-l">
+                            <span className="text-[11px] sm:text-xs text-muted-foreground font-medium">Databases</span>
+                            <span className="text-[11px] sm:text-sm font-semibold font-mono text-green-600 dark:text-green-400 mt-0.5">
+                                3/3 Online
                             </span>
                         </div>
                     </div>
                 </Card>
             )}
 
-            <Card className="border shadow-sm p-4 space-y-4">
+            <Card className="border shadow-sm p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3 flex-wrap">
                         <div className="w-56">
@@ -329,15 +328,15 @@ export default function SSAdminPage() {
                                 No files currently stored in {selectedBucket}.
                             </div>
                         ) : (
-                            <div className="divide-y rounded border text-xs">
+                            <div className="divide-y rounded border text-xs overflow-hidden">
                                 {filteredBucketFiles.map((file) => (
                                     <div
                                         key={file.key}
-                                        className="p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-muted/30 transition-colors"
+                                        className="p-2 sm:p-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2 hover:bg-muted/30 transition-colors"
                                     >
-                                        <div className="min-w-0 font-mono">
-                                            <p className="font-semibold truncate text-primary">{file.key}</p>
-                                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                        <div className="min-w-0 font-mono overflow-hidden">
+                                            <p className="font-semibold truncate text-primary text-[11px] sm:text-xs">{file.key}</p>
+                                            <p className="text-[10px] sm:text-[11px] text-muted-foreground mt-0.5 truncate">
                                                 {formatBytes(file.size)} · {file.lastModified ? new Date(file.lastModified).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true }) : ""}
                                             </p>
                                         </div>
@@ -371,14 +370,14 @@ export default function SSAdminPage() {
                                 {filteredShares.map((share) => (
                                     <div
                                         key={share.shareId}
-                                        className={`p-3 rounded border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2 ${
+                                        className={`p-2.5 sm:p-3 rounded border text-xs flex flex-col gap-2 overflow-hidden ${
                                             share.isExpired ? "opacity-60 bg-muted/10 border-dashed" : "hover:border-primary/40"
                                         }`}
                                     >
-                                        <div className="min-w-0 space-y-1">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span className="font-mono font-bold text-primary">#{share.shareId}</span>
-                                                <Badge variant="outline" className="text-[10px] font-mono">
+                                        <div className="min-w-0 space-y-1 overflow-hidden">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className="font-mono font-bold text-primary text-[11px]">#{share.shareId}</span>
+                                                <Badge variant="outline" className="text-[10px] font-mono max-w-[120px] truncate">
                                                     {share.creatorUsername}
                                                 </Badge>
                                                 <Badge variant={share.isPublic ? "secondary" : "default"} className="text-[10px]">
@@ -386,7 +385,7 @@ export default function SSAdminPage() {
                                                 </Badge>
                                                 {share.isPasswordProtected && (
                                                     <Badge variant="outline" className="text-[10px] text-amber-500 border-amber-500/40">
-                                                        <Lock className="w-2.5 h-2.5 mr-0.5" /> Password
+                                                        <Lock className="w-2.5 h-2.5 mr-0.5" /> PW
                                                     </Badge>
                                                 )}
                                                 <Badge variant={share.isExpired ? "destructive" : "outline"} className="text-[10px]">
@@ -394,18 +393,18 @@ export default function SSAdminPage() {
                                                 </Badge>
                                             </div>
 
-                                            <div className="text-muted-foreground text-[11px] font-mono">
-                                                Files: {share.files.length} ({formatBytes(share.totalBytes)}) · Downloads: {share.remainingDownloads}/{share.maxDownloads}
-                                                {share.text ? ` · Text: ${share.text.slice(0, 40)}...` : ""}
+                                            <div className="text-muted-foreground text-[10px] sm:text-[11px] font-mono truncate">
+                                                Files: {share.files.length} ({formatBytes(share.totalBytes)}) · DL: {share.remainingDownloads}/{share.maxDownloads}
+                                                {share.text ? ` · ${share.text.slice(0, 30)}...` : ""}
                                             </div>
-                                            <div className="text-muted-foreground text-[11px] font-mono">
-                                                Created: {new Date(share.createdAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
-                                                {" · "}
-                                                Expires: {new Date(share.expiresAt).toLocaleString("en-IN", { timeZone: "Asia/Kolkata", day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+                                            <div className="text-muted-foreground text-[10px] sm:text-[11px] font-mono truncate">
+                                                {new Date(share.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" })}
+                                                {" → "}
+                                                {new Date(share.expiresAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" })}
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-1.5 self-end sm:self-auto flex-shrink-0">
+                                        <div className="flex items-center gap-1.5 self-end flex-shrink-0">
                                             <Button asChild size="sm" variant="outline" className="h-6 text-[11px] px-2">
                                                 <Link href={`/share/${share.shareId}`} target="_blank">
                                                     <ExternalLink className="w-3 h-3 mr-1" />

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, Database } from "lucide-react";
+import { List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, GraduationCap } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -15,6 +15,7 @@ export function useDashboardNavigation() {
       { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
+      { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
       { title: "Vacant", shortTitle: "Empty", path: "/vacant", icon: Building },
       {
@@ -59,8 +60,10 @@ export function useDashboardNavigation() {
           { title: "Admin", path: "/admin" },
           { title: "SS Admin", path: "/admin/secureshare" },
           { title: "Resource Admin", path: "/admin/resources" },
+          { title: "Faculty Admin", path: "/admin/faculty" },
         ],
       });
+
     }
     setMenuItems(menu);
   }, [isAdmin]);

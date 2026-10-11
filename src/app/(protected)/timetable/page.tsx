@@ -9,6 +9,7 @@ import { useAbsentSimulation } from "@/hooks/timetable/useAbsentSimulation";
 import { SubjectDialog } from "@/components/page/timetable/SubjectDialog";
 import { MultiDateSelectDialog } from "@/components/page/timetable/MultiDateSelectDialog";
 import { WhatIfAbsentButton } from "@/components/page/timetable/WhatIfAbsentButton";
+import { FacultyTimetableSection } from "@/components/page/timetable/FacultyTimetableSection";
 import { TIME_SLOTS, WEEK_DAYS, ALL_DAYS, parseSubject, formatCountdown } from "@/shared/utils/timetable";
 import { mapManyToAttendanceShape } from "@/shared/utils/attendance";
 import { trimText } from "@/shared/utils/functions";
@@ -58,8 +59,9 @@ const Timetable = () => {
   }, [ongoingClass, upcomingClass]);
 
   return (
-    <div className="h-full flex flex-col space-y-4">
+    <div className="flex flex-col space-y-4 pb-12">
       <div className="flex flex-wrap items-center justify-between gap-2">
+
         <div className="flex items-center gap-2">
           <WhatIfAbsentButton
             isSimulationActive={isSimulationActive}
@@ -187,16 +189,17 @@ const Timetable = () => {
         onReset={clearAll}
       />
 
-      <Card className="flex min-h-0 flex-1 flex-col overflow-hidden border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card dark:shadow-none">
+      <Card className="flex flex-col border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card dark:shadow-none">
         <CardHeader className="flex-shrink-0 border-b border-slate-200 bg-slate-50 py-3 dark:border-0 dark:bg-transparent">
           <CardTitle className="flex items-center gap-2 text-base md:text-lg">
             <Clock className="w-4 h-4 md:w-5 md:h-5" />
             Class Schedule
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 min-h-0 p-2 md:p-4">
-          <div className="max-h-full overflow-auto rounded-md bg-slate-100 p-1 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent dark:bg-transparent dark:p-0 dark:pr-1 dark:scrollbar-thumb-gray-600">
+        <CardContent className="p-2 md:p-4">
+          <div className="overflow-x-auto rounded-md bg-slate-100 p-1 scrollbar-thin scrollbar-thumb-slate-400 scrollbar-track-transparent dark:bg-transparent dark:p-0 dark:pr-1 dark:scrollbar-thumb-gray-600">
             <table className="w-full border-separate border-spacing-1 table-fixed">
+
               <thead className="sticky top-0 z-[2] bg-background dark:bg-gray-900">
                 <tr>
                   <th className="sticky left-0 z-[3] w-16 min-w-[64px] rounded-md bg-slate-800 p-2 text-left text-white md:w-20 md:min-w-[80px] dark:bg-gray-800 dark:text-foreground">
@@ -274,6 +277,8 @@ const Timetable = () => {
           </div>
         </CardContent>
       </Card>
+
+      <FacultyTimetableSection subjects={subjects} />
     </div>
   );
 };
