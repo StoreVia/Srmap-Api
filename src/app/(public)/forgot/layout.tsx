@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Forgot Password",
   description: "Reset your SRM AP student portal password. Recover access to your SRMAP API account securely.",
   alternates: {
-    canonical: "https://srmapi.in/forgot",
+    canonical: "https://srmapi.mrpan.in/forgot",
   },
   openGraph: {
     title: "Forgot Password | SRMAP API",
     description: "Reset your SRM AP student portal password. Recover access to your SRMAP API account securely.",
-    url: "https://srmapi.in/forgot",
+    url: "https://srmapi.mrpan.in/forgot",
   },
 };
 

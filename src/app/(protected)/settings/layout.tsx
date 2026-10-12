@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: "Settings",
   description: "Manage your SRMAP API account settings, preferences, theme, startup page, and notification options.",
   alternates: {
-    canonical: "https://srmapi.in/settings",
+    canonical: "https://srmapi.mrpan.in/settings",
   },
   robots: {
     index: false,

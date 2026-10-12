@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   title: "Arcade",
   description: "Play multiplayer chess, typing test challenges, and arcade mini-games on SRMAP API.",
   alternates: {
-    canonical: "https://srmapi.in/arcade",
+    canonical: "https://srmapi.mrpan.in/arcade",
   },
   openGraph: {
     title: "Arcade | SRMAP API",
     description: "Play multiplayer chess, typing test challenges, and arcade mini-games on SRMAP API.",
-    url: "https://srmapi.in/arcade",
+    url: "https://srmapi.mrpan.in/arcade",
   },
 };
 
@@ -18,8 +18,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://srmapi.in" },
-    { "@type": "ListItem", position: 2, name: "Arcade", item: "https://srmapi.in/arcade" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://srmapi.mrpan.in" },
+    { "@type": "ListItem", position: 2, name: "Arcade", item: "https://srmapi.mrpan.in/arcade" },
   ],
 };
 

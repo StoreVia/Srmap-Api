@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Academic Calendar",
   description: "View the SRM University AP academic calendar with exam dates, holidays, semester schedules, and important deadlines.",
   alternates: {
-    canonical: "https://srmapi.in/calender",
+    canonical: "https://srmapi.mrpan.in/calender",
   },
   openGraph: {
     title: "Academic Calendar | SRMAP API",
     description: "View the SRM University AP academic calendar with exam dates, holidays, semester schedules, and important deadlines.",
-    url: "https://srmapi.in/calender",
+    url: "https://srmapi.mrpan.in/calender",
   },
 };
 
@@ -17,8 +17,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Home", item: "https://srmapi.in" },
-    { "@type": "ListItem", position: 2, name: "Academic Calendar", item: "https://srmapi.in/calender" },
+    { "@type": "ListItem", position: 1, name: "Home", item: "https://srmapi.mrpan.in" },
+    { "@type": "ListItem", position: 2, name: "Academic Calendar", item: "https://srmapi.mrpan.in/calender" },
   ],
 };
 

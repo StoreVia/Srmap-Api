@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://srmapi.in";
+  const baseUrl = "https://srmapi.mrpan.in";
 
   return {
     rules: [

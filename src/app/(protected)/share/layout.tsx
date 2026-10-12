@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Secure Share",
   description: "Share text, code, and files securely with password protection, expiration timers, and single-use download links between SRM AP students.",
   alternates: {
-    canonical: "https://srmapi.in/share",
+    canonical: "https://srmapi.mrpan.in/share",
   },
   openGraph: {
     title: "Secure Share | SRMAP API",
     description: "Share text, code, and files securely with password protection, expiration timers, and single-use download links between SRM AP students.",
-    url: "https://srmapi.in/share",
+    url: "https://srmapi.mrpan.in/share",
   },
 };
 
