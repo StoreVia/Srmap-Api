@@ -455,3 +455,62 @@ export async function searchFacultyTimetables(query: string, limit = 20): Promis
     updatedAt: d.updatedAt
   }));
 }
+
+export async function matchFacultyProfiles(names: string[]) {
+  if (!names || names.length === 0) return [];
+  const secondaryClient = await useSecondaryMongo();
+  const facultyDb = secondaryClient.db("faculty");
+
+  const allFaculty = await facultyDb.collection("faculty").find({}, {
+    projection: {
+      name: 1,
+      slug: 1,
+      designation: 1,
+      departments: 1,
+      degree: 1,
+      email: 1,
+      imageUrl: 1,
+      officeLocation: 1,
+      ratingSummary: 1
+    }
+  }).toArray();
+
+  const tokenizedFaculty = allFaculty.map(f => ({
+    faculty: {
+      ...f,
+      _id: f._id.toString()
+    },
+    tokens: getTokens(f.name)
+  }));
+
+  const results: any[] = [];
+  const addedSlugs = new Set<string>();
+
+  for (const raw of names) {
+    if (!raw || /skilling|trainer|tmp\d|ises\d/i.test(raw)) continue;
+    const tokens = getTokens(raw);
+    let bestFaculty: any = null;
+    let bestScore = 0;
+
+    for (const item of tokenizedFaculty) {
+      const score = matchScore(tokens, item.tokens);
+      if (score > bestScore) {
+        bestScore = score;
+        bestFaculty = item.faculty;
+      }
+    }
+
+    if (bestScore >= 0.5 && bestFaculty && !addedSlugs.has(bestFaculty.slug)) {
+      addedSlugs.add(bestFaculty.slug);
+      let name = bestFaculty.name || "";
+      const half = name.length / 2;
+      if (name.length % 2 === 0 && name.slice(0, half) === name.slice(half)) {
+        name = name.slice(0, half);
+      }
+      name = name.replace(/^(Prof\.|Dr\.)([^\s])/i, "$1 $2");
+      results.push({ ...bestFaculty, name });
+    }
+  }
+
+  return results;
+}

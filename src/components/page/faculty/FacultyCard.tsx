@@ -34,7 +34,7 @@ export function FacultyCard({ faculty, onSelect, onRate }: FacultyCardProps) {
   return (
     <>
       <Card className="w-full overflow-hidden hover:shadow-md transition-all border-border/60 hover:border-primary/40 flex flex-col justify-between group">
-        <CardContent className="p-4 sm:p-5 flex flex-col h-full justify-between gap-4">
+        <CardContent className="p-3.5 sm:p-4 flex flex-col h-full justify-between gap-3">
           <div className="cursor-pointer" onClick={() => onSelect(faculty)}>
             <div className="flex items-center gap-3">
               <div
@@ -109,17 +109,17 @@ export function FacultyCard({ faculty, onSelect, onRate }: FacultyCardProps) {
             </div>
           </div>
 
-          <div className="pt-3 border-t flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1.5">
+          <div className="pt-3 border-t flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-1.5 min-w-0">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button
                     type="button"
                     className="flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-semibold bg-muted/60 hover:bg-muted transition-colors border"
                   >
-                    <Star className={`w-3.5 h-3.5 ${hasRating ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
-                    <span>{hasRating ? `${summary.overallAvg}` : "Unrated"}</span>
-                    <ChevronDown className="w-3 h-3 text-muted-foreground" />
+                    <Star className={`w-3.5 h-3.5 flex-shrink-0 ${hasRating ? "text-amber-500 fill-amber-500" : "text-muted-foreground"}`} />
+                    <span className="whitespace-nowrap">{hasRating ? `${summary.overallAvg}` : "Unrated"}</span>
+                    <ChevronDown className="w-3 h-3 text-muted-foreground flex-shrink-0" />
                   </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-56 p-2">
@@ -159,13 +159,13 @@ export function FacultyCard({ faculty, onSelect, onRate }: FacultyCardProps) {
               </DropdownMenu>
 
               {hasRating && (
-                <span className="text-[11px] text-muted-foreground">
+                <span className="text-[11px] text-muted-foreground whitespace-nowrap">
                   ({summary.totalRatings})
                 </span>
               )}
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               <Button
                 variant="outline"
                 size="sm"
