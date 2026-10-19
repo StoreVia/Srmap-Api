@@ -59,6 +59,21 @@ installSerwist({
       }),
     },
     {
+      matcher: ({ request, url }) =>
+        request.destination === "image" &&
+        url.origin === "https://www.srmap.edu.in" &&
+        url.pathname.startsWith("/wp-content/uploads/"),
+      handler: new CacheFirst({
+        cacheName: "faculty-profile-images",
+        plugins: [
+          new ExpirationPlugin({
+            maxEntries: 700,
+            maxAgeSeconds: 60 * 60 * 24 * 30,
+          }),
+        ],
+      }),
+    },
+    {
       matcher: ({ request }) =>
         request.destination === "script" ||
         request.destination === "style",
