@@ -213,16 +213,12 @@ const Feedback = () => {
                     </DialogHeader>
                     <div className="flex flex-col items-center justify-center space-y-4 py-4">
                         <div className="bg-green-100 dark:bg-green-900 p-4 rounded-lg text-center">
-                            <p className="text-sm text-green-800 dark:text-green-200">Checkout out our new omegle page!</p>
+                            <p className="text-sm text-green-800 dark:text-green-200">Show your support by joining our whatsapp channel!</p>
                         </div>
                     </div>
                     <DialogFooter className="flex flex-col sm:flex-row sm:flex-wrap gap-2 w-full">
                         <Button variant="outline" onClick={() => setSuccessDialogOpen(false)} className="w-full sm:w-auto sm:flex-1 min-w-[120px]">
                             Maybe Later
-                        </Button>
-                        <Button onClick={() => router.push("/omegle")} className="w-full sm:w-auto sm:flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white">
-                            <ExternalLink className="h-4 w-4 mr-2 shrink-0" />
-                            <span className="truncate">Omegele</span>
                         </Button>
                         <Button onClick={() => whatsapp()} className="w-full sm:w-auto sm:flex-1 min-w-[160px] bg-green-600 hover:bg-green-700 text-white">
                             <ExternalLink className="h-4 w-4 mr-2 shrink-0" />

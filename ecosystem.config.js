@@ -10,14 +10,5 @@ module.exports = {
         PORT: 3000,
       },
     },
-    {
-      name: "omegle",
-      cwd: `${__dirname}/omegle`,
-      script: "index.js",
-      env: {
-        NODE_ENV: "production",
-        PORT: 3001,
-      },
-    },
   ],
 };

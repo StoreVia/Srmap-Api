@@ -35,7 +35,6 @@ export function useDashboardNavigation() {
       { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
       { title: "Profile", shortTitle: "Profile", path: "/profile", icon: User },
       { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap },
-      { title: "Omegle", shortTitle: "Omegle", path: "/omegle", icon: Video },
       { title: "Settings", shortTitle: "Settings", path: "/settings", icon: Settings },
       {
         title: "About & GitHub",

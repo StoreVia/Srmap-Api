@@ -95,6 +95,7 @@ export async function solveCaptcha(imageBuffer: Buffer): Promise<string | null> 
         outputTensor = model.predict(inputTensor) as tf.Tensor;
 
         const captchaText = decodeCaptchaOutput(outputTensor);
+        console.log("Captcha Solved");
         return captchaText || null;
     } catch (error: any) {
         console.error("[Captcha Solver] Error solving captcha:", error?.message || error);
