@@ -11,12 +11,12 @@ module.exports = {
       },
     },
     {
-      name: "arcade",
-      cwd: `${__dirname}/arcade-server`,
-      script: "dist/main.js",
+      name: "omegle",
+      cwd: `${__dirname}/omegle`,
+      script: "index.js",
       env: {
         NODE_ENV: "production",
-        PORT: 8081,
+        PORT: 3001,
       },
     },
   ],
