@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
-import { List, Calendar, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, GraduationCap } from "lucide-react";
+import { List, Calendar, Video, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, GraduationCap } from "lucide-react";
 
 export function useDashboardNavigation() {
   const pathname = usePathname();
@@ -12,7 +12,7 @@ export function useDashboardNavigation() {
 
   useEffect(() => {
     const baseMenu: MenuItem[] = [
-      { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap, highlight: true },
+      { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
@@ -29,13 +29,13 @@ export function useDashboardNavigation() {
         ],
       },
       { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
-      // { title: "Arcade", shortTitle: "Arcade", path: "/arcade", icon: Gamepad2 },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
       { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2 },
       { title: "Subjects", shortTitle: "Subjects", path: "/subjects", icon: Library },
       { title: "Profile", shortTitle: "Profile", path: "/profile", icon: User },
-      { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit },
+      { title: "Faculty & Staff", shortTitle: "Faculty", path: "/faculty", icon: GraduationCap },
+      { title: "Omegle", shortTitle: "Omegle", path: "/omegle", icon: Video },
       { title: "Settings", shortTitle: "Settings", path: "/settings", icon: Settings },
       {
         title: "About & GitHub",

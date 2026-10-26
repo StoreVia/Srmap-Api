@@ -52,7 +52,7 @@ type DecodedToken = {
   admin?: boolean;
 };
 
-const wsUrl = "ws://0.0.0.0:8080/ws";
+const wsUrl = "wss://srmapi.mrpan.in/ws";
 
 const rtcConfig: RTCConfiguration = {
   iceServers: [

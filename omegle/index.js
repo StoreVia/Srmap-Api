@@ -1,10 +1,11 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: "../.env" });
 import crypto from "node:crypto";
 import http from "node:http";
 import jwt from "jsonwebtoken";
 import { WebSocket, WebSocketServer } from "ws";
 
-const port = 8080;
+const port = 3001;
 const accessSecret = process.env.ACCESS_SECRET;
 
 if (!accessSecret) {

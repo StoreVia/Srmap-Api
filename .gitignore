@@ -1,5 +1,6 @@
-.env
 .next
+.env
+.env.local
 .DS_Store
 dist
 temp
@@ -12,3 +13,4 @@ next-env.d.ts
 package-lock.json
 empty_classrooms.json
 arcade.db*
+deprecated/python
