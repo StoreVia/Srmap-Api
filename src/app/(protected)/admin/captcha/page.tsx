@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/utils/useToast";
 import API from "@/lib/api/axiosClient";
-import { Ban, Captions, RefreshCw, ShieldCheck } from "lucide-react";
+import { Ban, Captions, RefreshCw, RotateCcw, ShieldCheck } from "lucide-react";
 
 interface CaptchaIp {
   ip: string;
@@ -23,13 +23,16 @@ interface CaptchaAdminData {
   requests: number;
   deniedRequests: number;
   uniqueIps: number;
+  selfSolved: number;
   ips: CaptchaIp[];
 }
 
 export default function CaptchaAdminPage() {
   const [data, setData] = useState<CaptchaAdminData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [resettingScope, setResettingScope] = useState<"api" | "self" | null>(null);
   const [ipAction, setIpAction] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
@@ -42,6 +45,15 @@ export default function CaptchaAdminPage() {
       setLoading(false);
     }
   }, []);
+
+  const refreshData = useCallback(async () => {
+    setIsRefreshing(true);
+    try {
+      await loadData();
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [loadData]);
 
   useEffect(() => {
     loadData();
@@ -78,8 +90,45 @@ export default function CaptchaAdminPage() {
     }
   };
 
+  const resetStats = async (scope: "api" | "self") => {
+    setResettingScope(scope);
+    try {
+      await API.post("/admin/captcha/reset", { scope });
+      await loadData();
+      toast({
+        title: scope === "api" ? "Captcha API statistics reset" : "Self statistics reset",
+        description: scope === "api" ? "API request counts and IP records were deleted." : "Self solve count was reset.",
+      });
+    } catch {
+      toast({
+        title: scope === "api" ? "Could not reset captcha API statistics" : "Could not reset self statistics",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setResettingScope(null);
+    }
+  };
+
   return (
-    <Card className="overflow-hidden">
+    <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Self</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs text-muted-foreground">Captchas solved by this server during login and password recovery</p>
+            <p className="mt-1 text-2xl font-semibold">{loading ? "…" : (data?.selfSolved ?? 0).toLocaleString()}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => resetStats("self")} disabled={loading || isRefreshing || resettingScope !== null} className="w-full sm:w-auto">
+            <RotateCcw className={`h-4 w-4 sm:mr-2 ${resettingScope === "self" ? "animate-spin" : ""}`} />
+            {resettingScope === "self" ? "Resetting…" : "Reset Self"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
       <CardHeader className="flex flex-col gap-3 border-b bg-muted/20 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
           <Captions className="h-4 w-4" />
@@ -106,15 +155,21 @@ export default function CaptchaAdminPage() {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-sm font-semibold">Requesting IP addresses</h3>
             <p className="text-xs text-muted-foreground">Showing the 200 most recently active IPs</p>
           </div>
-          <Button size="sm" variant="outline" onClick={loadData} disabled={loading} aria-label="Refresh captcha activity">
-            <RefreshCw className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Refresh</span>
-          </Button>
+          <div className="flex flex-wrap items-center justify-end gap-2 sm:shrink-0">
+            <Button size="sm" variant="outline" onClick={() => resetStats("api")} disabled={loading || isRefreshing || resettingScope !== null}>
+              <RotateCcw className={`h-4 w-4 sm:mr-2 ${resettingScope === "api" ? "animate-spin" : ""}`} />
+              <span>{resettingScope === "api" ? "Resetting…" : "Reset API & IPs"}</span>
+            </Button>
+            <Button size="sm" variant="outline" onClick={refreshData} disabled={loading || isRefreshing || resettingScope !== null} aria-label="Refresh captcha activity">
+              <RefreshCw className={`h-4 w-4 sm:mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
+              <span>{isRefreshing ? "Refreshing…" : "Refresh"}</span>
+            </Button>
+          </div>
         </div>
 
         {loading && <p className="rounded-md border p-4 text-sm text-muted-foreground">Loading activity…</p>}
@@ -145,6 +200,7 @@ export default function CaptchaAdminPage() {
           ))}
         </ul>
       </CardContent>
-    </Card>
+      </Card>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { solveCaptcha } from "@/lib/captcha";
+import { recordCaptchaSelfSolve } from "@/server/captcha/captchaAdmin";
 import { main, captcha, authenticate } from "@/server/utils/headers";
 import { LoginResponse } from "@/types/server/login";
 import { callApiWithRetry } from "@/shared/api/retryApi";
@@ -35,6 +36,7 @@ async function attemptLogin(username: string, password: string): Promise<LoginRe
 
   const captchaBuffer = Buffer.from(await captchaRes.arrayBuffer());
   const captchaTextRaw = await solveCaptcha(captchaBuffer);
+  if (captchaTextRaw) await recordCaptchaSelfSolve();
   if (!captchaTextRaw) throw new Error("SRM server is unreachable. Please try again later.");
 
   const payload = new URLSearchParams({

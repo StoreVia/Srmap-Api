@@ -33,10 +33,12 @@ type CaptchaDocument = {
   blockedBy?: string;
   firstRequestedAt?: Date;
   lastRequestedAt?: Date;
+  solved?: number;
+  lastSolvedAt?: Date;
 };
 
 async function getCollection() {
-  return (await useMongo()).db("college_db").collection<CaptchaDocument>("acptcha");
+  return (await useMongo()).db("college_db").collection<CaptchaDocument>("captcha");
 }
 
 async function getSettings() {
@@ -80,9 +82,10 @@ export async function recordCaptchaRequest(ip: string) {
 export async function getCaptchaAdminData() {
   const collection = await getCollection();
   const settings = await getSettings();
+  const self = await collection.findOne({ _id: "self" });
   const [summary] = await collection
     .aggregate<{ requests: number; deniedRequests: number; uniqueIps: number }>([
-      { $match: { _id: { $ne: "settings" } } },
+      { $match: { _id: { $nin: ["settings", "self"] }, requests: { $gt: 0 } } },
       {
         $group: {
           _id: null,
@@ -94,7 +97,7 @@ export async function getCaptchaAdminData() {
     ])
     .toArray();
   const ips = (await collection
-    .find({ _id: { $ne: "settings" } })
+    .find({ _id: { $nin: ["settings", "self"] } })
     .sort({ lastRequestedAt: -1 })
     .limit(200)
     .toArray()) as CaptchaDocument[] as CaptchaIpRecord[];
@@ -103,6 +106,7 @@ export async function getCaptchaAdminData() {
     requests: summary?.requests ?? 0,
     deniedRequests: summary?.deniedRequests ?? 0,
     uniqueIps: summary?.uniqueIps ?? 0,
+    selfSolved: self?.solved ?? 0,
     ips: ips.map(({ _id, ...record }) => ({
       ip: record.ip ?? _id,
       requests: record.requests ?? 0,
@@ -114,6 +118,31 @@ export async function getCaptchaAdminData() {
       lastRequestedAt: record.lastRequestedAt ?? record.firstRequestedAt ?? new Date(0),
     })),
   };
+}
+
+export async function recordCaptchaSelfSolve() {
+  try {
+    const collection = await getCollection();
+    await collection.updateOne(
+      { _id: "self" },
+      { $inc: { solved: 1 }, $set: { lastSolvedAt: new Date() } },
+      { upsert: true },
+    );
+  } catch {
+    console.error("Captcha self-stat update failed.");
+  }
+}
+
+export async function resetCaptchaApiStats() {
+  const collection = await getCollection();
+  await collection.deleteMany(
+    { _id: { $nin: ["settings", "self"] } },
+  );
+}
+
+export async function resetCaptchaSelfStats() {
+  const collection = await getCollection();
+  await collection.updateOne({ _id: "self" }, { $set: { solved: 0 } }, { upsert: true });
 }
 
 export async function setCaptchaEnabled(enabled: boolean, admin: string) {

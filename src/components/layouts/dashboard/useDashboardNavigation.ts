@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { MenuItem } from "./types";
+import routePrefetch from "@/config/route-prefetch.json";
 import { List, Calendar, Video, ListChecks, Building, FileSpreadsheet, Folder, Calculator, CalendarDays, Library, User, Edit, Settings, Users, Shield, Gamepad2, Share2, GraduationCap } from "lucide-react";
 
 export function useDashboardNavigation() {
@@ -71,9 +72,11 @@ export function useDashboardNavigation() {
   useEffect(() => {
     if (menuItems.length > 0) {
       menuItems.forEach((item) => {
-        router.prefetch(item.path);
+        if (routePrefetch[item.path as keyof typeof routePrefetch]) router.prefetch(item.path);
         if (item.subItems) {
-          item.subItems.forEach((sub) => router.prefetch(sub.path));
+          item.subItems.forEach((sub) => {
+            if (routePrefetch[sub.path as keyof typeof routePrefetch]) router.prefetch(sub.path);
+          });
         }
       });
     }

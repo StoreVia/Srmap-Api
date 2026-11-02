@@ -230,11 +230,6 @@ function FacultyDirectoryContent() {
   return (
     <div className="w-full space-y-6 pb-20">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Faculty & Staff
-          </h1>
-        </div>
 
         <Tabs value={tab} onValueChange={(val: any) => { setTab(val); handleClearSearch(); }} className="w-full md:w-auto">
           <TabsList className="grid w-full md:w-64 grid-cols-2">

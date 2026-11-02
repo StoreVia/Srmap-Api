@@ -183,7 +183,7 @@ export default function FacultyAdminPage() {
     <div className="w-full space-y-6 pb-20">
       <Card className="shadow-sm border-slate-200 bg-white dark:border-border dark:bg-card">
         <CardHeader>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-col gap-4 sm:flex-row-reverse sm:items-center sm:justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <Database className="w-5 h-5 text-primary" />
               Scrape Faculty & Staff

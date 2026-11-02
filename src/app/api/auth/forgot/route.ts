@@ -8,6 +8,7 @@ import { PARAMETERS } from "@/shared/utils/messages";
 import { userBlockedResponse } from "@/server/utils/responses";
 import { isBlocked, errorResponse } from "@/server/utils/functions";
 import { solveCaptcha } from "@/lib/captcha";
+import { recordCaptchaSelfSolve } from "@/server/captcha/captchaAdmin";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
@@ -36,6 +37,7 @@ export async function POST(req: NextRequest) {
 
             const captchaBuffer = Buffer.from(captchaResponse.data, "binary");
             const captchaText = await solveCaptcha(captchaBuffer);
+            if (captchaText) await recordCaptchaSelfSolve();
 
             if (!captchaText) {
                 return errorResponse("Solving Captcha Failed!", {}, 500);

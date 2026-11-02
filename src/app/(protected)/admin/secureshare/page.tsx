@@ -210,7 +210,7 @@ export default function SSAdminPage() {
 
     return (
         <div className="w-full space-y-4 pb-16">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3">
+            <div className="flex flex-col gap-3 border-b pb-3 sm:flex-row sm:items-center sm:justify-end">
                 <div className="flex items-center gap-2 flex-wrap">
                     <Button
                         variant="destructive"
