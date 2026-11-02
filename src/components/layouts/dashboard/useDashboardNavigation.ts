@@ -60,6 +60,7 @@ export function useDashboardNavigation() {
           { title: "SS Admin", path: "/admin/secureshare" },
           { title: "Resource Admin", path: "/admin/resources" },
           { title: "Faculty Admin", path: "/admin/faculty" },
+          { title: "Captcha Admin", path: "/admin/captcha" },
         ],
       });
 
