@@ -17,4 +17,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           script: |
-            sudo /home/srmapi/deploy.sh
+            sudo -u srmapi /home/srmapi/deploy.sh
