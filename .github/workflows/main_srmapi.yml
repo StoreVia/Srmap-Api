@@ -27,7 +27,7 @@ jobs:
       - name: Build Next.js application
         run: npm run build
         env:
-          NEXT_PUBLIC_TURNSTILE_SITEKEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITEKEY }}
+          NEXT_PUBLIC_TURNSTILE_SITEKEY: ${{ secrets.TURNSTILE_SITEKEY }}
 
       - name: Prepare standalone output
         run: |
