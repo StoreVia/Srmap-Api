@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
-    "start": "PORT=3000 next start",
+    "start": "node server.js",
+    "start:local": "PORT=3000 next start",
     "lint": "next lint",
     "faculty": "cd scripts/faculty && node convertFacultyExcelToJson.js"
   },
