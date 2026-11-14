@@ -3,6 +3,7 @@ const withSerwistInit = require("@serwist/next").default;
 const isDev = process.env.NODE_ENV === "development";
 
 const config = {
+  output: "standalone",
   reactStrictMode: !isDev,
   trailingSlash: false,
   allowedDevOrigins: ['192.168.0.189'],
