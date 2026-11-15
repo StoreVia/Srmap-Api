@@ -1,20 +1,20 @@
 name: Deploy
 
 on:
-push:
+  push:
     branches:
-    - main
+      - main
 
 jobs:
-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Deploy
+      - name: Deploy
         uses: appleboy/ssh-action@v1
         with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        script: |
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
             /home/srmapi/deploy.sh
