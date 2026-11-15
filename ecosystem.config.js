@@ -3,14 +3,15 @@ module.exports = {
     {
       name: "srmapi",
       cwd: __dirname,
-      script: "npm",
-      args: "start",
-      instances: "max",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 6767",
+      instances: 2,
       exec_mode: "cluster",
       env: {
         NODE_ENV: "production",
-        PORT: 6767,
       },
+      autorestart: true,
+      max_restarts: 10,
     },
   ],
 };
