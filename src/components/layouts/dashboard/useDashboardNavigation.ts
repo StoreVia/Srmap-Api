@@ -13,7 +13,7 @@ export function useDashboardNavigation() {
 
   useEffect(() => {
     const baseMenu: MenuItem[] = [
-      { title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit, highlight: true },
+      //{ title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },

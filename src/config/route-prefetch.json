@@ -1,5 +1,5 @@
 {
-  "/feedback": true,
+  "/feedback": false,
   "/attendance": true,
   "/timetable": true,
   "/markattendance": true,
