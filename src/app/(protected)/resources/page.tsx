@@ -81,11 +81,14 @@ const Resources = () => {
     const [activeResourceType, setActiveResourceType] = useState<"previousYearPapers" | "slidesAndNotes">("previousYearPapers");
     const [previewResource, setPreviewResource] = useState<Resource | null>(null);
     const [showSubjects, setShowSubjects] = useState<boolean>(true);
-    const [selectedExamType, setSelectedExamType] = useState<"mid" | "sem">("mid");
+    const [selectedExamType, setSelectedExamType] = useState<"mid" | "sem">("sem");
 
     const [courses, setCourses] = useState<Record<string, Course>>({});
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [resources, setResources] = useState<SubjectResources | null>(null);
+    const midSemPapers = resources?.previousYearPapers?.mid ?? [];
+    const endSemPapers = resources?.previousYearPapers?.sem ?? [];
+    const selectedExamPapers = selectedExamType === "mid" ? midSemPapers : endSemPapers;
     const [loading, setLoading] = useState({
         courses: false,
         subjects: false,
@@ -591,7 +594,7 @@ const Resources = () => {
                                 >
                                     <TabsList className="mb-6 w-full grid grid-cols-2 h-auto">
                                         <TabsTrigger value="previousYearPapers" className="py-2 px-1 text-xs sm:text-sm">
-                                            Previous Papers
+                                            Exam Papers
                                         </TabsTrigger>
                                         <TabsTrigger value="slidesAndNotes" className="py-2 px-1 text-xs sm:text-sm">
                                             Slides & Notes
@@ -599,76 +602,86 @@ const Resources = () => {
                                     </TabsList>
 
                                     <TabsContent value="previousYearPapers" className="mt-0">
-                                        {resources.previousYearPapers ? (
-                                            <div>
-                                                <div className="mb-4">
-                                                    <label className="block text-sm font-medium mb-1">
-                                                        Select Exam Type
-                                                    </label>
-                                                    <Select
-                                                        value={selectedExamType}
-                                                        onValueChange={(val) => setSelectedExamType(val as "mid" | "sem")}
-                                                    >
-                                                        <SelectTrigger className="w-40">
-                                                            <SelectValue placeholder="Select Exam" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            <SelectGroup>
-                                                                <SelectItem value="mid">Mid Semester</SelectItem>
-                                                                <SelectItem value="sem">End Semester</SelectItem>
-                                                            </SelectGroup>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-                                                    {resources.previousYearPapers[selectedExamType]?.length ? (
-                                                        resources.previousYearPapers[selectedExamType]!.map((resource) => (
-                                                            <Card
-                                                                key={resource.id}
-                                                                className="transition-all duration-200 hover:shadow-lg flex flex-col justify-between"
-                                                            >
-                                                                <CardHeader className="pb-2">
-                                                                    <CardTitle className="flex items-start gap-2 text-base sm:text-lg">
-                                                                        <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0 mt-1" />
-                                                                        <span className="line-clamp-2 leading-snug">{resource.title}</span>
-                                                                    </CardTitle>
-                                                                    <CardDescription className="text-xs sm:text-sm">
-                                                                        {resource.type.toUpperCase()} - {resource.size}
-                                                                    </CardDescription>
-                                                                </CardHeader>
-                                                                <CardFooter className="flex items-center gap-2 pt-2 border-t mt-auto">
-                                                                    <Button
-                                                                        variant="outline"
-                                                                        size="sm"
-                                                                        onClick={() => handlePreview(resource)}
-                                                                        className="flex-1 text-xs"
-                                                                    >
-                                                                        <FileText className="h-3.5 w-3.5 mr-1.5" /> Preview
-                                                                    </Button>
-                                                                    <Button
-                                                                        size="sm"
-                                                                        onClick={() => handleDownload(resource)}
-                                                                        className="flex-1 text-xs"
-                                                                    >
-                                                                        <Download className="h-3.5 w-3.5 mr-1.5" /> Download
-                                                                    </Button>
-                                                                </CardFooter>
-                                                            </Card>
-                                                        ))
-                                                    ) : (
-                                                        <div className="col-span-full flex flex-col items-center justify-center h-32 border border-dashed rounded-lg text-gray-500">
-                                                            <FileText className="h-8 w-8 mb-2 opacity-50" />
-                                                            <p>No {selectedExamType.toUpperCase()} papers available</p>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                        <div>
+                                            <div className="mb-5 grid grid-cols-2 gap-3">
+                                                {([
+                                                    { value: "mid", title: "Mid-Sem", description: "Mid-Semester", papers: midSemPapers },
+                                                    { value: "sem", title: "End-Sem", description: "End-Semester", papers: endSemPapers },
+                                                ] as const).map((exam) => {
+                                                    const isSelected = selectedExamType === exam.value;
+                                                    return (
+                                                        <button
+                                                            key={exam.value}
+                                                            type="button"
+                                                            aria-pressed={isSelected}
+                                                            onClick={() => setSelectedExamType(exam.value)}
+                                                            className={`flex min-h-24 flex-col items-start justify-between rounded-lg border p-3 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:p-4 ${
+                                                                isSelected
+                                                                    ? "border-university-700 bg-university-700/5 ring-1 ring-university-700"
+                                                                    : "border-border bg-card hover:border-university-700/50 hover:bg-muted/50"
+                                                            }`}
+                                                        >
+                                                            <span className="flex items-center gap-2">
+                                                                <FileText className={`h-4 w-4 ${isSelected ? "text-university-700" : "text-muted-foreground"}`} />
+                                                                <span className="font-semibold">{exam.title}</span>
+                                                            </span>
+                                                            <span className="mt-3 flex w-full flex-wrap items-center justify-between gap-1">
+                                                                <span className="text-xs text-muted-foreground">{exam.description}</span>
+                                                                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                                                    isSelected
+                                                                        ? "bg-university-700 text-white"
+                                                                        : "bg-muted text-muted-foreground"
+                                                                }`}>
+                                                                    {exam.papers.length} {exam.papers.length === 1 ? "paper" : "papers"}
+                                                                </span>
+                                                            </span>
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
-                                        ) : (
-                                            <div className="flex flex-col items-center justify-center h-64 border border-dashed rounded-lg text-gray-500">
-                                                <FileText className="h-12 w-12 mb-2 opacity-50" />
-                                                <p>No Previous Papers Available</p>
+                                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                                                {selectedExamPapers.length ? (
+                                                    selectedExamPapers.map((resource) => (
+                                                        <Card
+                                                            key={resource.id}
+                                                            className="transition-all duration-200 hover:shadow-lg flex flex-col justify-between"
+                                                        >
+                                                            <CardHeader className="pb-2">
+                                                                <CardTitle className="flex items-start gap-2 text-base sm:text-lg">
+                                                                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-university-700 flex-shrink-0 mt-1" />
+                                                                    <span className="line-clamp-2 leading-snug">{resource.title}</span>
+                                                                </CardTitle>
+                                                                <CardDescription className="text-xs sm:text-sm">
+                                                                    {resource.type.toUpperCase()} - {resource.size}
+                                                                </CardDescription>
+                                                            </CardHeader>
+                                                            <CardFooter className="grid min-w-0 grid-cols-2 gap-2 pt-2 border-t mt-auto">
+                                                                <Button
+                                                                    variant="outline"
+                                                                    size="sm"
+                                                                    onClick={() => handlePreview(resource)}
+                                                                    className="h-auto min-h-9 w-full min-w-0 gap-1 whitespace-normal px-2 py-2 text-xs leading-tight"
+                                                                >
+                                                                    <FileText className="h-3.5 w-3.5" /> Preview
+                                                                </Button>
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => handleDownload(resource)}
+                                                                    className="h-auto min-h-9 w-full min-w-0 gap-1 whitespace-normal px-2 py-2 text-xs leading-tight"
+                                                                >
+                                                                    <Download className="h-3.5 w-3.5" /> Download
+                                                                </Button>
+                                                            </CardFooter>
+                                                        </Card>
+                                                    ))
+                                                ) : (
+                                                    <div className="col-span-full flex flex-col items-center justify-center h-32 border border-dashed rounded-lg text-gray-500">
+                                                        <FileText className="h-8 w-8 mb-2 opacity-50" />
+                                                        <p>No {selectedExamType === "mid" ? "Mid-Sem" : "End-Sem"} papers available</p>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
+                                        </div>
                                     </TabsContent>
 
                                     <TabsContent value="slidesAndNotes" className="mt-0">
@@ -688,21 +701,21 @@ const Resources = () => {
                                                                 {resource.type.toUpperCase()} - {resource.size}
                                                             </CardDescription>
                                                         </CardHeader>
-                                                        <CardFooter className="flex items-center gap-2 pt-2 border-t mt-auto">
+                                                        <CardFooter className="grid min-w-0 grid-cols-2 gap-2 pt-2 border-t mt-auto">
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() => handlePreview(resource)}
-                                                                className="flex-1 text-xs"
+                                                                className="h-auto min-h-9 w-full min-w-0 gap-1 whitespace-normal px-2 py-2 text-xs leading-tight"
                                                             >
-                                                                <FileText className="h-3.5 w-3.5 mr-1.5" /> Preview
+                                                                <FileText className="h-3.5 w-3.5" /> Preview
                                                             </Button>
                                                             <Button
                                                                 size="sm"
                                                                 onClick={() => handleDownload(resource)}
-                                                                className="flex-1 text-xs"
+                                                                className="h-auto min-h-9 w-full min-w-0 gap-1 whitespace-normal px-2 py-2 text-xs leading-tight"
                                                             >
-                                                                <Download className="h-3.5 w-3.5 mr-1.5" /> Download
+                                                                <Download className="h-3.5 w-3.5" /> Download
                                                             </Button>
                                                         </CardFooter>
                                                     </Card>

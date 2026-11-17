@@ -14,6 +14,7 @@ export function useDashboardNavigation() {
   useEffect(() => {
     const baseMenu: MenuItem[] = [
       //{ title: "Feedback", shortTitle: "Feedback", path: "/feedback", icon: Edit, highlight: true },
+      { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder, highlight: true },
       { title: "Attendance Details", shortTitle: "Attendance", path: "/attendance", icon: List },
       { title: "Time Table", shortTitle: "Timetable", path: "/timetable", icon: Calendar },
       { title: "Mark Attendance", shortTitle: "Mark Code", path: "/markattendance", icon: ListChecks },
@@ -29,7 +30,6 @@ export function useDashboardNavigation() {
           { title: "Semester Results", path: "/exams/semester-results" },
         ],
       },
-      { title: "Resources", shortTitle: "Files", path: "/resources", icon: Folder },
       { title: "CGPA Calculator", shortTitle: "CGPA", path: "/cgpa", icon: Calculator },
       { title: "Academic Calender", shortTitle: "Calendar", path: "/calender", icon: CalendarDays },
       { title: "Secure Share", shortTitle: "Share", path: "/share", icon: Share2 },
